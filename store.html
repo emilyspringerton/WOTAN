@@ -47,10 +47,20 @@
   }
   .card p { margin: 0 0 0.75rem; color: var(--fg-dim); }
   label { display: block; font-size: 0.85rem; color: var(--fg-dim); margin: 0.75rem 0 0.25rem; }
+  label .hint { font-weight: 400; opacity: 0.75; }
   input {
     width: 100%; padding: 0.5rem 0.6rem; border-radius: 6px; border: 1px solid var(--border);
     background: var(--bg); color: var(--fg); font-size: 0.95rem;
   }
+  /* WOTAN-997: password field + its own show/hide ("eye") toggle, side by side. */
+  .pw-row { display: flex; gap: 0.4rem; align-items: stretch; }
+  .pw-row input { flex: 1; min-width: 0; }
+  .eye-toggle {
+    margin-top: 0; padding: 0 0.6rem; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg-card); color: var(--fg-dim); font-size: 1rem; cursor: pointer;
+    line-height: 1;
+  }
+  .eye-toggle.active { color: var(--accent); border-color: var(--accent); }
   button {
     margin-top: 1rem; padding: 0.55rem 1.1rem; border-radius: 6px; border: 1px solid var(--accent);
     background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; font-size: 0.9rem;
@@ -93,7 +103,20 @@
     <label for="email">Email</label>
     <input type="email" id="email" autocomplete="username">
     <label for="password">Password</label>
-    <input type="password" id="password" autocomplete="current-password">
+    <div class="pw-row">
+      <input type="password" id="password" autocomplete="current-password">
+      <button type="button" class="eye-toggle" id="password-eye" aria-label="Show password" title="Show password">&#128065;</button>
+    </div>
+    <!-- WOTAN-997 ("have them confirm the password type it twice"): only enforced on register
+         (see doAuth('register') below) -- a returning login only ever needs the one real
+         password, so this field is validated, never required, for the login path. Shown
+         always rather than only after clicking "Register instead" -- avoids a second click just
+         to reveal it, and a login attempt with something typed here is simply ignored. -->
+    <label for="confirm-password">Confirm Password <span class="hint">(new accounts only)</span></label>
+    <div class="pw-row">
+      <input type="password" id="confirm-password" autocomplete="new-password">
+      <button type="button" class="eye-toggle" id="confirm-password-eye" aria-label="Show password" title="Show password">&#128065;</button>
+    </div>
     <div>
       <button id="login-btn">Log in</button>
       <button class="secondary" id="register-btn">Register instead</button>
@@ -156,6 +179,13 @@ async function doAuth(endpoint) {
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   if (!email || !password) { setAuthMsg('Email and password required.', 'error'); return; }
+  // WOTAN-997: confirm-password is only a real requirement for a NEW account -- a returning
+  // login only ever needs the one real password on file, so this check is scoped to the
+  // register endpoint specifically, not applied to login even if something's typed there.
+  if (endpoint === 'register') {
+    const confirm = document.getElementById('confirm-password').value;
+    if (password !== confirm) { setAuthMsg('Passwords do not match.', 'error'); return; }
+  }
   setAuthMsg('Working…');
   try {
     const body = await api('/auth/email/' + endpoint, { method: 'POST', body: JSON.stringify({ email, password }) });
@@ -311,6 +341,23 @@ function escapeHtml(s) {
 document.getElementById('login-btn').addEventListener('click', () => doAuth('login'));
 document.getElementById('register-btn').addEventListener('click', () => doAuth('register'));
 document.getElementById('logout-btn').addEventListener('click', logout);
+
+// WOTAN-997 ("have the field like hidden with the eye thing"): toggles one password input
+// between type="password" and type="text", independent per field (password vs
+// confirm-password each get their own real toggle state, not a shared one).
+function wirePasswordEye(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  btn.addEventListener('click', () => {
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.classList.toggle('active', !showing);
+    btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    btn.title = showing ? 'Show password' : 'Hide password';
+  });
+}
+wirePasswordEye('password', 'password-eye');
+wirePasswordEye('confirm-password', 'confirm-password-eye');
 
 // Real page-load bootstrap: if a token is already sitting in localStorage from a prior visit,
 // skip straight to resolving the character/catalog instead of forcing a fresh login every time.

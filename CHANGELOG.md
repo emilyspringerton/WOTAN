@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-04 (3)
+
+- feat(store): `WOTAN-997` -- `store.html`'s register form now has a real "Confirm Password"
+  field, validated (`password !== confirm` → real error, no request sent) only on the register
+  path, never enforced on login (a returning login only ever needs the one real password on
+  file). Both the password and confirm-password fields get their own independent show/hide
+  ("eye") toggle button, flipping `type="password"`/`type="text"` per field. JS syntax-checked;
+  no live browser test (no headless-browser harness in this repo, same real limitation IDUXN-003
+  already named for a different repo's own page JS).
+
 ## 2026-09-04 (2)
 
 - ops: **WOTAN-DNS-001 fully live.** `sudo-queue/48-setup-wotan-nginx-and-dir.sh` ran (nginx site
