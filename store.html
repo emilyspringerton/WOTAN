@@ -365,6 +365,12 @@ if (getToken() && getPlayerID()) {
   document.getElementById('logout-btn').hidden = false;
   setAuthMsg('Restoring your session…');
   afterLogin().then(() => setAuthMsg('')).catch(() => {});
+} else if (new URLSearchParams(location.search).get('signup') === '1') {
+  // GFD-UA-001: the GFD client's own login screen opens this page with ?signup=1 (Ctrl+Alt+S,
+  // "no account? sign up") -- real, small hint so landing here from that link puts the cursor
+  // straight into the email field instead of making someone click into it themselves.
+  document.getElementById('email').focus();
+  setAuthMsg('Fill in the fields below, then click "Register instead" to create your account.');
 }
 </script>
 </body>
