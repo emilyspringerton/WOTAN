@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-04 (4)
+
+- feat(store): `?signup=1` (from GFD's own new `Ctrl+Alt+S` sign-up shortcut, `GFD-UA-001`)
+  focuses the email field and hints toward the register button on load.
+
 ## 2026-09-04 (3)
 
 - feat(store): `WOTAN-997` -- `store.html`'s register form now has a real "Confirm Password"
