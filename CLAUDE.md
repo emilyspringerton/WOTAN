@@ -26,9 +26,16 @@ need a real backend eventually (Phase 2 of that doc) — deferred, not decided y
 
 - `index.html` — real placeholder landing page (esports hub branding, "coming soon" framing),
   matching `OKEMILY/hats.html`'s own honest-placeholder precedent (every purchase/feature control
-  visibly disabled, not faked as live).
+  visibly disabled, not faked as live). Now links to `store.html`.
+- `store.html` — real, code-complete WOTAN_HAT_STORE_NORTHSTAR.md Phase 2 store page (2026-09-04):
+  IDUNA email/password login, resolves the player's GFD character, real hat catalog/buy/equip
+  against IDUNA's live Phase 1 endpoints, all via this repo's own `/api/` nginx proxy. Not yet
+  reachable from the outside — this whole subdomain isn't deployed yet (see below).
 - No deploy pipeline yet — needs `WOTAN-DNS-001`'s own Cloudflare subdomain + a real nginx server
-  block (matching `OKEMILY/ops/nginx-okemily.conf`'s own pattern) before this can go live.
+  block (matching `OKEMILY/ops/nginx-okemily.conf`'s own pattern) before this can go live. DNS
+  itself is already live (`wotan.okemily.com` A record confirmed via the real Cloudflare API,
+  2026-09-04); what's missing is the server side, queued in
+  `sudo-queue/48-setup-wotan-nginx-and-dir.sh`.
 
 ## Related
 
