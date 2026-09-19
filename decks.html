@@ -304,12 +304,12 @@
     placeTip(el, x, y);
   }
   function placeTip(el, x, y) {
-    var w = 300, h = tip.offsetHeight || 460, vw = window.innerWidth, vh = window.innerHeight, pad = 14;
+    var w = 300, h = tip.offsetHeight || 460, vw = window.innerWidth, vh = window.innerHeight, pad = 28;
     if (vw < 620) { // phones: dock at the bottom centre
       tip.style.left = Math.max(8, (vw - w) / 2) + 'px'; tip.style.top = Math.max(8, vh - h - 12) + 'px'; return;
     }
     if (x == null) { var r = el.getBoundingClientRect(); x = r.right; y = r.top; }
-    var left = x + pad, top = y - h / 3;
+    var left = x + pad, top = y - 70;
     if (left + w + pad > vw) left = x - w - pad * 2;
     if (left < 8) left = 8;
     top = Math.max(8, Math.min(top, vh - h - 8));
