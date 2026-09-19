@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-09-19
+- feat(decks): Offense/Operations/Defense colours, keyword column/filter/legend, cards.json v2 (105 cards); not deployed until the server ships the retheme (sess-20260918-1725-497f394f)
 
 - feat: DEADWEIGHT Draft Decks browser (decks.html) -- drafted decks + win rates, filters/sorts, big card tooltip on hover, per-card records tab; data/cards.json generated from DEADWEIGHT; README/CLAUDE status corrected (site is live) (sess-20260918-1725-497f394f)
 
