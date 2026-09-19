@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-19
+
+- feat: DEADWEIGHT Draft Decks browser (decks.html) -- drafted decks + win rates, filters/sorts, big card tooltip on hover, per-card records tab; data/cards.json generated from DEADWEIGHT; README/CLAUDE status corrected (site is live) (sess-20260918-1725-497f394f)
+
+
 ## 2026-09-04 (4)
 
 - feat(store): `?signup=1` (from GFD's own new `Ctrl+Alt+S` sign-up shortcut, `GFD-UA-001`)
