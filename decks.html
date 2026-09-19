@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Draft Decks &mdash; WOTAN</title>
+<meta name="description" content="Every deck drafted in DEADWEIGHT's draft queue, with win rates. Hover any card to see it full size.">
+<style>
+  :root {
+    --bg: #0b0c10;
+    --bg-card: #14161c;
+    --bg-raise: #1b1e26;
+    --fg: #eef0f4;
+    --fg-dim: #a8adb8;
+    --accent: #7c8cff;
+    --border: #23262f;
+    --good: #5fd48a;
+    --bad: #ff6b6b;
+    --burst: #d9534f;
+    --tank: #d9a13a;
+    --shield: #4a86e8;
+    --shadow: 0 18px 50px rgba(0, 0, 0, .55);
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #fafafa;
+      --bg-card: #ffffff;
+      --bg-raise: #f1f2f6;
+      --fg: #14161c;
+      --fg-dim: #4a4f5c;
+      --accent: #4451c7;
+      --border: #e4e4e8;
+      --good: #2e7d4f;
+      --bad: #c0392b;
+      --shadow: 0 18px 50px rgba(20, 22, 28, .28);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--fg); line-height: 1.5;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button { font: inherit; color: inherit; }
+
+  /* ---- top bar ---- */
+  .topbar { border-bottom: 1px solid var(--border); background: var(--bg-card); position: sticky; top: 0; z-index: 20; }
+  .topbar-in { max-width: 1100px; margin: 0 auto; padding: .7rem 1.25rem; display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+  .brand { font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--fg); }
+  .brand small { color: var(--fg-dim); font-weight: 500; letter-spacing: .08em; margin-left: .5rem; }
+  nav { display: flex; gap: .25rem; flex-wrap: wrap; flex: 1; }
+  nav a { color: var(--fg-dim); padding: .35rem .7rem; border-radius: 8px; font-size: .95rem; }
+  nav a:hover { background: var(--bg-raise); color: var(--fg); text-decoration: none; }
+  nav a[aria-current="page"] { color: var(--fg); background: var(--bg-raise); }
+  .signin { border: 1px dashed var(--border); background: transparent; color: var(--fg-dim); border-radius: 8px; padding: .35rem .8rem; font-size: .9rem; cursor: not-allowed; }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1.25rem 5rem; }
+  h1 { font-size: 2rem; margin: 0 0 .25rem; line-height: 1.15; }
+  .lede { color: var(--fg-dim); margin: 0 0 1.25rem; max-width: 62ch; }
+
+  /* ---- stat tiles ---- */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .75rem; margin: 0 0 1.5rem; }
+  .stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: .8rem 1rem; }
+  .stat b { display: block; font-size: 1.6rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--fg-dim); font-size: .82rem; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* ---- tabs + filters ---- */
+  .tabs { display: flex; gap: .25rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+  .tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: .6rem 1rem; color: var(--fg-dim); cursor: pointer; font-weight: 600; }
+  .tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+  .filters { display: flex; flex-wrap: wrap; gap: .6rem .9rem; align-items: end; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: .8rem 1rem; margin-bottom: 1rem; }
+  .filters label { display: flex; flex-direction: column; gap: .2rem; font-size: .75rem; color: var(--fg-dim); text-transform: uppercase; letter-spacing: .05em; }
+  select, input[type=search] { background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 8px; padding: .45rem .6rem; font: inherit; font-size: .95rem; text-transform: none; letter-spacing: 0; }
+  select:focus, input:focus, button:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg button { background: var(--bg); border: 0; padding: .45rem .8rem; cursor: pointer; font-size: .95rem; color: var(--fg-dim); }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .pill { display: inline-flex; align-items: center; gap: .4rem; background: var(--bg-raise); border: 1px solid var(--accent); border-radius: 999px; padding: .2rem .4rem .2rem .75rem; font-size: .9rem; }
+  .pill button { background: none; border: 0; cursor: pointer; color: var(--fg-dim); font-size: 1.1rem; line-height: 1; padding: 0 .3rem; }
+
+  /* ---- deck rows ---- */
+  .deck { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: .9rem 1rem 1rem; margin-bottom: .8rem; }
+  .deck:target, .deck.flash { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .deck-head { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+  .rank { font-size: 1.4rem; font-weight: 700; color: var(--fg-dim); min-width: 2.6rem; font-variant-numeric: tabular-nums; }
+  .title { font-weight: 700; }
+  .title a { color: var(--fg); }
+  .who { color: var(--fg-dim); font-size: .92rem; }
+  .badge { font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: .1rem .5rem; border: 1px solid var(--border); color: var(--fg-dim); }
+  .badge.human { color: var(--good); border-color: var(--good); }
+  .record { margin-left: auto; text-align: right; min-width: 210px; }
+  .record .wl { font-variant-numeric: tabular-nums; font-size: .95rem; }
+  .record .wl b { color: var(--fg); }
+  .bar { height: 8px; border-radius: 999px; background: var(--bg-raise); overflow: hidden; margin-top: .3rem; display: flex; }
+  .bar i { display: block; height: 100%; }
+  .bar .w { background: var(--good); }
+  .bar .d { background: var(--fg-dim); opacity: .55; }
+  .bar .l { background: var(--bad); }
+  .pct { font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+  .few { color: var(--fg-dim); font-size: .78rem; }
+
+  .strip { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .8rem; }
+  .chip { display: inline-flex; align-items: center; gap: .35rem; background: var(--bg-raise); border: 1px solid var(--border); border-left: 4px solid var(--kc, var(--border)); border-radius: 7px; padding: .22rem .55rem .22rem .4rem; font-size: .85rem; cursor: help; }
+  .chip .cost { background: #000a; color: #ffd54f; border-radius: 50%; width: 1.3rem; height: 1.3rem; display: inline-grid; place-items: center; font-size: .72rem; font-weight: 700; }
+  .chip .n { color: var(--fg-dim); font-weight: 700; }
+  .chip.on { border-color: var(--accent); }
+  .expand { margin-top: .7rem; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; font-size: .9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: .6rem; margin-top: .7rem; }
+
+  /* ---- card face (used by minis, the tooltip and the card table) ---- */
+  .face { --kc: var(--burst); position: relative; border-radius: 12px; border: 2px solid var(--kc); background: linear-gradient(180deg, var(--bg-raise), var(--bg-card)); overflow: hidden; display: flex; flex-direction: column; aspect-ratio: 5 / 7; text-align: center; }
+  .face.burst { --kc: var(--burst); } .face.tank { --kc: var(--tank); } .face.shield { --kc: var(--shield); }
+  .face .fh { background: var(--kc); color: #fff; font-weight: 700; padding: .3em .4em .3em 2.1em; min-height: 2.5em; display: flex; align-items: center; justify-content: center; line-height: 1.1; font-size: .78em; }
+  .face .gem { position: absolute; left: .35em; top: .3em; width: 1.7em; height: 1.7em; border-radius: 50%; background: #000c; color: #ffd54f; font-weight: 800; display: grid; place-items: center; font-size: .8em; }
+  .face .cred { position: absolute; left: .35em; top: 2.2em; min-width: 1.7em; height: 1.7em; border-radius: 999px; background: #000c; color: #7cfc9a; font-weight: 800; display: grid; place-items: center; font-size: .7em; padding: 0 .3em; }
+  .face .pow { font-size: 2.4em; font-weight: 800; line-height: 1; margin-top: .25em; }
+  .face .pow.none { visibility: hidden; }
+  .face .kind { color: var(--kc); font-size: .62em; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; margin-bottom: .3em; }
+  .face .txt { color: var(--fg); font-size: .68em; line-height: 1.3; padding: 0 .6em .7em; margin-top: auto; margin-bottom: auto; }
+  .face .cnt { position: absolute; right: .3em; bottom: .3em; background: var(--accent); color: #fff; font-weight: 800; border-radius: 999px; min-width: 1.9em; text-align: center; padding: .05em .4em; font-size: .8em; }
+  .mini { font-size: 13px; cursor: help; border: 0; background: none; padding: 0; text-align: inherit; }
+  .mini .face { width: 100%; }
+
+  /* ---- big tooltip ---- */
+  #tip { position: fixed; z-index: 100; width: 300px; pointer-events: none; opacity: 0; transform: translateY(4px) scale(.98); transition: opacity .12s, transform .12s; filter: drop-shadow(var(--shadow)); }
+  #tip.show { opacity: 1; transform: none; }
+  #tip .face { font-size: 20px; border-width: 3px; border-radius: 18px; }
+  #tip .meta { margin-top: .5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: .5rem .75rem; font-size: .82rem; color: var(--fg-dim); }
+  #tip .meta b { color: var(--fg); }
+
+  /* ---- cards table ---- */
+  table { width: 100%; border-collapse: collapse; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  th, td { padding: .5rem .7rem; text-align: right; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--fg-dim); cursor: pointer; user-select: none; background: var(--bg-raise); white-space: nowrap; }
+  th[aria-sort] { color: var(--fg); }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: var(--bg-raise); }
+  td .chip { cursor: help; }
+  .lnk { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; font-size: .88rem; }
+
+  .more { display: block; margin: 1rem auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: .55rem 1.4rem; cursor: pointer; }
+  .more:hover { border-color: var(--accent); }
+  .note, .empty, .err { color: var(--fg-dim); text-align: center; padding: 2rem 1rem; }
+  .err { color: var(--bad); }
+  footer { margin-top: 2rem; color: var(--fg-dim); font-size: .85rem; max-width: 80ch; }
+  @media (max-width: 640px) {
+    .topbar-in { gap: .4rem .75rem; }
+    .brand small { display: none; }
+    .signin { margin-left: auto; }
+    nav { order: 3; flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; }
+    nav a { white-space: nowrap; }
+    .record { margin-left: 0; text-align: left; width: 100%; }
+    h1 { font-size: 1.6rem; }
+    th, td { padding: .45rem .4rem; font-size: .85rem; }
+    .hide-sm { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { #tip { transition: none; } html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="/">WOTAN<small>EINHORN_INDUSTRIAL</small></a>
+    <nav aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/decks.html" aria-current="page">Draft Decks</a>
+      <a href="/store.html">Hat Store</a>
+    </nav>
+    <button class="signin" type="button" disabled title="Sign-in is coming: tournaments and deck tools will need an account. Browsing stays open.">Sign in (soon)</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Draft Decks</h1>
+  <p class="lede">Every deck drafted in <b>DEADWEIGHT</b>'s draft queue, and how it has done. Players and bots pick 16 times into a 23-card deck; a deck that wins gets played again, a losing bot drafts a new one. Hover (or tap) any card to see it full size.</p>
+
+  <section class="stats" id="stats" aria-label="Totals" aria-live="polite"></section>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-decks" aria-selected="true" aria-controls="panel-decks">Decks</button>
+    <button class="tab" role="tab" id="tab-cards" aria-selected="false" aria-controls="panel-cards">Cards</button>
+  </div>
+
+  <section id="panel-decks" role="tabpanel" aria-labelledby="tab-decks">
+    <div class="filters">
+      <label>Drafted by
+        <span class="seg" id="f-who" role="group" aria-label="Drafted by">
+          <button type="button" data-v="" aria-pressed="true">All</button>
+          <button type="button" data-v="human" aria-pressed="false">Players</button>
+          <button type="button" data-v="bot" aria-pressed="false">Bots</button>
+        </span>
+      </label>
+      <label>Sort
+        <select id="f-sort">
+          <option value="score">Best (adjusted for games played)</option>
+          <option value="winrate">Raw win rate</option>
+          <option value="games">Most games</option>
+          <option value="recent">Newest</option>
+        </select>
+      </label>
+      <label>Min games
+        <select id="f-min">
+          <option value="1">1+</option><option value="3">3+</option><option value="5">5+</option>
+          <option value="10">10+</option><option value="25">25+</option>
+        </select>
+      </label>
+      <label>Player
+        <input type="search" id="f-q" placeholder="name" autocomplete="off" aria-label="Filter by player name">
+      </label>
+      <span id="f-card"></span>
+    </div>
+    <div id="decks"></div>
+    <button class="more" id="more" hidden type="button">Show more</button>
+  </section>
+
+  <section id="panel-cards" role="tabpanel" aria-labelledby="tab-cards" hidden>
+    <div class="filters">
+      <label>Type
+        <span class="seg" id="c-kind" role="group" aria-label="Card type">
+          <button type="button" data-v="" aria-pressed="true">All</button>
+          <button type="button" data-v="burst" aria-pressed="false">Burst</button>
+          <button type="button" data-v="tank" aria-pressed="false">Tank</button>
+          <button type="button" data-v="shield" aria-pressed="false">Shield</button>
+        </span>
+      </label>
+      <label>Search
+        <input type="search" id="c-q" placeholder="card name or text" autocomplete="off" aria-label="Search cards">
+      </label>
+    </div>
+    <div style="overflow-x:auto"><table id="ctable"></table></div>
+  </section>
+
+  <footer>
+    <p><b>How to read this.</b> Win rate = wins &divide; games (draws don't count as wins). "Best" ranks by the lower bound of a 95% confidence interval, so a 9&ndash;1 deck outranks a 2&ndash;0 deck. A winning deck keeps getting queued, so long records mean a deck kept winning; a deck with few games hasn't been tested much. The Cards tab is every card's record across every deck that ran it, not balance advice: the set has deliberately bad cards and deliberately strong ones.</p>
+    <p>Browsing is open to everyone. Accounts (for tournaments and deck tools) are planned.</p>
+  </footer>
+</main>
+
+<div id="tip" role="tooltip" aria-hidden="true"></div>
+
+<script>
+(function () {
+  'use strict';
+  var API = '/api/v1/games/deadweight';
+  var PAGE = 40;
+  var cards = {};              // id -> card
+  var cardList = [];
+  var cardStats = {};          // id -> stat
+  var st = { who: '', sort: 'score', min: 5, q: '', card: -1, offset: 0, decks: [], total: 0, open: {}, tab: 'decks' };
+  var cst = { kind: '', q: '', sort: 'card', dir: 1 };
+  var $ = function (id) { return document.getElementById(id); };
+  var KIND_LABEL = { burst: 'Burst', tank: 'Tank', shield: 'Shield' };
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function pct(x) { return (x * 100).toFixed(x === 1 || x === 0 ? 0 : 1) + '%'; }
+  function cardOf(id) { return cards[id] || { id: id, name: 'Card ' + id, kind: 'burst', cost: 0, power: 0, credit: 0, text: '' }; }
+
+  /* What a card does, in words. Base cards have no rider text, so describe the triangle. */
+  function ruleText(c) {
+    if (c.text) return c.text;
+    var beats = { burst: 'Tank', tank: 'Shield', shield: 'Burst' }[c.kind];
+    return 'Deals ' + c.power + ' damage when it wins the exchange. ' + KIND_LABEL[c.kind] + ' beats ' + beats + '.';
+  }
+
+  function face(c, count) {
+    return '<div class="face ' + c.kind + '">' +
+      '<div class="gem" title="Energy cost">' + c.cost + '</div>' +
+      (c.credit ? '<div class="cred" title="Credits required">$' + c.credit + '</div>' : '') +
+      '<div class="fh">' + esc(c.name) + '</div>' +
+      '<div class="pow' + (c.power > 0 ? '' : ' none') + '">' + c.power + '</div>' +
+      '<div class="kind">' + KIND_LABEL[c.kind] + '</div>' +
+      '<div class="txt">' + esc(ruleText(c)) + '</div>' +
+      (count > 1 ? '<div class="cnt">&times;' + count + '</div>' : '') +
+      '</div>';
+  }
+
+  function counts(list) {
+    var m = {}, order = [];
+    list.forEach(function (id) { if (!(id in m)) { m[id] = 0; order.push(id); } m[id]++; });
+    return order.map(function (id) { return { id: id, n: m[id] }; });
+  }
+
+  function chip(id, n) {
+    var c = cardOf(id);
+    return '<button type="button" class="chip' + (st.card === id ? ' on' : '') + '" data-card="' + id + '" style="--kc:var(--' + c.kind + ')" aria-label="' + esc(c.name) + ', cost ' + c.cost + (n > 1 ? ', ' + n + ' copies' : '') + '">' +
+      '<span class="cost">' + c.cost + '</span>' + esc(c.name) + (n > 1 ? ' <span class="n">&times;' + n + '</span>' : '') + '</button>';
+  }
+
+  /* ---------------- tooltip ---------------- */
+  var tip = $('tip'), tipFor = null, pinned = false;
+  function showTip(el, x, y) {
+    var id = +el.getAttribute('data-card');
+    var c = cardOf(id), s = cardStats[id];
+    var meta = s && s.games ? '<b>' + pct(s.win_rate) + '</b> win rate over ' + s.games + ' games &middot; in ' + s.decks + ' decks' : 'No games recorded yet';
+    tip.innerHTML = face(c, 0) + '<div class="meta">' + meta + '</div>';
+    tip.setAttribute('aria-hidden', 'false');
+    tipFor = el;
+    tip.classList.add('show');
+    placeTip(el, x, y);
+  }
+  function placeTip(el, x, y) {
+    var w = 300, h = tip.offsetHeight || 460, vw = window.innerWidth, vh = window.innerHeight, pad = 14;
+    if (vw < 620) { // phones: dock at the bottom centre
+      tip.style.left = Math.max(8, (vw - w) / 2) + 'px'; tip.style.top = Math.max(8, vh - h - 12) + 'px'; return;
+    }
+    if (x == null) { var r = el.getBoundingClientRect(); x = r.right; y = r.top; }
+    var left = x + pad, top = y - h / 3;
+    if (left + w + pad > vw) left = x - w - pad * 2;
+    if (left < 8) left = 8;
+    top = Math.max(8, Math.min(top, vh - h - 8));
+    tip.style.left = left + 'px'; tip.style.top = top + 'px';
+  }
+  function hideTip() { tip.classList.remove('show'); tip.setAttribute('aria-hidden', 'true'); tipFor = null; pinned = false; }
+  function cardEl(t) { return t && t.closest ? t.closest('[data-card]') : null; }
+  document.addEventListener('pointerover', function (e) {
+    if (e.pointerType === 'touch') return;
+    var el = cardEl(e.target); if (el && el !== tipFor) showTip(el, e.clientX, e.clientY);
+  });
+  document.addEventListener('pointermove', function (e) {
+    if (e.pointerType === 'touch' || !tipFor || pinned) return;
+    if (cardEl(e.target) === tipFor) placeTip(tipFor, e.clientX, e.clientY);
+  });
+  document.addEventListener('pointerout', function (e) {
+    if (e.pointerType === 'touch' || pinned) return;
+    if (cardEl(e.target) && !cardEl(e.relatedTarget)) hideTip();
+  });
+  document.addEventListener('focusin', function (e) { var el = cardEl(e.target); if (el) showTip(el); });
+  document.addEventListener('focusout', function () { if (!pinned) hideTip(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hideTip(); });
+  window.addEventListener('scroll', function () { if (tipFor && !pinned) hideTip(); }, { passive: true });
+  document.addEventListener('click', function (e) { // touch: tap a card to pin its tooltip, tap elsewhere to close
+    var el = cardEl(e.target);
+    if (e.pointerType === 'touch' || (window.matchMedia && window.matchMedia('(hover: none)').matches)) {
+      if (el) { e.preventDefault(); showTip(el); pinned = true; } else if (pinned) hideTip();
+    }
+  });
+
+  /* ---------------- data ---------------- */
+  function getJSON(u) {
+    return fetch(u, { headers: { Accept: 'application/json' } }).then(function (r) {
+      if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+      return r.json();
+    });
+  }
+  function loadCards() {
+    return getJSON('/data/cards.json').then(function (d) {
+      cardList = d.cards; cardList.forEach(function (c) { cards[c.id] = c; });
+    });
+  }
+  function loadStats() {
+    return getJSON(API + '/card-stats').then(function (d) {
+      cardStats = {}; d.cards.forEach(function (s) { cardStats[s.card] = s; });
+      renderStats(d.summary);
+      if (st.tab === 'cards') renderCards();
+    });
+  }
+  function query(offset, limit) {
+    var p = ['sort=' + st.sort, 'min_games=' + st.min, 'offset=' + offset, 'limit=' + limit];
+    if (st.who) p.push('kind=' + st.who);
+    if (st.q) p.push('player=' + encodeURIComponent(st.q));
+    if (st.card >= 0) p.push('card=' + st.card);
+    return API + '/decks?' + p.join('&');
+  }
+  function loadDecks(reset) {
+    var limit = reset ? PAGE : Math.max(PAGE, st.decks.length);
+    var offset = 0;
+    return getJSON(query(offset, limit)).then(function (d) {
+      st.decks = d.decks; st.total = d.total; st.offset = d.decks.length;
+      renderDecks(); renderStats(d.summary);
+    }).catch(function (e) { $('decks').innerHTML = '<p class="err">Could not load decks (' + esc(e.message) + '). Try again in a moment.</p>'; });
+  }
+  function loadMore() {
+    getJSON(query(st.decks.length, PAGE)).then(function (d) {
+      st.decks = st.decks.concat(d.decks); st.total = d.total; renderDecks();
+    });
+  }
+
+  /* ---------------- render ---------------- */
+  function renderStats(s) {
+    if (!s) return;
+    var t = function (n, l) { return '<div class="stat"><b>' + n.toLocaleString() + '</b><span>' + l + '</span></div>'; };
+    $('stats').innerHTML = t(s.decks, 'Decks drafted') + t(s.matches, 'Matches played') + t(s.human_decks, 'Player decks') + t(s.bot_decks, 'Bot decks');
+  }
+
+  function renderDeck(d, rank) {
+    var g = d.games, wp = g ? d.wins / g * 100 : 0, dp = g ? d.draws / g * 100 : 0, lp = g ? d.losses / g * 100 : 0;
+    var open = !!st.open[d.deck_id];
+    var groups = counts(d.cards);
+    var strip = groups.map(function (c) { return chip(c.id, c.n); }).join('');
+    var grid = open ? '<div class="grid">' + groups.map(function (c) {
+      return '<button type="button" class="mini" data-card="' + c.id + '" aria-label="' + esc(cardOf(c.id).name) + '">' + face(cardOf(c.id), c.n) + '</button>';
+    }).join('') + '</div>' : '';
+    var when = d.created ? new Date(d.created * 1000).toLocaleString() : '';
+    return '<article class="deck" id="deck-' + d.deck_id + '">' +
+      '<div class="deck-head">' +
+      '<span class="rank" title="Rank in this list">' + (rank ? '#' + rank : '') + '</span>' +
+      '<div><div class="title"><a href="#deck-' + d.deck_id + '">Deck ' + d.deck_id + '</a> <span class="badge ' + (d.kind ? '' : 'human') + '">' + (d.kind ? 'Bot' : 'Player') + '</span></div>' +
+      '<div class="who">' + esc(d.player) + (when ? ' &middot; drafted ' + esc(when) : '') + '</div></div>' +
+      '<div class="record">' +
+      (g ? '<span class="pct">' + pct(d.win_rate) + '</span> <span class="wl"><b>' + d.wins + '</b>W &ndash; <b>' + d.losses + '</b>L' + (d.draws ? ' &ndash; ' + d.draws + 'D' : '') + '</span>' +
+        '<div class="bar" role="img" aria-label="' + d.wins + ' wins, ' + d.draws + ' draws, ' + d.losses + ' losses"><i class="w" style="width:' + wp + '%"></i><i class="d" style="width:' + dp + '%"></i><i class="l" style="width:' + lp + '%"></i></div>' +
+        (g < 5 ? '<div class="few">only ' + g + ' game' + (g === 1 ? '' : 's') + ' so far</div>' : '')
+        : '<span class="few">not played yet</span>') +
+      '</div></div>' +
+      '<div class="strip">' + strip + '</div>' +
+      '<button type="button" class="expand" data-expand="' + d.deck_id + '" aria-expanded="' + open + '">' + (open ? 'Hide full deck' : 'Show full deck (' + d.cards.length + ' cards)') + '</button>' +
+      grid + '</article>';
+  }
+
+  function renderDecks() {
+    var box = $('decks');
+    if (!st.decks.length) {
+      box.innerHTML = '<p class="empty">No decks match these filters yet.' + (st.min > 1 ? ' Try lowering "Min games".' : '') + '</p>';
+    } else {
+      box.innerHTML = st.decks.map(function (d, i) { return renderDeck(d, st.sort === 'recent' ? 0 : i + 1); }).join('');
+    }
+    var more = $('more');
+    more.hidden = st.decks.length >= st.total;
+    more.textContent = 'Show more (' + (st.total - st.decks.length) + ' left)';
+    var pill = $('f-card');
+    if (st.card >= 0) {
+      pill.innerHTML = '<span class="pill">Only decks with <b>' + esc(cardOf(st.card).name) + '</b><button type="button" id="clearcard" aria-label="Clear card filter">&times;</button></span>';
+      $('clearcard').onclick = function () { setCard(-1); };
+    } else pill.innerHTML = '';
+  }
+
+  function renderCards() {
+    var q = cst.q.toLowerCase();
+    var rows = cardList.filter(function (c) {
+      return (!cst.kind || c.kind === cst.kind) && (!q || (c.name + ' ' + c.text).toLowerCase().indexOf(q) >= 0);
+    }).map(function (c) { var s = cardStats[c.id] || {}; return { c: c, s: s }; });
+    var key = {
+      card: function (r) { return r.c.id; }, name: function (r) { return r.c.name.toLowerCase(); }, cost: function (r) { return r.c.cost; },
+      power: function (r) { return r.c.power; }, decks: function (r) { return r.s.decks || 0; }, games: function (r) { return r.s.games || 0; },
+      win: function (r) { return r.s.games ? r.s.score : -1; }
+    }[cst.sort];
+    rows.sort(function (a, b) { var x = key(a), y = key(b); return (x < y ? -1 : x > y ? 1 : 0) * cst.dir; });
+    var head = [['name', 'Card'], ['cost', 'Cost'], ['power', 'Power'], ['decks', 'Decks'], ['games', 'Games'], ['win', 'Win rate']];
+    var th = head.map(function (h) {
+      var on = cst.sort === h[0];
+      return '<th data-sort="' + h[0] + '"' + (on ? ' aria-sort="' + (cst.dir > 0 ? 'ascending' : 'descending') + '"' : '') + '>' + h[1] + (on ? (cst.dir > 0 ? ' &#9650;' : ' &#9660;') : '') + '</th>';
+    }).join('') + '<th class="hide-sm" style="cursor:default">Decks</th>';
+    var body = rows.map(function (r) {
+      var c = r.c, s = r.s;
+      return '<tr><td>' + chip(c.id, 1) + '</td><td>' + c.cost + '</td><td>' + (c.power || '&ndash;') + '</td><td>' + (s.decks || 0) + '</td><td>' + (s.games || 0) + '</td>' +
+        '<td>' + (s.games ? '<b>' + pct(s.win_rate) + '</b>' : '<span class="few">&ndash;</span>') + '</td>' +
+        '<td class="hide-sm"><button type="button" class="lnk" data-filter-card="' + c.id + '">show decks</button></td></tr>';
+    }).join('');
+    $('ctable').innerHTML = '<thead><tr>' + th + '</tr></thead><tbody>' + (body || '<tr><td colspan="7" class="empty">No cards match.</td></tr>') + '</tbody>';
+  }
+
+  /* ---------------- state / URL ---------------- */
+  function sync() {
+    var p = new URLSearchParams();
+    if (st.who) p.set('who', st.who);
+    if (st.sort !== 'score') p.set('sort', st.sort);
+    if (st.min !== 5) p.set('min', st.min);
+    if (st.q) p.set('q', st.q);
+    if (st.card >= 0) p.set('card', st.card);
+    if (st.tab === 'cards') p.set('tab', 'cards');
+    var s = p.toString();
+    history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash);
+  }
+  function setCard(id) { st.card = id; syncControls(); sync(); loadDecks(true); }
+  function showTab(name) {
+    st.tab = name;
+    ['decks', 'cards'].forEach(function (n) {
+      $('tab-' + n).setAttribute('aria-selected', String(n === name));
+      $('panel-' + n).hidden = n !== name;
+    });
+    if (name === 'cards') renderCards();
+    hideTip(); sync();
+  }
+  function syncControls() {
+    Array.prototype.forEach.call($('f-who').children, function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === st.who)); });
+    $('f-sort').value = st.sort; $('f-min').value = String(st.min); $('f-q').value = st.q;
+  }
+  function readURL() {
+    var p = new URLSearchParams(location.search);
+    st.who = p.get('who') || ''; st.sort = p.get('sort') || 'score'; st.min = +(p.get('min') || 5); st.q = p.get('q') || '';
+    st.card = p.has('card') ? +p.get('card') : -1;
+    if (p.get('tab') === 'cards') st.tab = 'cards';
+  }
+
+  /* ---------------- events ---------------- */
+  $('tab-decks').onclick = function () { showTab('decks'); };
+  $('tab-cards').onclick = function () { showTab('cards'); };
+  $('f-who').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st.who = b.getAttribute('data-v'); syncControls(); sync(); loadDecks(true); });
+  $('f-sort').onchange = function () { st.sort = this.value; sync(); loadDecks(true); };
+  $('f-min').onchange = function () { st.min = +this.value; sync(); loadDecks(true); };
+  var qt = null;
+  $('f-q').oninput = function () { var v = this.value.trim(); clearTimeout(qt); qt = setTimeout(function () { st.q = v; sync(); loadDecks(true); }, 250); };
+  $('more').onclick = loadMore;
+  $('decks').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-expand]');
+    if (b) { var id = b.getAttribute('data-expand'); st.open[id] = !st.open[id]; hideTip(); renderDecks(); var a = $('deck-' + id); if (a) a.scrollIntoView({ block: 'nearest' }); }
+  });
+  $('c-kind').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return; cst.kind = b.getAttribute('data-v');
+    Array.prototype.forEach.call($('c-kind').children, function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    renderCards();
+  });
+  $('c-q').oninput = function () { cst.q = this.value.trim(); renderCards(); };
+  $('ctable').addEventListener('click', function (e) {
+    var th = e.target.closest('th[data-sort]');
+    if (th) { var k = th.getAttribute('data-sort'); if (cst.sort === k) cst.dir = -cst.dir; else { cst.sort = k; cst.dir = (k === 'name' || k === 'card') ? 1 : -1; } renderCards(); return; }
+    var l = e.target.closest('[data-filter-card]');
+    if (l) { st.card = +l.getAttribute('data-filter-card'); st.min = 1; showTab('decks'); syncControls(); sync(); loadDecks(true); }
+  });
+
+  /* ---------------- boot ---------------- */
+  readURL(); syncControls();
+  if (st.tab === 'cards') showTab('cards');
+  loadCards().then(function () { return Promise.all([loadStats(), loadDecks(true)]); }).then(function () {
+    if (location.hash.indexOf('#deck-') === 0) {
+      var id = +location.hash.slice(6), el = $('deck-' + id);
+      if (el) { el.classList.add('flash'); el.scrollIntoView({ block: 'center' }); }
+      else getJSON(API + '/decks/' + id).then(function (d) { st.decks.unshift(d); st.open[id] = true; renderDecks(); var e2 = $('deck-' + id); if (e2) { e2.classList.add('flash'); e2.scrollIntoView({ block: 'center' }); } }).catch(function () {});
+    }
+  }).catch(function (e) {
+    $('decks').innerHTML = '<p class="err">Could not load the card catalog (' + esc(e.message) + ').</p>';
+  });
+  setInterval(function () { if (!document.hidden && !tipFor) { loadStats(); loadDecks(false); } }, 30000);
+})();
+</script>
+</body>
+</html>
