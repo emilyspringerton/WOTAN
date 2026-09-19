@@ -19,7 +19,7 @@ own repo/subdomain. Plain static HTML/CSS/JS, no build step. See `CLAUDE.md` for
   (`internal/deckstats`, `internal/http/handlers/deck_stats.go`) that tail `dw_server`'s `decks.ndjson`
   (`DEADWEIGHT_DECK_LOG`, default `/home/fatbaby/DEADWEIGHT/var/matches/decks.ndjson`). The nginx `/api/` proxy
   (`ops/nginx-wotan.conf`) forwards them, so the page is same-origin.
-- `data/cards.json` — the 73-card catalog for the tooltips, **generated** from DEADWEIGHT's rules and card text:
+- `data/cards.json` — the 105-card catalog (kind, keyword, cost, power, text) for the tooltips, **generated** from DEADWEIGHT's rules and card text:
   `cd DEADWEIGHT && scripts/export_cards.sh` (re-run after any card change).
 
 ## Deploy

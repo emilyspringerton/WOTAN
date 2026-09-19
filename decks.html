@@ -16,9 +16,9 @@
     --border: #23262f;
     --good: #5fd48a;
     --bad: #ff6b6b;
-    --burst: #d9534f;
-    --tank: #d9a13a;
-    --shield: #4a86e8;
+    --offense: #d9534f;      /* Red */
+    --operations: #e0a52f;   /* Yellow */
+    --defense: #4a86e8;      /* Blue */
     --shadow: 0 18px 50px rgba(0, 0, 0, .55);
   }
   @media (prefers-color-scheme: light) {
@@ -112,8 +112,8 @@
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: .6rem; margin-top: .7rem; }
 
   /* ---- card face (used by minis, the tooltip and the card table) ---- */
-  .face { --kc: var(--burst); position: relative; border-radius: 12px; border: 2px solid var(--kc); background: linear-gradient(180deg, var(--bg-raise), var(--bg-card)); overflow: hidden; display: flex; flex-direction: column; aspect-ratio: 5 / 7; text-align: center; }
-  .face.burst { --kc: var(--burst); } .face.tank { --kc: var(--tank); } .face.shield { --kc: var(--shield); }
+  .face { --kc: var(--offense); position: relative; border-radius: 12px; border: 2px solid var(--kc); background: linear-gradient(180deg, var(--bg-raise), var(--bg-card)); overflow: hidden; display: flex; flex-direction: column; aspect-ratio: 5 / 7; text-align: center; }
+  .face.offense { --kc: var(--offense); } .face.operations { --kc: var(--operations); } .face.defense { --kc: var(--defense); }
   .face .fh { background: var(--kc); color: #fff; font-weight: 700; padding: .3em .4em .3em 2.1em; min-height: 2.5em; display: flex; align-items: center; justify-content: center; line-height: 1.1; font-size: .78em; }
   .face .gem { position: absolute; left: .35em; top: .3em; width: 1.7em; height: 1.7em; border-radius: 50%; background: #000c; color: #ffd54f; font-weight: 800; display: grid; place-items: center; font-size: .8em; }
   .face .cred { position: absolute; left: .35em; top: 2.2em; min-width: 1.7em; height: 1.7em; border-radius: 999px; background: #000c; color: #7cfc9a; font-weight: 800; display: grid; place-items: center; font-size: .7em; padding: 0 .3em; }
@@ -143,6 +143,9 @@
   td .chip { cursor: help; }
   .lnk { background: none; border: 0; color: var(--accent); cursor: pointer; padding: 0; font-size: .88rem; }
 
+  .legend { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: .6rem 1rem; margin-bottom: 1rem; color: var(--fg-dim); font-size: .92rem; }
+  .legend summary { cursor: pointer; color: var(--fg); font-weight: 600; }
+  .legend ul { margin: .4rem 0 0; padding-left: 1.2rem; }
   .more { display: block; margin: 1rem auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: .55rem 1.4rem; cursor: pointer; }
   .more:hover { border-color: var(--accent); }
   .note, .empty, .err { color: var(--fg-dim); text-align: center; padding: 2rem 1rem; }
@@ -223,15 +226,31 @@
       <label>Type
         <span class="seg" id="c-kind" role="group" aria-label="Card type">
           <button type="button" data-v="" aria-pressed="true">All</button>
-          <button type="button" data-v="burst" aria-pressed="false">Burst</button>
-          <button type="button" data-v="tank" aria-pressed="false">Tank</button>
-          <button type="button" data-v="shield" aria-pressed="false">Shield</button>
+          <button type="button" data-v="offense" aria-pressed="false">Offense</button>
+          <button type="button" data-v="operations" aria-pressed="false">Operations</button>
+          <button type="button" data-v="defense" aria-pressed="false">Defense</button>
         </span>
+      </label>
+      <label>Keyword
+        <select id="c-kw">
+          <option value="">Any</option><option>Lock</option><option>Sabotage</option><option>Flank</option><option>Scan</option><option>Siphon</option>
+        </select>
       </label>
       <label>Search
         <input type="search" id="c-q" placeholder="card name or text" autocomplete="off" aria-label="Search cards">
       </label>
     </div>
+    <details class="legend">
+      <summary>How the colours and keywords work</summary>
+      <p><b style="color:var(--offense)">Offense (Red)</b> beats <b style="color:var(--operations)">Operations (Yellow)</b>, which beats <b style="color:var(--defense)">Defense (Blue)</b>, which beats Offense. Offense is direct attacks, missiles and kinetic force; Defense is barriers, structural integrity and repair; Operations is an active tactical suite that exploits defending ships. Every Operations card has one keyword:</p>
+      <ul>
+        <li><b>Lock</b> &mdash; precision targeting that shatters defenses (ignores armor, can't be reflected).</li>
+        <li><b>Sabotage</b> &mdash; internal system hacks and viruses (burns, cancels, disabled cards).</li>
+        <li><b>Flank</b> &mdash; positional movement to strike undefended areas (bonus against a passed or defending opponent).</li>
+        <li><b>Scan</b> &mdash; intel gathering that exposes the enemy (bonuses that read their hull, energy, credits or card).</li>
+        <li><b>Siphon</b> &mdash; resource and energy theft.</li>
+      </ul>
+    </details>
     <div style="overflow-x:auto"><table id="ctable"></table></div>
   </section>
 
@@ -252,18 +271,18 @@
   var cardList = [];
   var cardStats = {};          // id -> stat
   var st = { who: '', sort: 'score', min: 5, q: '', card: -1, offset: 0, decks: [], total: 0, open: {}, tab: 'decks' };
-  var cst = { kind: '', q: '', sort: 'card', dir: 1 };
+  var cst = { kind: '', kw: '', q: '', sort: 'card', dir: 1 };
   var $ = function (id) { return document.getElementById(id); };
-  var KIND_LABEL = { burst: 'Burst', tank: 'Tank', shield: 'Shield' };
+  var KIND_LABEL = { offense: 'Offense', operations: 'Operations', defense: 'Defense' };
 
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function pct(x) { return (x * 100).toFixed(x === 1 || x === 0 ? 0 : 1) + '%'; }
-  function cardOf(id) { return cards[id] || { id: id, name: 'Card ' + id, kind: 'burst', cost: 0, power: 0, credit: 0, text: '' }; }
+  function cardOf(id) { return cards[id] || { id: id, name: 'Card ' + id, kind: 'offense', keyword: '', cost: 0, power: 0, credit: 0, text: '' }; }
 
   /* What a card does, in words. Base cards have no rider text, so describe the triangle. */
   function ruleText(c) {
     if (c.text) return c.text;
-    var beats = { burst: 'Tank', tank: 'Shield', shield: 'Burst' }[c.kind];
+    var beats = { offense: 'Operations', operations: 'Defense', defense: 'Offense' }[c.kind];
     return 'Deals ' + c.power + ' damage when it wins the exchange. ' + KIND_LABEL[c.kind] + ' beats ' + beats + '.';
   }
 
@@ -273,7 +292,7 @@
       (c.credit ? '<div class="cred" title="Credits required">$' + c.credit + '</div>' : '') +
       '<div class="fh">' + esc(c.name) + '</div>' +
       '<div class="pow' + (c.power > 0 ? '' : ' none') + '">' + c.power + '</div>' +
-      '<div class="kind">' + KIND_LABEL[c.kind] + '</div>' +
+      '<div class="kind">' + KIND_LABEL[c.kind] + (c.keyword ? ' &middot; ' + esc(c.keyword) : '') + '</div>' +
       '<div class="txt">' + esc(ruleText(c)) + '</div>' +
       (count > 1 ? '<div class="cnt">&times;' + count + '</div>' : '') +
       '</div>';
@@ -432,26 +451,26 @@
   function renderCards() {
     var q = cst.q.toLowerCase();
     var rows = cardList.filter(function (c) {
-      return (!cst.kind || c.kind === cst.kind) && (!q || (c.name + ' ' + c.text).toLowerCase().indexOf(q) >= 0);
+      return (!cst.kind || c.kind === cst.kind) && (!cst.kw || c.keyword === cst.kw) && (!q || (c.name + ' ' + c.text).toLowerCase().indexOf(q) >= 0);
     }).map(function (c) { var s = cardStats[c.id] || {}; return { c: c, s: s }; });
     var key = {
-      card: function (r) { return r.c.id; }, name: function (r) { return r.c.name.toLowerCase(); }, cost: function (r) { return r.c.cost; },
+      card: function (r) { return r.c.id; }, name: function (r) { return r.c.name.toLowerCase(); }, kw: function (r) { return r.c.keyword || '~'; }, cost: function (r) { return r.c.cost; },
       power: function (r) { return r.c.power; }, decks: function (r) { return r.s.decks || 0; }, games: function (r) { return r.s.games || 0; },
       win: function (r) { return r.s.games ? r.s.score : -1; }
     }[cst.sort];
     rows.sort(function (a, b) { var x = key(a), y = key(b); return (x < y ? -1 : x > y ? 1 : 0) * cst.dir; });
-    var head = [['name', 'Card'], ['cost', 'Cost'], ['power', 'Power'], ['decks', 'Decks'], ['games', 'Games'], ['win', 'Win rate']];
+    var head = [['name', 'Card'], ['kw', 'Keyword'], ['cost', 'Cost'], ['power', 'Power'], ['decks', 'Decks'], ['games', 'Games'], ['win', 'Win rate']];
     var th = head.map(function (h) {
       var on = cst.sort === h[0];
       return '<th data-sort="' + h[0] + '"' + (on ? ' aria-sort="' + (cst.dir > 0 ? 'ascending' : 'descending') + '"' : '') + '>' + h[1] + (on ? (cst.dir > 0 ? ' &#9650;' : ' &#9660;') : '') + '</th>';
     }).join('') + '<th class="hide-sm" style="cursor:default">Decks</th>';
     var body = rows.map(function (r) {
       var c = r.c, s = r.s;
-      return '<tr><td>' + chip(c.id, 1) + '</td><td>' + c.cost + '</td><td>' + (c.power || '&ndash;') + '</td><td>' + (s.decks || 0) + '</td><td>' + (s.games || 0) + '</td>' +
+      return '<tr><td>' + chip(c.id, 1) + '</td><td>' + (c.keyword ? esc(c.keyword) : '<span class="few">&ndash;</span>') + '</td><td>' + c.cost + '</td><td>' + (c.power || '&ndash;') + '</td><td>' + (s.decks || 0) + '</td><td>' + (s.games || 0) + '</td>' +
         '<td>' + (s.games ? '<b>' + pct(s.win_rate) + '</b>' : '<span class="few">&ndash;</span>') + '</td>' +
         '<td class="hide-sm"><button type="button" class="lnk" data-filter-card="' + c.id + '">show decks</button></td></tr>';
     }).join('');
-    $('ctable').innerHTML = '<thead><tr>' + th + '</tr></thead><tbody>' + (body || '<tr><td colspan="7" class="empty">No cards match.</td></tr>') + '</tbody>';
+    $('ctable').innerHTML = '<thead><tr>' + th + '</tr></thead><tbody>' + (body || '<tr><td colspan="8" class="empty">No cards match.</td></tr>') + '</tbody>';
   }
 
   /* ---------------- state / URL ---------------- */
@@ -506,6 +525,7 @@
     renderCards();
   });
   $('c-q').oninput = function () { cst.q = this.value.trim(); renderCards(); };
+  $('c-kw').onchange = function () { cst.kw = this.value; renderCards(); };
   $('ctable').addEventListener('click', function (e) {
     var th = e.target.closest('th[data-sort]');
     if (th) { var k = th.getAttribute('data-sort'); if (cst.sort === k) cst.dir = -cst.dir; else { cst.sort = k; cst.dir = (k === 'name' || k === 'card') ? 1 : -1; } renderCards(); return; }
