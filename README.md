@@ -22,6 +22,8 @@ own repo/subdomain. Plain static HTML/CSS/JS, no build step. See `CLAUDE.md` for
 - `data/cards.json` — the 105-card catalog (kind, keyword, cost, power, text) for the tooltips, **generated** from DEADWEIGHT's rules and card text:
   `cd DEADWEIGHT && scripts/export_cards.sh` (re-run after any card change).
 
+Decks drafted before the 2026-09-19 Offense/Operations/Defense retheme were archived server-side (`decks.pre-retheme.ndjson`) and are not shown.
+
 ## Deploy
 
 `~/wotan-deploy.sh` (rsync to `/var/www/wotan`). Accounts (tournaments, deck tools) are planned; the header's "Sign in"
