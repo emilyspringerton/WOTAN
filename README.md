@@ -5,6 +5,10 @@
 distinct live content — REDGARDEN leaderboard, hero stats, GFD Battlegrounds demo, mailing list — and links forward to
 here). Plain static HTML/CSS/JS, no build step. See `CLAUDE.md` for status and related docs.
 
+**Look**: BRAWLPIT "neon brutalist" art direction (2026-09-24) — near-black violet background,
+violet primary accent, a gold secondary accent, one shared stylesheet (`css/wotan-theme.css`)
+across every page. Dark-only by design.
+
 ## What is live
 
 - **`/decks.html` — DEADWEIGHT Draft Decks** (open to everyone, no account): every deck drafted in DEADWEIGHT's draft

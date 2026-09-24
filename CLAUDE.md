@@ -21,6 +21,16 @@ near-zero footprint, trivially administrable by Claude Code: edit → commit →
 hat-store/pixel-editor feature work scoped in `BRAWLPIT/docs/WOTAN_HAT_STORE_NORTHSTAR.md` will
 need a real backend eventually (Phase 2 of that doc) — deferred, not decided yet.
 
+## Design system
+
+`css/wotan-theme.css` (2026-09-24) is the one shared stylesheet for all 5 pages — BRAWLPIT
+"neon brutalist" art direction: near-black violet background, violet primary accent, a gold
+"IDUNA undertone" secondary accent, plus cyan/orange/red/blue/green utility colors, all as CSS
+custom properties. Shared topbar/nav, cards, buttons, badges, and form inputs live here; each
+page keeps only its own page-specific overrides in a local `<style>` block. Dark-only, no
+light-mode variant — deliberate, not an oversight. New pages should link this stylesheet and the
+shared topbar markup rather than re-declaring `:root`/base styles.
+
 ## Real, current status
 
 - `decks.html` — **DEADWEIGHT Draft Decks** (2026-09-19): the unauthenticated deck browser. Reads IDUNA's public

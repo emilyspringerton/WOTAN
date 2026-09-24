@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-09-24 (4)
+- feat(design): **full visual redesign — BRAWLPIT "neon brutalist" art direction** (founder
+  real-time: "improve the design of the WOTAN platform use the brawlpit aesthetic the neon
+  brutalist look but make it clean and readable and friendly the shankpit menu color pallette" /
+  "attaching an example of a shankpit style art direction with IDUNA undertones use this as
+  inspo"). New shared theme (`css/wotan-theme.css`), applied to all 5 live pages
+  (`index.html`, `decks.html`, `store.html`, `profile.html`, `friends.html`) in place of each
+  page's own copy-pasted `:root`/base `<style>` block. Palette: near-black violet background
+  (`--bg: #0b0518`), violet primary accent (`--violet`/`--violet-bright`), a gold "IDUNA
+  undertone" secondary accent (`--gold`/`--gold-bright`) used for the active-nav pill and
+  highlight numbers, cyan/orange/red/blue/green utility colors -- `decks.html`'s existing
+  Offense/Operations/Defense card-type coloring rides the same CSS variables unchanged (its JS
+  only ever referenced those variables/classes by name, never a hardcoded hex, so the recolor
+  was a pure CSS-layer change). Shared component styles: topbar/nav with `aria-current="page"`
+  active-state styling, cards, buttons (primary/secondary/danger/gold), badges, form inputs,
+  Space Grotesk display font. Deliberately no light-mode variant -- a neon-brutalist identity
+  doesn't have one; this repo is dark-only now, a deliberate call, not an oversight. One real
+  bug found and fixed during the centralization: `store.html`'s JS emits a bare
+  `class="badge"` (no `.pending`/`.accepted`/`.declined` modifier) for "Owned"/"Equipped"
+  states, which the new shared `.badge` base (unstyled without a modifier, by design) would
+  have rendered colorless -- added a page-local override. Verified with real headless
+  (Playwright/Chromium) screenshots of all 5 pages served locally, checked for readability,
+  contrast, and no leftover unstyled elements before shipping -- not just "the CSS parses."
+
 ## 2026-09-24 (3)
 - chore(verify): diagnosed and cleared a stalled background run of the Duel Phase 3c e2e harness
   (`duel_wotan_phase3c_e2e.sh`/`.js`, scratch, not committed) and re-ran it fresh against the

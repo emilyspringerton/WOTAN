@@ -5,58 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Draft Decks &mdash; WOTAN</title>
 <meta name="description" content="Every deck drafted in DEADWEIGHT's draft queue, with win rates. Hover any card to see it full size.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-theme.css">
 <style>
-  :root {
-    --bg: #0b0c10;
-    --bg-card: #14161c;
-    --bg-raise: #1b1e26;
-    --fg: #eef0f4;
-    --fg-dim: #a8adb8;
-    --accent: #7c8cff;
-    --border: #23262f;
-    --good: #5fd48a;
-    --bad: #ff6b6b;
-    --offense: #d9534f;      /* Red */
-    --operations: #e0a52f;   /* Yellow */
-    --defense: #4a86e8;      /* Blue */
-    --shadow: 0 18px 50px rgba(0, 0, 0, .55);
-  }
-  @media (prefers-color-scheme: light) {
-    :root {
-      --bg: #fafafa;
-      --bg-card: #ffffff;
-      --bg-raise: #f1f2f6;
-      --fg: #14161c;
-      --fg-dim: #4a4f5c;
-      --accent: #4451c7;
-      --border: #e4e4e8;
-      --good: #2e7d4f;
-      --bad: #c0392b;
-      --shadow: 0 18px 50px rgba(20, 22, 28, .28);
-    }
-  }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    background: var(--bg); color: var(--fg); line-height: 1.5;
-  }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  button { font: inherit; color: inherit; }
-
-  /* ---- top bar ---- */
-  .topbar { border-bottom: 1px solid var(--border); background: var(--bg-card); position: sticky; top: 0; z-index: 20; }
-  .topbar-in { max-width: 1100px; margin: 0 auto; padding: .7rem 1.25rem; display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
-  .brand { font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--fg); }
-  .brand small { color: var(--fg-dim); font-weight: 500; letter-spacing: .08em; margin-left: .5rem; }
-  nav { display: flex; gap: .25rem; flex-wrap: wrap; flex: 1; }
-  nav a { color: var(--fg-dim); padding: .35rem .7rem; border-radius: 8px; font-size: .95rem; }
-  nav a:hover { background: var(--bg-raise); color: var(--fg); text-decoration: none; }
-  nav a[aria-current="page"] { color: var(--fg); background: var(--bg-raise); }
-  .signin { border: 1px dashed var(--border); background: transparent; color: var(--fg-dim); border-radius: 8px; padding: .35rem .8rem; font-size: .9rem; cursor: not-allowed; }
-
   .wrap { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1.25rem 5rem; }
   h1 { font-size: 2rem; margin: 0 0 .25rem; line-height: 1.15; }
   .lede { color: var(--fg-dim); margin: 0 0 1.25rem; max-width: 62ch; }
@@ -155,8 +108,8 @@
     .topbar-in { gap: .4rem .75rem; }
     .brand small { display: none; }
     .signin { margin-left: auto; }
-    nav { order: 3; flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; }
-    nav a { white-space: nowrap; }
+    nav.site-nav { order: 3; flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; }
+    nav.site-nav a { white-space: nowrap; }
     .record { margin-left: 0; text-align: left; width: 100%; }
     h1 { font-size: 1.6rem; }
     th, td { padding: .45rem .4rem; font-size: .85rem; }
@@ -169,10 +122,11 @@
 <header class="topbar">
   <div class="topbar-in">
     <a class="brand" href="/">WOTAN<small>EINHORN_INDUSTRIAL</small></a>
-    <nav aria-label="Main">
+    <nav class="site-nav" aria-label="Main">
       <a href="/">Home</a>
       <a href="/decks.html" aria-current="page">Draft Decks</a>
       <a href="/store.html">Hat Store</a>
+      <a href="/friends.html">Friends &amp; Duels</a>
     </nav>
     <button class="signin" type="button" disabled title="Sign-in is coming: tournaments and deck tools will need an account. Browsing stays open.">Sign in (soon)</button>
   </div>
