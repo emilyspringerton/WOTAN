@@ -16,7 +16,8 @@ across every page. Dark-only by design.
   card"), sortable (sample-size-adjusted "Best", raw win rate, most games, newest), each deck's cards as chips with a
   **big card tooltip on hover** (tap on phones; keyboard focus works too) and an expandable full-deck card grid; a
   **Cards** tab with every card's record across all decks. Deep links: `/decks.html#deck-451`, filters live in the URL.
-- `/store.html` — the BRAWLPIT hat store (IDUNA login).
+- `/store.html` — the BRAWLPIT hat store. Login is a real redirect to IDUNA's own hosted SSO
+  page (`iam.okemily.com`) — this page has no password field of its own.
 - **`/profile.html` — public DEADWEIGHT player profiles** (no login): look up any player by
   Player ID, see rating/W-L-D/matches/friend count.
 - **`/friends.html` — DEADWEIGHT friends & duels** (S536/S537, 2026-09-24): log in with a

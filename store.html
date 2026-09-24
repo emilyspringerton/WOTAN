@@ -11,15 +11,6 @@
 <link rel="stylesheet" href="/css/wotan-theme.css">
 <style>
   label .hint { font-weight: 400; opacity: 0.75; text-transform: none; letter-spacing: 0; }
-  /* WOTAN-997: password field + its own show/hide ("eye") toggle, side by side. */
-  .pw-row { display: flex; gap: 0.4rem; align-items: stretch; }
-  .pw-row input { flex: 1; min-width: 0; }
-  .eye-toggle {
-    margin-top: 0; padding: 0 0.6rem; border-radius: 8px; border: 2px solid var(--border);
-    background: var(--bg-card); color: var(--fg-dim); font-size: 1rem; cursor: pointer;
-    line-height: 1;
-  }
-  .eye-toggle.active { color: var(--violet-bright); border-color: var(--violet-bright); }
   .hat-row {
     display: flex; align-items: center; justify-content: space-between; gap: 1rem;
     padding: 0.85rem 0; border-bottom: 1px solid var(--border);
@@ -47,33 +38,16 @@
   <h1>Hat Store</h1>
   <p class="tagline">Spend your GFD Flow on a BRAWLPIT cosmetic hat.</p>
 
-  <!-- Login/register (WOTAN_HAT_STORE_NORTHSTAR.md Phase 2): real IDUNA email+password auth,
-       POST /api/v1/auth/email/login or /register, proxied same-origin so no CORS/cross-origin
-       bearer-token dance is needed (see ops/nginx-wotan.conf's own /api/ block). The returned
-       JWT is kept in localStorage only -- per-viewer, never sent anywhere but back to this same
-       IDUNA instance as an Authorization: Bearer header. -->
+  <!-- Login (WOTAN_HAT_STORE_NORTHSTAR.md Phase 2, SSO'd 2026-09-24 -- founder real-time:
+       "instead of putting your password into page on wotan iduna needs to become the SSO"):
+       no email/password form here anymore. This links out to IDUNA's own dedicated login page
+       (iam.okemily.com -- a real cross-domain redirect, not a same-origin proxy trick), which
+       hands a token back via a URL fragment on return. See IDUNA/internal/http/handlers/
+       sso_login.go for the full rationale. -->
   <div class="card" id="auth-card">
-    <p id="auth-status">Log in with your WOTAN/IDUNA account to see the catalog and buy hats.</p>
-    <label for="email">Email</label>
-    <input type="email" id="email" autocomplete="username">
-    <label for="password">Password</label>
-    <div class="pw-row">
-      <input type="password" id="password" autocomplete="current-password">
-      <button type="button" class="eye-toggle" id="password-eye" aria-label="Show password" title="Show password">&#128065;</button>
-    </div>
-    <!-- WOTAN-997 ("have them confirm the password type it twice"): only enforced on register
-         (see doAuth('register') below) -- a returning login only ever needs the one real
-         password, so this field is validated, never required, for the login path. Shown
-         always rather than only after clicking "Register instead" -- avoids a second click just
-         to reveal it, and a login attempt with something typed here is simply ignored. -->
-    <label for="confirm-password">Confirm Password <span class="hint">(new accounts only)</span></label>
-    <div class="pw-row">
-      <input type="password" id="confirm-password" autocomplete="new-password">
-      <button type="button" class="eye-toggle" id="confirm-password-eye" aria-label="Show password" title="Show password">&#128065;</button>
-    </div>
+    <p id="auth-status">Sign in with your IDUNA account to see the catalog and buy hats.</p>
     <div>
-      <button id="login-btn">Log in</button>
-      <button class="secondary" id="register-btn">Register instead</button>
+      <a class="button" id="sso-login-link" href="#">Sign in with IDUNA</a>
       <button class="secondary" id="logout-btn" hidden>Log out</button>
     </div>
     <div class="msg" id="auth-msg"></div>
@@ -129,27 +103,31 @@ function setAuthMsg(text, kind) {
   el.className = 'msg' + (kind ? ' ' + kind : '');
 }
 
-async function doAuth(endpoint) {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  if (!email || !password) { setAuthMsg('Email and password required.', 'error'); return; }
-  // WOTAN-997: confirm-password is only a real requirement for a NEW account -- a returning
-  // login only ever needs the one real password on file, so this check is scoped to the
-  // register endpoint specifically, not applied to login even if something's typed there.
-  if (endpoint === 'register') {
-    const confirm = document.getElementById('confirm-password').value;
-    if (password !== confirm) { setAuthMsg('Passwords do not match.', 'error'); return; }
-  }
-  setAuthMsg('Working…');
-  try {
-    const body = await api('/auth/email/' + endpoint, { method: 'POST', body: JSON.stringify({ email, password }) });
-    setToken(body.token);
-    setPlayerID(body.player_id);
-    setAuthMsg('Logged in as ' + (body.display_name || email) + '.', 'ok');
-    await afterLogin();
-  } catch (e) {
-    setAuthMsg(e.message, 'error');
-  }
+// IDUNA SSO (2026-09-24): builds the "Sign in with IDUNA" link's href. redirect_uri is this
+// page's own URL with any existing hash/query stripped, so the return trip doesn't chain.
+// signup=1 (from GFD's own deep link, see the bootstrap block below) is forwarded through so
+// the SSO page can default to its register mode.
+function buildSsoURL() {
+  const redirect = location.origin + location.pathname;
+  const params = new URLSearchParams({ redirect_uri: redirect });
+  if (new URLSearchParams(location.search).get('signup') === '1') params.set('signup', '1');
+  return 'https://iam.okemily.com/?' + params.toString();
+}
+
+// Reads the token IDUNA's SSO page hands back via URL fragment
+// (#sso_token=...&player_id=...&display_name=...), stores it exactly like the old inline-form
+// login did, then scrubs the fragment so a refresh/share doesn't carry the token in the URL.
+async function handleSsoReturn() {
+  const frag = new URLSearchParams(location.hash.slice(1));
+  const token = frag.get('sso_token');
+  const playerID = frag.get('player_id');
+  if (!token || !playerID) return false;
+  setToken(token);
+  setPlayerID(playerID);
+  history.replaceState(null, '', location.pathname + location.search);
+  setAuthMsg('Signed in as ' + (frag.get('display_name') || 'IDUNA account') + '.', 'ok');
+  await afterLogin();
+  return true;
 }
 
 function logout() {
@@ -292,40 +270,20 @@ function escapeHtml(s) {
   return d.innerHTML;
 }
 
-document.getElementById('login-btn').addEventListener('click', () => doAuth('login'));
-document.getElementById('register-btn').addEventListener('click', () => doAuth('register'));
+document.getElementById('sso-login-link').href = buildSsoURL();
 document.getElementById('logout-btn').addEventListener('click', logout);
 
-// WOTAN-997 ("have the field like hidden with the eye thing"): toggles one password input
-// between type="password" and type="text", independent per field (password vs
-// confirm-password each get their own real toggle state, not a shared one).
-function wirePasswordEye(inputId, btnId) {
-  const input = document.getElementById(inputId);
-  const btn = document.getElementById(btnId);
-  btn.addEventListener('click', () => {
-    const showing = input.type === 'text';
-    input.type = showing ? 'password' : 'text';
-    btn.classList.toggle('active', !showing);
-    btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
-    btn.title = showing ? 'Show password' : 'Hide password';
-  });
-}
-wirePasswordEye('password', 'password-eye');
-wirePasswordEye('confirm-password', 'confirm-password-eye');
-
-// Real page-load bootstrap: if a token is already sitting in localStorage from a prior visit,
-// skip straight to resolving the character/catalog instead of forcing a fresh login every time.
-if (getToken() && getPlayerID()) {
-  document.getElementById('logout-btn').hidden = false;
-  setAuthMsg('Restoring your session…');
-  afterLogin().then(() => setAuthMsg('')).catch(() => {});
-} else if (new URLSearchParams(location.search).get('signup') === '1') {
-  // GFD-UA-001: the GFD client's own login screen opens this page with ?signup=1 (Ctrl+Alt+S,
-  // "no account? sign up") -- real, small hint so landing here from that link puts the cursor
-  // straight into the email field instead of making someone click into it themselves.
-  document.getElementById('email').focus();
-  setAuthMsg('Fill in the fields below, then click "Register instead" to create your account.');
-}
+// Real page-load bootstrap, in priority order: a token just handed back from IDUNA's SSO page
+// wins over a stale localStorage one (handleSsoReturn short-circuits via its own return value);
+// otherwise fall back to restoring a prior session exactly like before SSO existed.
+handleSsoReturn().then((handled) => {
+  if (handled) return;
+  if (getToken() && getPlayerID()) {
+    document.getElementById('logout-btn').hidden = false;
+    setAuthMsg('Restoring your session…');
+    afterLogin().then(() => setAuthMsg('')).catch(() => {});
+  }
+});
 </script>
 </body>
 </html>

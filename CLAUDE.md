@@ -29,7 +29,22 @@ need a real backend eventually (Phase 2 of that doc) — deferred, not decided y
 custom properties. Shared topbar/nav, cards, buttons, badges, and form inputs live here; each
 page keeps only its own page-specific overrides in a local `<style>` block. Dark-only, no
 light-mode variant — deliberate, not an oversight. New pages should link this stylesheet and the
-shared topbar markup rather than re-declaring `:root`/base styles.
+shared topbar markup rather than re-declaring `:root`/base styles. `button`/`.secondary`/`.gold`
+rules also match a `.button` class, so a plain `<a>` can be styled like a button (2026-09-24,
+added for store.html's "Sign in with IDUNA" link).
+
+## Auth — IDUNA as SSO (standing, 2026-09-24)
+
+`store.html` does not render its own email/password form. It links to IDUNA's own hosted login
+page (`https://iam.okemily.com/?redirect_uri=<this page's URL>`, real cross-domain redirect —
+see `IDUNA/internal/http/handlers/sso_login.go`), which hands a JWT back via a URL fragment on
+return (`#sso_token=...&player_id=...`). Any new page on this site that needs an IDUNA login
+should follow the same pattern (link out with `redirect_uri`, read the returned fragment) rather
+than adding another inline form — that's the whole point of the SSO page existing.
+`iam.okemily.com`'s DNS/cert are not live yet (see `IDUNA/ops/nginx/iam-okemily.conf` +
+`sudo-queue/91-iam-okemily-sso-domain.sh`); until then the same route is reachable via any
+caller's own same-origin `/api/` proxy. `friends.html`'s own login form is unrelated — it
+authenticates DEADWEIGHT accounts, a separate credential system from IDUNA platform accounts.
 
 ## Real, current status
 
@@ -43,8 +58,10 @@ shared topbar markup rather than re-declaring `:root`/base styles.
   matching `OKEMILY/hats.html`'s own honest-placeholder precedent (every purchase/feature control
   visibly disabled, not faked as live). Now links to `store.html`.
 - `store.html` — real, code-complete WOTAN_HAT_STORE_NORTHSTAR.md Phase 2 store page (2026-09-04):
-  IDUNA email/password login, resolves the player's GFD character, real hat catalog/buy/equip
-  against IDUNA's live Phase 1 endpoints, all via this repo's own `/api/` nginx proxy.
+  resolves the player's GFD character, real hat catalog/buy/equip against IDUNA's live Phase 1
+  endpoints, all via this repo's own `/api/` nginx proxy. Login is IDUNA's own hosted SSO page
+  (2026-09-24) — see "Design system" below and `IDUNA/internal/http/handlers/sso_login.go` —
+  not an inline form on this page anymore.
 - Deploy: `~/wotan-deploy.sh` rsyncs this repo to `/var/www/wotan` (no build step).
 
 ## Related

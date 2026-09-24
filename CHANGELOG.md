@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-09-24 (5)
+- feat(auth): **store.html no longer collects a password of its own** (founder real-time:
+  "instead of putting your password into page on wotan iduna needs to become the SSO"). Removed
+  the inline email/password/confirm-password form and its eye-toggle show/hide buttons entirely;
+  the "Sign in with IDUNA" link now sends the browser to IDUNA's own dedicated SSO login page
+  (`https://iam.okemily.com/?redirect_uri=<this page's own URL>`, see `IDUNA/internal/http/
+  handlers/sso_login.go`) -- a real cross-domain redirect, not a same-origin trick. On return,
+  IDUNA hands the JWT back via a URL fragment (`#sso_token=...&player_id=...&display_name=...`),
+  which `handleSsoReturn()` reads, stores in `localStorage` exactly like the old inline form did,
+  and scrubs from the URL (`history.replaceState`) so a refresh/share never carries the token.
+  The `?signup=1` deep link from GFD's own login screen (Ctrl+Alt+S) still works, now forwarded
+  as a query param onto the SSO page so it can default to register mode instead of focusing a
+  local field. Added a shared `.button` class to `css/wotan-theme.css` (mirrors the existing
+  `button`/`button.secondary`/`.gold` rules onto `<a>` elements) so a link can be styled like a
+  button -- reusable by any future page, not store.html-specific.
+  **Depends on `iduna.service` actually carrying the new SSO route and, ideally,
+  `iam.okemily.com`'s DNS/cert existing (`IDUNA/ops/nginx/iam-okemily.conf` +
+  `sudo-queue/91-iam-okemily-sso-domain.sh`, neither live yet) -- this commit is held un-deployed
+  (not yet rsynced via `~/wotan-deploy.sh`) until then, since deploying it first would break the
+  live hat-store login for real users.** `friends.html`'s own login form is untouched -- it
+  authenticates DEADWEIGHT accounts, a genuinely separate credential system from IDUNA platform
+  accounts (see this file's own 2026-09-24 entries for S536/S537), out of scope for this change.
+
 ## 2026-09-24 (4)
 - feat(design): **full visual redesign — BRAWLPIT "neon brutalist" art direction** (founder
   real-time: "improve the design of the WOTAN platform use the brawlpit aesthetic the neon

@@ -128,17 +128,18 @@ input:focus, select:focus, button:focus-visible {
   outline: 2px solid var(--violet-bright); outline-offset: 1px; border-color: var(--violet-bright);
 }
 
-button {
+button, .button {
   margin-top: 1rem; padding: .6rem 1.2rem; border-radius: 8px; border: 2px solid var(--violet);
   background: var(--violet); color: #fff; font-weight: 700; cursor: pointer; font-size: .88rem;
   font-family: var(--font-display); letter-spacing: .02em; transition: box-shadow .15s, transform .08s;
+  display: inline-block; text-decoration: none;
 }
-button:hover:not(:disabled) { box-shadow: var(--glow); }
-button:active:not(:disabled) { transform: translateY(1px); }
-button.secondary { background: transparent; color: var(--violet-bright); }
-button.danger { background: transparent; color: var(--red); border-color: var(--red); }
-button.gold { background: var(--gold); border-color: var(--gold); color: var(--bg); }
-button.gold:hover:not(:disabled) { box-shadow: var(--glow-gold); }
+button:hover:not(:disabled), .button:hover { box-shadow: var(--glow); }
+button:active:not(:disabled), .button:active { transform: translateY(1px); }
+button.secondary, .button.secondary { background: transparent; color: var(--violet-bright); }
+button.danger, .button.danger { background: transparent; color: var(--red); border-color: var(--red); }
+button.gold, .button.gold { background: var(--gold); border-color: var(--gold); color: var(--bg); }
+button.gold:hover:not(:disabled), .button.gold:hover { box-shadow: var(--glow-gold); }
 button:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
 
 .badge {
