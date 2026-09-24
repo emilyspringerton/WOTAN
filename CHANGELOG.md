@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-09-24 (2)
+- ops+feat: **WOTAN is now the real front door** (S540, founder real-time: "finish shipping the
+  new WOTAN stuff / wotan.okemily.com should be the front door to the online social tournament
+  site"). Closed the one real gap left after S537/S536: `iduna.service` was still running a build
+  from before the friends/duels/profiles routes (`70b6b06`, `2716c8e`) landed, so every one of
+  `friends.html`'s calls would have 404'd against the real deployed API despite passing every
+  fixture-based test. Rebuilt IDUNA from current `main` (`go test ./...` clean across all 30+
+  packages), restarted `iduna.service` (health check passed, no downtime beyond the restart
+  itself), and re-deployed this repo's own `friends.html`/`profile.html` (previously committed
+  but never actually rsynced to `/var/www/wotan` -- deploy is a separate manual step from
+  `git push` here, and it had been missed). **Live-verified end to end against the real production
+  stack, not a fixture**: registered two real throwaway DEADWEIGHT accounts through
+  `wotan.okemily.com`'s own `/api/` proxy, upgraded both to email/password, logged in, sent and
+  accepted a real friend request, challenged and accepted a real duel, and confirmed a real,
+  correctly-shaped `match_token` came back -- the exact same call chain `friends.html` makes
+  itself, just driven by curl instead of a browser. `GET .../players/{id}/profile` also confirmed
+  live (friend_count reflected the new friendship).
+  `index.html` rewritten: dropped the "Under construction" badge and the "old page is still at
+  okemily.com/tournaments.html until this page fully replaces it" framing (had the direction of
+  the pointer backwards) -- now `Live`, leads with Player Profiles/Friends & Duels, and points
+  outward to `okemily.com/tournaments.html` only for the content that's genuinely still only
+  there (REDGARDEN leaderboard, hero stats, GFD Battlegrounds demo). `OKEMILY/tournaments.html`
+  got a matching banner pointing back here (see that repo's own CHANGELOG). `README.md` updated
+  per SAGA README Reality. (sess-20260923-1030-4a526255)
+
 ## 2026-09-24
 - feat: Duel Phase 3c -- `friends.html` surfaces the live match_token on an accepted duel (S537
   Duel Phase 2, Phase 3, WOTAN half). WOTAN has no game client of its own to queue a match into --

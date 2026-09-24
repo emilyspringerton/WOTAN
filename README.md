@@ -1,7 +1,9 @@
 # WOTAN
 
-Esports/stats hub for EINHORN_INDUSTRIAL (`wotan.okemily.com`), being split out of `OKEMILY/tournaments.html` into its
-own repo/subdomain. Plain static HTML/CSS/JS, no build step. See `CLAUDE.md` for status and related docs.
+`wotan.okemily.com` — the online social tournament site for EINHORN_INDUSTRIAL, and (2026-09-24) the real front door:
+`index.html` no longer defers to `OKEMILY/tournaments.html`, it's the other way around now (that page keeps its own
+distinct live content — REDGARDEN leaderboard, hero stats, GFD Battlegrounds demo, mailing list — and links forward to
+here). Plain static HTML/CSS/JS, no build step. See `CLAUDE.md` for status and related docs.
 
 ## What is live
 
@@ -28,7 +30,13 @@ own repo/subdomain. Plain static HTML/CSS/JS, no build step. See `CLAUDE.md` for
   already shows its own Play button for the same duel. Live-verified with a real headless Chrome
   against the real `friends.html`: the token box + Copy button render correctly for an accepted
   duel, and a real (CDP-synthesized, trusted) click resolves `navigator.clipboard.writeText()`.
-- `/` — landing page.
+  **Live-tested end to end against the real deployed API (2026-09-24)**, not just a fake fixture:
+  two real throwaway DEADWEIGHT accounts registered/upgraded/logged in, a real friend request
+  sent/accepted, a real duel challenged/accepted, and a real `match_token` minted — all through
+  `wotan.okemily.com`'s own live `/api/` proxy to the actually-running `iduna.service` (rebuilt
+  and restarted the same session to carry these routes for the first time).
+- `/` — landing page, and now genuinely the front door (2026-09-24): links every live page above,
+  no more "under construction" framing.
 
 ## How the deck browser gets its data
 
