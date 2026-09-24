@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-09-24 (3)
+- chore(verify): diagnosed and cleared a stalled background run of the Duel Phase 3c e2e harness
+  (`duel_wotan_phase3c_e2e.sh`/`.js`, scratch, not committed) and re-ran it fresh against the
+  currently-deployed `friends.html` (MD5-confirmed identical to `/var/www/wotan/friends.html`).
+  Root cause: the harness hardcoded its Chrome remote-debugging port (`19223`) with no timeout on
+  any CDP round-trip -- if a prior run's Chrome process wasn't fully reaped before a rerun, the
+  new instance either fails to bind that port or the script ends up talking to a stale/half-dead
+  one, and an unanswered CDP message then hangs forever with no self-recovery (this is what
+  happened to task `bcud2ohkw` earlier the same day: killed by exact PID after confirming via
+  `/proc/*/cmdline` it was scratch, not a live service). Checked directly before doing anything
+  else: no process was actually still running or bound to that port at the time of this pass --
+  the earlier stall had already been cleared. Randomized the port in the scratch harness so a
+  future rerun can't collide with a leftover instance the same way. Fresh run: real headless
+  Chrome loaded the real `friends.html`, logged in, rendered the accepted duel's `match_token` +
+  Copy token button, and a real (CDP-synthesized, trusted) click resolved
+  `navigator.clipboard.writeText()` -- button showed "Copied!", screenshotted. No app code
+  changed; this reconfirms Duel Phase 3c (`61bfbce`, Apple #20690, `EMILY/BACKLOG.md` SECTION 537)
+  is genuinely shipped and working against what's live today, not just what was true when it was
+  first verified. (sess-20260923-1030-4a526255)
+
 ## 2026-09-24 (2)
 - ops+feat: **WOTAN is now the real front door** (S540, founder real-time: "finish shipping the
   new WOTAN stuff / wotan.okemily.com should be the front door to the online social tournament
