@@ -66,6 +66,7 @@
   .badge.accepted { color: var(--ok); border: 1px solid var(--ok); }
   .badge.declined { color: var(--danger); border: 1px solid var(--danger); }
   .own-id { font-size: 0.8rem; color: var(--fg-dim); word-break: break-all; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem; margin-top: 0.5rem; }
+  .token-box { font-size: 0.75rem; color: var(--fg-dim); word-break: break-all; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem; margin-top: 0.5rem; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -370,6 +371,33 @@ async function loadDuels() {
         actions.appendChild(acceptBtn);
         actions.appendChild(declineBtn);
         row.appendChild(actions);
+      } else if (d.status === 'accepted' && d.match_token) {
+        // WOTAN has no game client of its own to queue into -- the native SDL2 and browser
+        // DEADWEIGHT clients already read this same token straight from IDUNA and show their own
+        // Play button (S537 Duel Phase 2/3a/3b), so this duel just works if you open either one.
+        // Surfacing the raw token here is for the one real audience WOTAN CAN serve directly:
+        // `dw_client --match-token TOK` (the CLI client), a real, live flag as of Phase 2.
+        const wrap = document.createElement('div');
+        wrap.style.flexBasis = '100%';
+        const hint = document.createElement('div');
+        hint.className = 'row-sub';
+        hint.textContent = 'Open DEADWEIGHT — this duel is already waiting for you there. Or copy the token below for dw_client --match-token:';
+        const box = document.createElement('div');
+        box.className = 'token-box';
+        box.textContent = d.match_token;
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'secondary';
+        copyBtn.textContent = 'Copy token';
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(d.match_token).then(
+            () => { copyBtn.textContent = 'Copied!'; setTimeout(() => { copyBtn.textContent = 'Copy token'; }, 1500); },
+            () => { setMsg('duels-msg', 'Could not copy -- select and copy the token manually.', 'error'); }
+          );
+        };
+        wrap.appendChild(hint);
+        wrap.appendChild(box);
+        wrap.appendChild(copyBtn);
+        row.appendChild(wrap);
       }
       list.appendChild(row);
     });

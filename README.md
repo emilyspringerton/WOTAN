@@ -20,9 +20,14 @@ own repo/subdomain. Plain static HTML/CSS/JS, no build step. See `CLAUDE.md` for
   system from the Hat Store's IDUNA login** — DEADWEIGHT accounts and IDUNA platform accounts are
   different identities (`IDUNA/internal/http/handlers/game_online.go`'s per-game `players` table
   vs. IDUNA's own `users` table). Honest limit: no player-search-by-name yet, so adding a friend
-  means sharing your Player ID directly; turning an accepted duel into a live match instance is
-  real, named, deferred work (see `EMILY/BACKLOG.md` SECTION 537) — an accepted duel today just
-  means "it's on," not an automatic match launch.
+  means sharing your Player ID directly. **Duel Phase 2/3 (2026-09-24)**: an accepted duel now
+  carries a live, short-lived (15-min) `match_token` that the native SDL2 and browser DEADWEIGHT
+  clients read directly from IDUNA and use to queue for that specific opponent — WOTAN has no game
+  client of its own to launch a match into, so it surfaces the same token as a monospace field with
+  a **Copy token** button (for `dw_client --match-token`) plus a note that either real client
+  already shows its own Play button for the same duel. Live-verified with a real headless Chrome
+  against the real `friends.html`: the token box + Copy button render correctly for an accepted
+  duel, and a real (CDP-synthesized, trusted) click resolves `navigator.clipboard.writeText()`.
 - `/` — landing page.
 
 ## How the deck browser gets its data
