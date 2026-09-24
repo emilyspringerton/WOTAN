@@ -1,5 +1,8 @@
 # Changelog
 
+## 2026-09-24
+- feat: DEADWEIGHT friends & duels (`friends.html`) and public player profiles (`profile.html`) -- founder real-time: "add iduna online accounts / add social features / profiles / friends / friendly challenges (duels) / for DEADWEIGHT / WOTAN". New IDUNA routes under `/api/v1/games/deadweight/...` (friend-requests, friends, duels, players/{id}/profile -- IDUNA commit 70b6b06). `friends.html` logs in with a DEADWEIGHT account (separate credential system from `store.html`'s IDUNA login) to manage requests/friends/duels; `profile.html` is a public, no-login profile lookup. Verified: `node --check` on both pages' scripts, headless-Chrome screenshots of both pages (and the updated `index.html` nav), and a manual field-by-field contract check against `game_social.go`'s real JSON output. Not yet live-tested end to end through the real deployed API -- the IDUNA build carrying these routes is committed/pushed but not yet deployed to `iduna.service` (same real, named gap as the BIG_O IDUNA app work, 2026-09-23). `index.html`/`README.md` updated per SAGA README Reality. (sess-20260923-1030-4a526255)
+
 ## 2026-09-19
 - deploy: retheme colours/keywords live, season note (pre-retheme decks archived) (sess-20260918-1725-497f394f)
 - feat(decks): Offense/Operations/Defense colours, keyword column/filter/legend, cards.json v2 (105 cards); not deployed until the server ships the retheme (sess-20260918-1725-497f394f)

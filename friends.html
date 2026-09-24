@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friends &amp; Duels &mdash; EINHORN_INDUSTRIAL</title>
+<meta name="description" content="DEADWEIGHT friends list, friend requests, and friendly-challenge duels.">
+<style>
+  :root {
+    --bg: #0b0c10;
+    --bg-card: #14161c;
+    --fg: #eef0f4;
+    --fg-dim: #a8adb8;
+    --accent: #7c8cff;
+    --border: #23262f;
+    --danger: #ff6b6b;
+    --ok: #5fd48a;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #fafafa;
+      --bg-card: #ffffff;
+      --fg: #14161c;
+      --fg-dim: #4a4f5c;
+      --accent: #4451c7;
+      --border: #e4e4e8;
+      --danger: #c0392b;
+      --ok: #2e7d4f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+  .wordmark { font-size: 1.1rem; letter-spacing: 0.08em; color: var(--fg-dim); text-transform: uppercase; }
+  h1 { font-size: 2.2rem; margin: 0.5rem 0 0.25rem; line-height: 1.15; }
+  .tagline { font-size: 1.05rem; color: var(--fg-dim); margin-bottom: 1.5rem; }
+  a.back { color: var(--accent); }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
+  .card p { margin: 0 0 0.75rem; color: var(--fg-dim); }
+  label { display: block; font-size: 0.85rem; color: var(--fg-dim); margin: 0.75rem 0 0.25rem; }
+  input { width: 100%; padding: 0.5rem 0.6rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); font-size: 0.95rem; }
+  button { margin-top: 1rem; padding: 0.55rem 1.1rem; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+  button.secondary { background: transparent; color: var(--accent); }
+  button.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .msg { font-size: 0.9rem; margin-top: 0.75rem; }
+  .msg.error { color: var(--danger); }
+  .msg.ok { color: var(--ok); }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .row:last-child { border-bottom: none; }
+  .row-name { font-weight: 600; }
+  .row-sub { font-size: 0.8rem; color: var(--fg-dim); }
+  .row-actions { display: flex; gap: 0.5rem; }
+  .row-actions button { margin-top: 0; }
+  .badge {
+    display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em;
+    text-transform: uppercase; border-radius: 999px; padding: 0.1rem 0.5rem; margin-left: 0.5rem;
+  }
+  .badge.pending { color: var(--fg-dim); border: 1px solid var(--fg-dim); }
+  .badge.accepted { color: var(--ok); border: 1px solid var(--ok); }
+  .badge.declined { color: var(--danger); border: 1px solid var(--danger); }
+  .own-id { font-size: 0.8rem; color: var(--fg-dim); word-break: break-all; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem; margin-top: 0.5rem; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">EINHORN_INDUSTRIAL / WOTAN</div>
+  <h1>Friends &amp; Duels</h1>
+  <p class="tagline">DEADWEIGHT friends and friendly challenges. <a class="back" href="/">&larr; WOTAN</a> &middot;
+    <a class="back" href="/profile.html">Look up a profile</a></p>
+
+  <!-- Separate credential system from store.html's IAM login: this is DEADWEIGHT's own per-game
+       player account (POST /api/v1/games/deadweight/email-login), the same identity friends and
+       duels are keyed to (players.player_id). A guest-only account has no email/password yet --
+       set one first via the DEADWEIGHT client's own "link email" (guest-upgrade) flow. -->
+  <div class="card" id="auth-card">
+    <p id="auth-status">Log in with your DEADWEIGHT account email/password to manage friends and duels.
+      (No email/password yet? Link one from inside the DEADWEIGHT client first -- guest accounts alone
+      can't sign in here.)</p>
+    <label for="email">Email</label>
+    <input type="email" id="email" autocomplete="username">
+    <label for="password">Password</label>
+    <input type="password" id="password" autocomplete="current-password">
+    <div>
+      <button id="login-btn">Log in</button>
+      <button class="secondary" id="logout-btn" hidden>Log out</button>
+    </div>
+    <div class="msg" id="auth-msg"></div>
+  </div>
+
+  <div class="card" id="me-card" hidden>
+    <p><strong>You</strong></p>
+    <div id="me-name" style="font-size:1.2rem;font-weight:700;"></div>
+    <div id="me-stats" class="row-sub"></div>
+    <p style="margin-top:0.75rem;">Share this Player ID with a friend so they can add you (there's no
+      name search yet):</p>
+    <div class="own-id" id="me-id"></div>
+  </div>
+
+  <div class="card" id="add-card" hidden>
+    <p><strong>Add a friend</strong></p>
+    <label for="add-id">Their Player ID</label>
+    <input type="text" id="add-id" placeholder="e.g. 3fa2c1e0-...">
+    <button id="add-btn">Send friend request</button>
+    <div class="msg" id="add-msg"></div>
+  </div>
+
+  <div class="card" id="requests-card" hidden>
+    <p><strong>Friend requests</strong></p>
+    <div id="requests-list"></div>
+    <div class="msg" id="requests-msg"></div>
+  </div>
+
+  <div class="card" id="friends-card" hidden>
+    <p><strong>Friends</strong></p>
+    <div id="friends-list"></div>
+    <div class="msg" id="friends-msg"></div>
+  </div>
+
+  <div class="card" id="duels-card" hidden>
+    <p><strong>Duels</strong></p>
+    <div id="duels-list"></div>
+    <div class="msg" id="duels-msg"></div>
+  </div>
+</div>
+
+<script>
+// Real, honest, client-side only -- no framework, matching WOTAN's own index.html/decks.html
+// convention. All calls go through this same origin's /api/ proxy straight to IDUNA's real
+// per-game online-services routes (game_online.go / game_social.go).
+const GAME = 'deadweight';
+
+function getToken() { try { return localStorage.getItem('wotan_dw_token') || ''; } catch (e) { return ''; } }
+function setToken(t) { try { if (t) localStorage.setItem('wotan_dw_token', t); else localStorage.removeItem('wotan_dw_token'); } catch (e) {} }
+function getPlayerID() { try { return localStorage.getItem('wotan_dw_player_id') || ''; } catch (e) { return ''; } }
+function setPlayerID(p) { try { if (p) localStorage.setItem('wotan_dw_player_id', p); else localStorage.removeItem('wotan_dw_player_id'); } catch (e) {} }
+
+let myID = '';
+
+async function api(path, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+  const token = getToken();
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch('/api/v1/games/' + GAME + path, opts);
+  let body = null;
+  try { body = await res.json(); } catch (e) { /* no body */ }
+  if (!res.ok) {
+    const msg = (body && (body.error || body.message)) || res.statusText || ('HTTP ' + res.status);
+    throw new Error(msg);
+  }
+  return body;
+}
+
+function setMsg(id, text, kind) {
+  const el = document.getElementById(id);
+  el.textContent = text || '';
+  el.className = 'msg' + (kind ? ' ' + kind : '');
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s == null ? '' : String(s);
+  return d.innerHTML;
+}
+
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if (!email || !password) { setMsg('auth-msg', 'Email and password required.', 'error'); return; }
+  setMsg('auth-msg', 'Working…');
+  try {
+    const body = await api('/email-login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    setToken(body.token);
+    setPlayerID(body.player_id);
+    setMsg('auth-msg', 'Logged in as ' + body.display_name + '.', 'ok');
+    await afterLogin();
+  } catch (e) {
+    setMsg('auth-msg', e.message, 'error');
+  }
+}
+
+function logout() {
+  setToken('');
+  setPlayerID('');
+  myID = '';
+  ['me-card', 'add-card', 'requests-card', 'friends-card', 'duels-card'].forEach(id => document.getElementById(id).hidden = true);
+  document.getElementById('logout-btn').hidden = true;
+  setMsg('auth-msg', 'Logged out.');
+}
+
+async function afterLogin() {
+  myID = getPlayerID();
+  document.getElementById('logout-btn').hidden = false;
+  ['me-card', 'add-card', 'requests-card', 'friends-card', 'duels-card'].forEach(id => document.getElementById(id).hidden = false);
+  await Promise.all([loadMe(), loadRequests(), loadFriends(), loadDuels()]);
+}
+
+async function loadMe() {
+  try {
+    const p = await api('/players/' + encodeURIComponent(myID) + '/profile');
+    document.getElementById('me-name').textContent = p.display_name;
+    document.getElementById('me-stats').textContent =
+      'Rating ' + Math.round(p.rating) + ' — ' + p.wins + 'W ' + p.losses + 'L ' + p.draws + 'D — ' + p.friend_count + ' friend(s)';
+    document.getElementById('me-id').textContent = p.player_id;
+  } catch (e) {
+    setMsg('auth-msg', e.message, 'error');
+  }
+}
+
+async function sendRequest() {
+  const id = document.getElementById('add-id').value.trim();
+  if (!id) { setMsg('add-msg', 'Player ID required.', 'error'); return; }
+  setMsg('add-msg', 'Sending…');
+  try {
+    const body = await api('/friend-requests', { method: 'POST', body: JSON.stringify({ to_player_id: id }) });
+    setMsg('add-msg', body.status === 'accepted' ? 'You are now friends.' : 'Request sent.', 'ok');
+    document.getElementById('add-id').value = '';
+    await Promise.all([loadRequests(), loadFriends()]);
+  } catch (e) {
+    setMsg('add-msg', e.message, 'error');
+  }
+}
+
+async function loadRequests() {
+  const list = document.getElementById('requests-list');
+  list.innerHTML = '';
+  setMsg('requests-msg', '');
+  try {
+    const r = await api('/friend-requests');
+    if (r.incoming.length === 0 && r.outgoing.length === 0) {
+      list.innerHTML = '<p class="row-sub">No pending requests.</p>';
+      return;
+    }
+    r.incoming.forEach(fr => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML =
+        '<div><div class="row-name">' + escapeHtml(fr.requester_id) + '<span class="badge pending">Incoming</span></div>' +
+        '<div class="row-sub"><a class="back" href="/profile.html?player=' + encodeURIComponent(fr.requester_id) + '">View profile</a></div></div>';
+      const actions = document.createElement('div');
+      actions.className = 'row-actions';
+      const acceptBtn = document.createElement('button');
+      acceptBtn.textContent = 'Accept';
+      acceptBtn.onclick = () => respondRequest(fr.id, 'accept');
+      const declineBtn = document.createElement('button');
+      declineBtn.className = 'secondary';
+      declineBtn.textContent = 'Decline';
+      declineBtn.onclick = () => respondRequest(fr.id, 'decline');
+      actions.appendChild(acceptBtn);
+      actions.appendChild(declineBtn);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+    r.outgoing.forEach(fr => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML =
+        '<div><div class="row-name">' + escapeHtml(fr.recipient_id) + '<span class="badge pending">Outgoing — waiting</span></div></div>';
+      list.appendChild(row);
+    });
+  } catch (e) {
+    setMsg('requests-msg', e.message, 'error');
+  }
+}
+
+async function respondRequest(id, action) {
+  try {
+    await api('/friend-requests/' + id + '/' + action, { method: 'POST' });
+    await Promise.all([loadRequests(), loadFriends(), loadMe()]);
+  } catch (e) {
+    setMsg('requests-msg', e.message, 'error');
+  }
+}
+
+async function loadFriends() {
+  const list = document.getElementById('friends-list');
+  list.innerHTML = '';
+  setMsg('friends-msg', '');
+  try {
+    const friends = await api('/friends');
+    if (friends.length === 0) {
+      list.innerHTML = '<p class="row-sub">No friends yet.</p>';
+      return;
+    }
+    friends.forEach(f => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML =
+        '<div><div class="row-name">' + escapeHtml(f.display_name) + '</div>' +
+        '<div class="row-sub">Rating ' + Math.round(f.rating) + ' — ' +
+        '<a class="back" href="/profile.html?player=' + encodeURIComponent(f.player_id) + '">View profile</a></div></div>';
+      const actions = document.createElement('div');
+      actions.className = 'row-actions';
+      const duelBtn = document.createElement('button');
+      duelBtn.textContent = 'Challenge to a duel';
+      duelBtn.onclick = () => challenge(f.player_id, duelBtn);
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'danger';
+      removeBtn.textContent = 'Remove';
+      removeBtn.onclick = () => removeFriend(f.player_id);
+      actions.appendChild(duelBtn);
+      actions.appendChild(removeBtn);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+  } catch (e) {
+    setMsg('friends-msg', e.message, 'error');
+  }
+}
+
+async function removeFriend(id) {
+  try {
+    await api('/friends/' + encodeURIComponent(id), { method: 'DELETE' });
+    await Promise.all([loadFriends(), loadMe()]);
+  } catch (e) {
+    setMsg('friends-msg', e.message, 'error');
+  }
+}
+
+async function challenge(id, btn) {
+  btn.disabled = true;
+  setMsg('duels-msg', '');
+  try {
+    await api('/duels', { method: 'POST', body: JSON.stringify({ to_player_id: id }) });
+    setMsg('duels-msg', 'Challenge sent.', 'ok');
+    await loadDuels();
+  } catch (e) {
+    setMsg('duels-msg', e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function loadDuels() {
+  const list = document.getElementById('duels-list');
+  list.innerHTML = '';
+  setMsg('duels-msg', '');
+  try {
+    const duels = await api('/duels');
+    if (duels.length === 0) {
+      list.innerHTML = '<p class="row-sub">No duels yet.</p>';
+      return;
+    }
+    duels.forEach(d => {
+      const incoming = d.challenged_id === myID && d.status === 'pending';
+      const otherID = d.challenger_id === myID ? d.challenged_id : d.challenger_id;
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML =
+        '<div><div class="row-name">' + escapeHtml(otherID) + '<span class="badge ' + d.status + '">' + d.status + '</span></div>' +
+        '<div class="row-sub">' + (d.challenger_id === myID ? 'You challenged' : 'Challenged you') + '</div></div>';
+      if (incoming) {
+        const actions = document.createElement('div');
+        actions.className = 'row-actions';
+        const acceptBtn = document.createElement('button');
+        acceptBtn.textContent = 'Accept';
+        acceptBtn.onclick = () => respondDuel(d.id, 'accept');
+        const declineBtn = document.createElement('button');
+        declineBtn.className = 'secondary';
+        declineBtn.textContent = 'Decline';
+        declineBtn.onclick = () => respondDuel(d.id, 'decline');
+        actions.appendChild(acceptBtn);
+        actions.appendChild(declineBtn);
+        row.appendChild(actions);
+      }
+      list.appendChild(row);
+    });
+  } catch (e) {
+    setMsg('duels-msg', e.message, 'error');
+  }
+}
+
+async function respondDuel(id, action) {
+  try {
+    await api('/duels/' + id + '/' + action, { method: 'POST' });
+    await loadDuels();
+  } catch (e) {
+    setMsg('duels-msg', e.message, 'error');
+  }
+}
+
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('logout-btn').addEventListener('click', logout);
+document.getElementById('add-btn').addEventListener('click', sendRequest);
+
+if (getToken() && getPlayerID()) {
+  document.getElementById('logout-btn').hidden = false;
+  setMsg('auth-msg', 'Restoring your session…');
+  afterLogin().then(() => setMsg('auth-msg', '')).catch(() => {});
+}
+</script>
+</body>
+</html>

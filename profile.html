@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Profile &mdash; EINHORN_INDUSTRIAL</title>
+<meta name="description" content="Public DEADWEIGHT player profile: rating, record, and friend count.">
+<style>
+  :root {
+    --bg: #0b0c10;
+    --bg-card: #14161c;
+    --fg: #eef0f4;
+    --fg-dim: #a8adb8;
+    --accent: #7c8cff;
+    --border: #23262f;
+    --danger: #ff6b6b;
+    --ok: #5fd48a;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #fafafa;
+      --bg-card: #ffffff;
+      --fg: #14161c;
+      --fg-dim: #4a4f5c;
+      --accent: #4451c7;
+      --border: #e4e4e8;
+      --danger: #c0392b;
+      --ok: #2e7d4f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+  .wordmark { font-size: 1.1rem; letter-spacing: 0.08em; color: var(--fg-dim); text-transform: uppercase; }
+  h1 { font-size: 2.2rem; margin: 0.5rem 0 0.25rem; line-height: 1.15; }
+  .tagline { font-size: 1.05rem; color: var(--fg-dim); margin-bottom: 1.5rem; }
+  a.back { color: var(--accent); }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1.5rem 0; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 1rem; margin-top: 1rem; }
+  .stat { text-align: center; }
+  .stat .num { font-size: 1.6rem; font-weight: 700; }
+  .stat .label { font-size: 0.8rem; color: var(--fg-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+  .kind-badge {
+    display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em;
+    text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent);
+    border-radius: 999px; padding: 0.1rem 0.5rem; margin-left: 0.5rem;
+  }
+  .msg { font-size: 0.9rem; margin-top: 0.75rem; }
+  .msg.error { color: var(--danger); }
+  label { display: block; font-size: 0.85rem; color: var(--fg-dim); margin: 0.75rem 0 0.25rem; }
+  input { width: 100%; padding: 0.5rem 0.6rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--fg); font-size: 0.95rem; }
+  button { margin-top: 1rem; padding: 0.55rem 1.1rem; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">EINHORN_INDUSTRIAL / WOTAN</div>
+  <h1>Player Profile</h1>
+  <p class="tagline">DEADWEIGHT player record. <a class="back" href="/">&larr; WOTAN</a> &middot;
+    <a class="back" href="/friends.html">Friends &amp; Duels</a></p>
+
+  <div class="card" id="lookup-card">
+    <p>Look up any DEADWEIGHT player by their Player ID.</p>
+    <label for="lookup-id">Player ID</label>
+    <input type="text" id="lookup-id" placeholder="e.g. 3fa2c1e0-...">
+    <button id="lookup-btn">View profile</button>
+    <div class="msg" id="lookup-msg"></div>
+  </div>
+
+  <div class="card" id="profile-card" hidden>
+    <div id="profile-name" style="font-size:1.3rem;font-weight:700;"></div>
+    <div id="profile-id" style="font-size:0.8rem;color:var(--fg-dim);word-break:break-all;"></div>
+    <div class="stat-grid">
+      <div class="stat"><div class="num" id="stat-rating">-</div><div class="label">Rating</div></div>
+      <div class="stat"><div class="num" id="stat-record">-</div><div class="label">W / L / D</div></div>
+      <div class="stat"><div class="num" id="stat-matches">-</div><div class="label">Matches</div></div>
+      <div class="stat"><div class="num" id="stat-friends">-</div><div class="label">Friends</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Public, no-login page -- straight GET against IDUNA's public profile route, proxied same-origin
+// (see ops/nginx-wotan.conf's /api/ block, same pattern as decks.html/store.html).
+async function loadProfile(playerID) {
+  const card = document.getElementById('profile-card');
+  const msg = document.getElementById('lookup-msg');
+  msg.textContent = '';
+  card.hidden = true;
+  if (!playerID) return;
+  try {
+    const res = await fetch('/api/v1/games/deadweight/players/' + encodeURIComponent(playerID) + '/profile');
+    let body = null;
+    try { body = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error((body && (body.error || body.message)) || 'player not found');
+    document.getElementById('profile-name').textContent = body.display_name;
+    document.getElementById('profile-id').textContent = body.player_id;
+    document.getElementById('stat-rating').textContent = Math.round(body.rating);
+    document.getElementById('stat-record').textContent = body.wins + ' / ' + body.losses + ' / ' + body.draws;
+    document.getElementById('stat-matches').textContent = body.matches;
+    document.getElementById('stat-friends').textContent = body.friend_count;
+    card.hidden = false;
+  } catch (e) {
+    msg.textContent = e.message;
+    msg.className = 'msg error';
+  }
+}
+
+document.getElementById('lookup-btn').addEventListener('click', () => {
+  loadProfile(document.getElementById('lookup-id').value.trim());
+});
+document.getElementById('lookup-id').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('lookup-btn').click();
+});
+
+const qp = new URLSearchParams(location.search).get('player');
+if (qp) {
+  document.getElementById('lookup-id').value = qp;
+  loadProfile(qp);
+}
+</script>
+</body>
+</html>
