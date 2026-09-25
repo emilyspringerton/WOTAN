@@ -96,6 +96,14 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
 - `index.html` — landing page (esports hub branding; links Draft Decks and the store, "coming soon" framing for the rest),
   matching `OKEMILY/hats.html`'s own honest-placeholder precedent (every purchase/feature control
   visibly disabled, not faked as live). Now links to `store.html`.
+- `matches.html` — **DEADWEIGHT Matches** (S547, 2026-09-25): real leaderboard + recent-matches
+  list + a real round-by-round replay viewer. Reads IDUNA's public `/api/v1/games/deadweight/
+  {matches,matches/{id},matches/{id}/replay}` (new — tails `dw_server`'s `matches.ndjson`, and
+  `/replay` shells out to a new `dw_replay_dump` C tool that replays the match through
+  DEADWEIGHT's real `core/match.c`) plus the already-existing public `leaderboard` endpoint and
+  `data/cards.json`. See `NORTHSTAR.md` for the full account (why DEADWEIGHT, verification,
+  deferred work). Live-verified via real headless-Chromium screenshots (desktop + phone) against
+  the deployed page.
 - `store.html` — real, code-complete WOTAN_HAT_STORE_NORTHSTAR.md Phase 2 store page (2026-09-04):
   resolves the player's GFD character, real hat catalog/buy/equip against IDUNA's live Phase 1
   endpoints, all via this repo's own `/api/` nginx proxy. Login is IDUNA's own hosted SSO page
@@ -111,6 +119,8 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
 
 ## Related
 
+- `NORTHSTAR.md` — this repo's own S547 match stats+replay build (why DEADWEIGHT, architecture,
+  verification, deferred work).
 - `BRAWLPIT/docs/WOTAN_HAT_STORE_NORTHSTAR.md` — the real, scoped hat-store feature plan.
 - `OKEMILY/tournaments.html` — the original single-page version this repo is splitting WOTAN out
   of; not deleted, stays as the live page until this repo actually replaces it.

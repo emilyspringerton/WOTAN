@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEADWEIGHT Matches &mdash; WOTAN</title>
+<meta name="description" content="DEADWEIGHT match stats and a real, step-through round-by-round replay viewer — WOTAN, EINHORN_INDUSTRIAL's esports/stats hub.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-theme.css">
+<style>
+  /* Visual language: WOTAN's own neon-brutalist theme (kind colors --offense/--operations/--defense
+     already shared tokens, same ones decks.html's card chips use) + okemily.com/live-match.html's
+     established "spectator dashboard" pattern for the replay half of this page (resource/hull bars,
+     a two-seat scoreboard, team-colored panels) -- see NORTHSTAR.md for the full account. */
+  .wrap { padding-top: 2rem; }
+  .tabs { display: flex; gap: .5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .tab {
+    font-family: var(--font-display); font-size: .82rem; text-transform: uppercase; letter-spacing: .04em;
+    padding: .5rem 1rem; border-radius: 8px; border: 2px solid var(--border); background: var(--bg-card);
+    color: var(--fg-dim); cursor: pointer;
+  }
+  .tab.on { color: var(--bg); background: var(--gold); border-color: var(--gold); }
+  .tab:hover:not(.on) { border-color: var(--border-bright); color: var(--fg); }
+  .panel { display: none; }
+  .panel.on { display: block; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th, td { padding: .5rem .6rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--fg-dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+  tr.row-click { cursor: pointer; }
+  tr.row-click:hover td { background: var(--bg-card-hover); }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .kindbadge {
+    display: inline-block; font-size: .68rem; text-transform: uppercase; letter-spacing: .04em;
+    padding: .1rem .4rem; border-radius: 5px; margin-left: .35rem; font-weight: 700;
+  }
+  .kindbadge.bot { background: color-mix(in srgb, var(--cyan) 22%, transparent); color: var(--cyan); }
+  .kindbadge.human { background: color-mix(in srgb, var(--gold) 22%, transparent); color: var(--gold-bright); }
+  .modebadge {
+    display: inline-block; font-size: .68rem; text-transform: uppercase; letter-spacing: .04em;
+    padding: .15rem .5rem; border-radius: 999px; border: 1px solid var(--border-bright); color: var(--fg-dim);
+  }
+  .win { color: var(--ok); font-weight: 700; }
+  .loss { color: var(--fg-dim); }
+  .draw { color: var(--gold); }
+  .filters { display: flex; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: flex-end; }
+  .filters label { margin: 0; }
+  .filters input, .filters select {
+    background: var(--bg-raise); border: 1px solid var(--border); color: var(--fg); border-radius: 7px;
+    padding: .4rem .6rem; font-size: .85rem;
+  }
+  .msg { color: var(--fg-dim); padding: 1.5rem 0; text-align: center; }
+
+  /* ---- replay view ---- */
+  #replay-view { }
+  .seat0 { --sc: var(--cyan); } .seat1 { --sc: var(--orange); }
+  .vs-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .seat-name { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; }
+  .seat-name.seat0 { color: var(--cyan); } .seat-name.seat1 { color: var(--orange); }
+  .vs-mid { color: var(--fg-dim); font-family: var(--font-display); text-transform: uppercase; font-size: .8rem; letter-spacing: .08em; }
+  .hullrow { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+  .hullrow .lbl { width: 5.5rem; flex-shrink: 0; font-size: .82rem; color: var(--fg-dim); }
+  .bar-track { flex: 1; height: 12px; border-radius: 6px; background: var(--bg-raise); overflow: hidden; border: 1px solid var(--border); }
+  .bar-fill { height: 100%; border-radius: 6px; transition: width .25s ease; }
+  .bar-fill.hull0 { background: var(--cyan); } .bar-fill.hull1 { background: var(--orange); }
+  .bar-fill.energy0, .bar-fill.energy1 { background: var(--gold); }
+  .bar-val { width: 3.2rem; text-align: right; font-size: .8rem; font-variant-numeric: tabular-nums; color: var(--fg-dim); }
+
+  .round-controls { display: flex; align-items: center; gap: .5rem; margin: 1.25rem 0; flex-wrap: wrap; }
+  .round-controls button {
+    font-family: var(--font-display); text-transform: uppercase; font-size: .78rem; letter-spacing: .04em;
+    padding: .5rem .9rem; border-radius: 8px; border: 2px solid var(--border-bright); background: var(--bg-card);
+    color: var(--fg); cursor: pointer;
+  }
+  .round-controls button:hover { border-color: var(--violet-bright); }
+  .round-controls button:disabled { opacity: .35; cursor: not-allowed; }
+  .round-controls input[type=range] { flex: 1; min-width: 120px; accent-color: var(--violet); }
+  .round-label { font-family: var(--font-display); font-size: .85rem; color: var(--fg-dim); min-width: 6rem; text-align: center; }
+
+  .plays-row { display: flex; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; }
+  .play-card {
+    flex: 1; min-width: 220px; background: var(--bg-card); border: 2px solid var(--border);
+    border-left: 5px solid var(--kc, var(--border)); border-radius: 10px; padding: .85rem 1rem;
+  }
+  .play-card .who { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--fg-dim); margin-bottom: .3rem; }
+  .play-card .cardname { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; }
+  .play-card .cardmeta { font-size: .78rem; color: var(--fg-dim); margin-top: .2rem; }
+  .play-card .stat-row { display: flex; gap: .75rem; margin-top: .5rem; font-size: .8rem; }
+  .play-card .stat-row .dmg { color: var(--bad); } .play-card .stat-row .heal { color: var(--ok); }
+  .flags { margin-top: .4rem; display: flex; gap: .3rem; flex-wrap: wrap; }
+  .flag-badge {
+    font-size: .66rem; text-transform: uppercase; letter-spacing: .03em; padding: .1rem .4rem;
+    border-radius: 5px; background: color-mix(in srgb, var(--violet) 25%, transparent); color: var(--violet-bright);
+  }
+
+  .round-log { margin-top: 2rem; }
+  .round-log-row {
+    display: grid; grid-template-columns: 3rem 1fr 1fr 5rem; gap: .5rem; align-items: center;
+    padding: .5rem .3rem; border-bottom: 1px solid var(--border); font-size: .82rem; cursor: pointer;
+  }
+  .round-log-row:hover { background: var(--bg-card-hover); }
+  .round-log-row.active { background: color-mix(in srgb, var(--violet) 18%, transparent); }
+  .round-log-row .rn { color: var(--fg-dim); font-variant-numeric: tabular-nums; }
+  @media (max-width: 640px) {
+    .round-log-row { grid-template-columns: 2rem 1fr 1fr 3.5rem; font-size: .76rem; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="/">WOTAN<small>EINHORN_INDUSTRIAL</small></a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="/">Home</a>
+      <a href="/decks.html">Draft Decks</a>
+      <a href="/matches.html" aria-current="page">Matches</a>
+      <a href="/store.html">Hat Store</a>
+      <a href="/friends.html">Friends &amp; Duels</a>
+    </nav>
+  </div>
+</header>
+<div class="wrap wide">
+  <h1>DEADWEIGHT Matches</h1>
+  <p class="tagline">Real match stats and a round-by-round replay &mdash; every hand, every card, every hull swing, replayed
+    through DEADWEIGHT's own match engine. Open to everyone, no account needed.</p>
+
+  <div class="tabs">
+    <button class="tab on" data-tab="recent">Recent Matches</button>
+    <button class="tab" data-tab="leaderboard">Leaderboard</button>
+  </div>
+
+  <div class="panel on" id="panel-recent">
+    <div class="filters">
+      <div><label for="f-player">Player</label><input id="f-player" type="text" placeholder="name contains…"></div>
+      <div><label for="f-mode">Mode</label>
+        <select id="f-mode">
+          <option value="">All modes</option>
+          <option value="draft">Draft</option>
+          <option value="card">Random catalog</option>
+        </select>
+      </div>
+    </div>
+    <div id="recent-list"><p class="msg">Loading recent matches&hellip;</p></div>
+  </div>
+
+  <div class="panel" id="panel-leaderboard">
+    <div id="leaderboard-list"><p class="msg">Loading leaderboard&hellip;</p></div>
+  </div>
+
+  <div class="card" id="replay-card" style="display:none">
+    <a class="back" href="#" id="replay-close">&larr; Back to matches</a>
+    <div id="replay-view" style="margin-top:1rem"></div>
+  </div>
+</div>
+
+<script>
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  /* ---- card catalog + emoji (mirrors decks.html's cardOf/KIND_LABEL convention) ----
+     Emoji is assigned by kind+keyword, the real "type" of a card (cards.json's own kind/keyword
+     fields -- keyword only ever appears on Operations cards, one of 5 values, 7 cards each; see
+     NORTHSTAR.md for the full audit). This is the "emojis for items/units" S547 asked for. */
+  var cards = {};
+  var KIND_LABEL = { offense: 'Offense', operations: 'Operations', defense: 'Defense' };
+  var KEYWORD_EMOJI = { Flank: '🦅', Lock: '🔒', Scan: '📡', Siphon: '🧲', Sabotage: '💣' };
+  function cardEmoji(c) {
+    if (c.kind === 'offense') return '⚔️';
+    if (c.kind === 'defense') return '🛡️';
+    return KEYWORD_EMOJI[c.keyword] || '🎯';
+  }
+  function cardOf(id) {
+    if (id == null || id < 0) return { id: -1, name: 'Pass', kind: '', keyword: '', cost: 0, power: 0, text: '' };
+    return cards[id] || { id: id, name: 'Card ' + id, kind: 'offense', keyword: '', cost: 0, power: 0, text: '' };
+  }
+  fetch('/data/cards.json').then(function (r) { return r.json(); }).then(function (d) {
+    (d.cards || []).forEach(function (c) { cards[c.id] = c; });
+  }).catch(function () { /* cards.json optional -- falls back to "Card N" labels */ });
+
+  /* ---------------- Recent matches ---------------- */
+  var recentTimer = null;
+  function loadRecent() {
+    var player = $('f-player').value.trim(), mode = $('f-mode').value;
+    var url = '/api/v1/games/deadweight/matches?limit=30' + (player ? '&player=' + encodeURIComponent(player) : '') + (mode ? '&mode=' + mode : '');
+    fetch(url).then(function (r) { return r.json(); }).then(function (d) {
+      var list = $('recent-list');
+      if (!d.matches || !d.matches.length) { list.innerHTML = '<p class="msg">No matches found.</p>'; return; }
+      var rows = d.matches.map(function (m) {
+        var w = m.result[0] === 1 ? 0 : (m.result[1] === 1 ? 1 : -1);
+        var n0 = esc(m.names[0]), n1 = esc(m.names[1]);
+        var k0 = m.kinds[0] === 1 ? 'bot' : 'human', k1 = m.kinds[1] === 1 ? 'bot' : 'human';
+        return '<tr class="row-click" data-id="' + m.match_id + '">' +
+          '<td>' + (w === 0 ? '<span class="win">' + n0 + '</span>' : '<span class="loss">' + n0 + '</span>') + '<span class="kindbadge ' + k0 + '">' + k0 + '</span></td>' +
+          '<td>' + (w === 1 ? '<span class="win">' + n1 + '</span>' : '<span class="loss">' + n1 + '</span>') + '<span class="kindbadge ' + k1 + '">' + k1 + '</span></td>' +
+          '<td>' + (w < 0 ? '<span class="draw">Draw</span>' : '') + '</td>' +
+          '<td><span class="modebadge">' + (m.mode === 'draft' ? 'Draft' : 'Random') + '</span></td>' +
+          '<td class="num">' + m.rounds + '</td>' +
+          '<td class="num">#' + m.match_id + '</td>' +
+          '</tr>';
+      }).join('');
+      list.innerHTML = '<table><thead><tr><th>Winner</th><th>Opponent</th><th></th><th>Mode</th><th>Rounds</th><th>Match</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<p class="msg" style="padding-top:.75rem">Showing ' + d.matches.length + ' of ' + d.total + ' matches held in memory (most recent first). Click a row for the replay.</p>';
+      Array.prototype.forEach.call(list.querySelectorAll('tr[data-id]'), function (tr) {
+        tr.addEventListener('click', function () { location.hash = 'replay-' + tr.getAttribute('data-id'); });
+      });
+    }).catch(function () { $('recent-list').innerHTML = '<p class="msg">Couldn’t load recent matches — try again shortly.</p>'; });
+  }
+
+  /* ---------------- Leaderboard (real per-player stats: rating/W-L-D/matches) ---------------- */
+  function loadLeaderboard() {
+    fetch('/api/v1/games/deadweight/leaderboard?limit=25').then(function (r) { return r.json(); }).then(function (rows) {
+      var el = $('leaderboard-list');
+      if (!rows || !rows.length) { el.innerHTML = '<p class="msg">No ranked players yet.</p>'; return; }
+      var body = rows.map(function (p, i) {
+        return '<tr><td class="num">' + (i + 1) + '</td><td>' + esc(p.display_name) + '<span class="kindbadge ' + p.kind + '">' + p.kind + '</span></td>' +
+          '<td class="num">' + Math.round(p.rating) + '</td><td class="num">' + p.wins + '</td><td class="num">' + p.losses + '</td>' +
+          '<td class="num">' + p.draws + '</td><td class="num">' + p.matches + '</td></tr>';
+      }).join('');
+      el.innerHTML = '<table><thead><tr><th>#</th><th>Player</th><th class="num">Rating</th><th class="num">W</th><th class="num">L</th><th class="num">D</th><th class="num">Matches</th></tr></thead><tbody>' + body + '</tbody></table>';
+    }).catch(function () { $('leaderboard-list').innerHTML = '<p class="msg">Couldn’t load the leaderboard — try again shortly.</p>'; });
+  }
+
+  /* ---------------- Replay viewer ---------------- */
+  var replay = null, roundIdx = 0, playTimer = null;
+
+  function fmtCardLine(cardId, effId) {
+    var c = cardOf(cardId);
+    if (cardId < 0) return { emoji: '🚫', name: 'Pass', kind: '' };
+    var label = c.name;
+    if (effId != null && effId !== cardId && effId >= 0) label += ' → ' + cardOf(effId).name; // Dark Pool / substitution
+    return { emoji: cardEmoji(c), name: label, kind: c.kind, cost: c.cost, power: c.power };
+  }
+
+  var FLAG_LABELS = [
+    [1, 'Cancelled'], [2, 'Immune'], [4, 'Lifeline'], [8, 'Locked Opp'],
+    [16, 'Swapped'], [32, 'Discarded Opp'], [64, 'Redrew'], [128, 'Copied']
+  ];
+  function flagBadges(flags) {
+    if (!flags) return '';
+    return '<div class="flags">' + FLAG_LABELS.filter(function (f) { return flags & f[0]; })
+      .map(function (f) { return '<span class="flag-badge">' + f[1] + '</span>'; }).join('') + '</div>';
+  }
+
+  function renderRoundControls() {
+    var n = replay.rounds_data.length;
+    return '<div class="round-controls">' +
+      '<button id="rc-first" ' + (roundIdx === 0 ? 'disabled' : '') + '>⏮ First</button>' +
+      '<button id="rc-prev" ' + (roundIdx === 0 ? 'disabled' : '') + '>◀ Prev</button>' +
+      '<button id="rc-play">' + (playTimer ? '⏸ Pause' : '▶ Play') + '</button>' +
+      '<input id="rc-slider" type="range" min="0" max="' + (n - 1) + '" value="' + roundIdx + '">' +
+      '<button id="rc-next" ' + (roundIdx === n - 1 ? 'disabled' : '') + '>Next ▶</button>' +
+      '<button id="rc-last" ' + (roundIdx === n - 1 ? 'disabled' : '') + '>Last ⏭</button>' +
+      '<span class="round-label">Round ' + (roundIdx + 1) + ' / ' + n + '</span>' +
+      '</div>';
+  }
+
+  function renderReplay() {
+    var view = $('replay-view');
+    if (!replay || !replay.rounds_data.length) { view.innerHTML = '<p class="msg">No round data for this match.</p>'; return; }
+    var rd = replay.rounds_data[roundIdx];
+    var n0 = esc(replay.names[0]), n1 = esc(replay.names[1]);
+    var winLabel = replay.result[0] === 1 ? n0 + ' won' : replay.result[1] === 1 ? n1 + ' won' : 'Draw';
+    var reasonLabel = ['Hull depleted', 'Rounds limit', 'Forfeit', 'Server', 'Bankrupt'][replay.reason] || ('reason ' + replay.reason);
+
+    var h0pct = Math.max(0, Math.min(100, (rd.hull_after[0] / 20) * 100));
+    var h1pct = Math.max(0, Math.min(100, (rd.hull_after[1] / 20) * 100));
+    var e0pct = Math.max(0, Math.min(100, (rd.energy_after[0] / 12) * 100));
+    var e1pct = Math.max(0, Math.min(100, (rd.energy_after[1] / 12) * 100));
+
+    var p0 = fmtCardLine(rd.card[0], rd.eff[0]), p1 = fmtCardLine(rd.card[1], rd.eff[1]);
+
+    var html = '';
+    html += '<div class="vs-head">' +
+      '<div class="seat-name seat0">' + n0 + '</div>' +
+      '<div class="vs-mid">' + (replay.mode === 'draft' ? 'Draft' : 'Random') + ' &middot; ' + winLabel + ' &middot; ' + reasonLabel + ' &middot; match #' + replay.match_id + '</div>' +
+      '<div class="seat-name seat1">' + n1 + '</div>' +
+      '</div>';
+
+    html += '<div class="hullrow"><div class="lbl">' + n0 + ' Hull</div><div class="bar-track"><div class="bar-fill hull0" style="width:' + h0pct + '%"></div></div><div class="bar-val">' + rd.hull_after[0] + '/20</div></div>';
+    html += '<div class="hullrow"><div class="lbl">' + n1 + ' Hull</div><div class="bar-track"><div class="bar-fill hull1" style="width:' + h1pct + '%"></div></div><div class="bar-val">' + rd.hull_after[1] + '/20</div></div>';
+    html += '<div class="hullrow"><div class="lbl">' + n0 + ' Energy</div><div class="bar-track"><div class="bar-fill energy0" style="width:' + e0pct + '%"></div></div><div class="bar-val">' + rd.energy_after[0] + '</div></div>';
+    html += '<div class="hullrow"><div class="lbl">' + n1 + ' Energy</div><div class="bar-track"><div class="bar-fill energy1" style="width:' + e1pct + '%"></div></div><div class="bar-val">' + rd.energy_after[1] + '</div></div>';
+
+    html += renderRoundControls();
+
+    html += '<div class="plays-row">' +
+      '<div class="play-card" style="--kc:var(--' + (p0.kind || 'border') + ')"><div class="who">' + n0 + ' played</div>' +
+      '<div class="cardname">' + p0.emoji + ' ' + esc(p0.name) + '</div>' +
+      (p0.cost != null ? '<div class="cardmeta">Cost ' + p0.cost + (p0.power ? ' &middot; Power ' + p0.power : '') + (rd.roll[0] != null ? ' &middot; roll ' + rd.roll[0] : '') + '</div>' : '') +
+      '<div class="stat-row">' + (rd.dmg[0] ? '<span class="dmg">-' + rd.dmg[0] + ' hull</span>' : '') + (rd.heal[0] ? '<span class="heal">+' + rd.heal[0] + ' heal</span>' : '') + '</div>' +
+      flagBadges(rd.flags[0]) + '</div>' +
+      '<div class="play-card" style="--kc:var(--' + (p1.kind || 'border') + ')"><div class="who">' + n1 + ' played</div>' +
+      '<div class="cardname">' + p1.emoji + ' ' + esc(p1.name) + '</div>' +
+      (p1.cost != null ? '<div class="cardmeta">Cost ' + p1.cost + (p1.power ? ' &middot; Power ' + p1.power : '') + (rd.roll[1] != null ? ' &middot; roll ' + rd.roll[1] : '') + '</div>' : '') +
+      '<div class="stat-row">' + (rd.dmg[1] ? '<span class="dmg">-' + rd.dmg[1] + ' hull</span>' : '') + (rd.heal[1] ? '<span class="heal">+' + rd.heal[1] + ' heal</span>' : '') + '</div>' +
+      flagBadges(rd.flags[1]) + '</div>' +
+      '</div>';
+
+    html += '<div class="round-log"><h2 style="font-family:var(--font-display);font-size:1rem;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-dim)">Full round log</h2>';
+    replay.rounds_data.forEach(function (r, i) {
+      var a = fmtCardLine(r.card[0], r.eff[0]), b = fmtCardLine(r.card[1], r.eff[1]);
+      html += '<div class="round-log-row' + (i === roundIdx ? ' active' : '') + '" data-round="' + i + '">' +
+        '<div class="rn">R' + (i + 1) + '</div>' +
+        '<div>' + a.emoji + ' ' + esc(a.name) + (r.dmg[0] ? ' <span class="dmg">-' + r.dmg[0] + '</span>' : '') + '</div>' +
+        '<div>' + b.emoji + ' ' + esc(b.name) + (r.dmg[1] ? ' <span class="dmg">-' + r.dmg[1] + '</span>' : '') + '</div>' +
+        '<div class="num">' + r.hull_after[0] + ' &ndash; ' + r.hull_after[1] + '</div>' +
+        '</div>';
+    });
+    html += '</div>';
+
+    if (!replay.final_done) html += '<p class="msg">Note: this match ended by forfeit/server action, so the recorded plays don’t reach a natural finish &mdash; the trace above still reflects every logged round.</p>';
+
+    view.innerHTML = html;
+
+    $('rc-first').onclick = function () { setRound(0); };
+    $('rc-prev').onclick = function () { setRound(roundIdx - 1); };
+    $('rc-next').onclick = function () { setRound(roundIdx + 1); };
+    $('rc-last').onclick = function () { setRound(replay.rounds_data.length - 1); };
+    $('rc-slider').oninput = function (e) { setRound(+e.target.value); };
+    $('rc-play').onclick = togglePlay;
+    Array.prototype.forEach.call(view.querySelectorAll('.round-log-row'), function (row) {
+      row.addEventListener('click', function () { setRound(+row.getAttribute('data-round')); });
+    });
+  }
+
+  function setRound(i) {
+    if (!replay) return;
+    roundIdx = Math.max(0, Math.min(replay.rounds_data.length - 1, i));
+    if (roundIdx === replay.rounds_data.length - 1 && playTimer) togglePlay();
+    renderReplay();
+  }
+  function togglePlay() {
+    if (playTimer) { clearInterval(playTimer); playTimer = null; renderReplay(); return; }
+    playTimer = setInterval(function () {
+      if (roundIdx >= replay.rounds_data.length - 1) { clearInterval(playTimer); playTimer = null; renderReplay(); return; }
+      roundIdx++; renderReplay();
+    }, 1400);
+    renderReplay();
+  }
+
+  function loadReplay(id) {
+    $('replay-card').style.display = '';
+    $('replay-view').innerHTML = '<p class="msg">Loading replay&hellip; (replaying match #' + id + ' through the real match engine)</p>';
+    window.scrollTo({ top: $('replay-card').offsetTop - 20, behavior: 'smooth' });
+    fetch('/api/v1/games/deadweight/matches/' + id + '/replay').then(function (r) {
+      if (!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    }).then(function (d) {
+      if (playTimer) { clearInterval(playTimer); playTimer = null; }
+      replay = d; roundIdx = 0; renderReplay();
+    }).catch(function (e) {
+      $('replay-view').innerHTML = '<p class="msg">Couldn’t load this replay (' + esc(String(e.message || e)) + '). It may have aged out of the recent-matches window.</p>';
+    });
+  }
+
+  $('replay-close').addEventListener('click', function (e) { e.preventDefault(); location.hash = ''; });
+
+  function onHash() {
+    var h = location.hash.replace('#', '');
+    if (h.indexOf('replay-') === 0) {
+      loadReplay(h.slice(7));
+    } else {
+      $('replay-card').style.display = 'none';
+      if (playTimer) { clearInterval(playTimer); playTimer = null; }
+    }
+  }
+  window.addEventListener('hashchange', onHash);
+
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+    t.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('on'); });
+      document.querySelectorAll('.panel').forEach(function (x) { x.classList.remove('on'); });
+      t.classList.add('on');
+      $('panel-' + t.getAttribute('data-tab')).classList.add('on');
+    });
+  });
+
+  $('f-player').addEventListener('input', function () { clearTimeout(recentTimer); recentTimer = setTimeout(loadRecent, 250); });
+  $('f-mode').addEventListener('change', loadRecent);
+
+  loadRecent();
+  loadLeaderboard();
+  onHash();
+  setInterval(function () { if (!location.hash) loadRecent(); }, 15000); // light auto-refresh of the recent list, same spirit as live-match.html's poll
+</script>
+</body>
+</html>

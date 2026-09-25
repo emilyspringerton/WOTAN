@@ -16,6 +16,15 @@ across every page. Dark-only by design.
   card"), sortable (sample-size-adjusted "Best", raw win rate, most games, newest), each deck's cards as chips with a
   **big card tooltip on hover** (tap on phones; keyboard focus works too) and an expandable full-deck card grid; a
   **Cards** tab with every card's record across all decks. Deep links: `/decks.html#deck-451`, filters live in the URL.
+- **`/matches.html` — DEADWEIGHT Matches** (S547, 2026-09-25, open to everyone, no account): a real
+  leaderboard (rating/W-L-D/matches, from IDUNA's live `game_player_stats`), a recent-matches list
+  (filterable by player/mode), and a genuine round-by-round **replay viewer** — Prev/Next/Play/Last
+  controls, a round slider, a full round log — that steps through every hand of a real match, cards
+  shown as an emoji by kind/keyword (⚔️ Offense, 🛡️ Defense, 🦅 Lock/Scan/Siphon/Sabotage/Flank for
+  Operations). This is a real engine replay, not a reconstruction guess: a new tool
+  (`DEADWEIGHT/tools/replay_dump.c`) replays the match through DEADWEIGHT's actual `core/match.c`,
+  verified 300/300 clean against the most recent live matches. See `NORTHSTAR.md` for the full
+  account (why DEADWEIGHT over D2/other games, what's deferred).
 - `/store.html` — the BRAWLPIT hat store. Login is a real redirect to IDUNA's own hosted SSO
   page (`iam.okemily.com`) — this page has no password field of its own.
 - **`/profile.html` — public DEADWEIGHT player profiles** (no login): look up any player by
@@ -53,6 +62,23 @@ across every page. Dark-only by design.
   `cd DEADWEIGHT && scripts/export_cards.sh` (re-run after any card change).
 
 Decks drafted before the 2026-09-19 Offense/Operations/Defense retheme were archived server-side (`decks.pre-retheme.ndjson`) and are not shown.
+
+## How the matches/replay page gets its data
+
+- `GET /api/v1/games/deadweight/matches`, `/matches/{id}`, `/matches/{id}/replay` — public,
+  read-only, rate-limited endpoints in IDUNA (`internal/matchlog`,
+  `internal/http/handlers/match_replay.go`) that tail `dw_server`'s `matches.ndjson` (sibling log
+  to `decks.ndjson` above, `DEADWEIGHT_MATCH_LOG`, default
+  `/home/fatbaby/.local/var/deadweight/matches/matches.ndjson`), keeping the most recent 2000
+  matches in memory. `/replay` shells out to `dw_replay_dump` (built from
+  `DEADWEIGHT/tools/replay_dump.c`, installed at `~/.local/opt/deadweight/bin/dw_replay_dump`),
+  which replays the match through DEADWEIGHT's real match core and returns a full round-by-round
+  JSON trace. Same `/api/` proxy as the deck browser above.
+- `GET /api/v1/games/deadweight/leaderboard` — already-existing, already-public per-player
+  aggregate stats (`IDUNA/internal/http/handlers/game_online.go`), reused as-is for the
+  Leaderboard tab.
+- `data/cards.json` (same file the deck browser uses) also drives the replay viewer's per-card
+  emoji (kind/keyword → emoji, see `NORTHSTAR.md`).
 
 ## Deploy
 
