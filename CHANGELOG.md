@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-09-25 (2)
+- Add matches.html: real DEADWEIGHT leaderboard, recent-match list, and a round-by-round replay viewer (S547) driven by new IDUNA match-log endpoints (sess-20260923-1030-4a526255)
 - fix(auth): **SSO session is now sticky across pages** (founder real-time: "the SSO should be
   sticky when i click around it forgets im logged in"). New shared `js/iduna-sso.js`
   (`getIdunaSession`/`setIdunaSession`/`clearIdunaSession`/`buildSsoURL`/`handleIdunaSsoReturn`),
