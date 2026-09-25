@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/wotan-theme.css">
+<script src="/js/iduna-sso.js"></script>
 <style>
   label .hint { font-weight: 400; opacity: 0.75; text-transform: none; letter-spacing: 0; }
   .hat-row {
@@ -75,10 +76,12 @@
 // All calls go through this same origin's /api/ proxy (see ops/nginx-wotan.conf) straight to
 // IDUNA's real MMO/hats endpoints (BRAWLPIT/docs/WOTAN_HAT_STORE_NORTHSTAR.md Phase 2).
 
-function getToken() { try { return localStorage.getItem('wotan_token') || ''; } catch (e) { return ''; } }
-function setToken(t) { try { if (t) localStorage.setItem('wotan_token', t); else localStorage.removeItem('wotan_token'); } catch (e) {} }
-function getPlayerID() { try { return localStorage.getItem('wotan_player_id') || ''; } catch (e) { return ''; } }
-function setPlayerID(p) { try { if (p) localStorage.setItem('wotan_player_id', p); else localStorage.removeItem('wotan_player_id'); } catch (e) {} }
+// getToken()/getPlayerID() read the SHARED cross-page IDUNA session (js/iduna-sso.js, 2026-09-25
+// -- "the SSO should be sticky when i click around it forgets im logged in"). Signing in here or
+// on friends.html now makes both pages see the same session, since they read/write the same
+// localStorage keys instead of each page keeping its own separate copy.
+function getToken() { const s = getIdunaSession(); return s ? s.token : ''; }
+function getPlayerID() { const s = getIdunaSession(); return s ? s.playerID : ''; }
 
 let characterID = '';
 
@@ -103,36 +106,25 @@ function setAuthMsg(text, kind) {
   el.className = 'msg' + (kind ? ' ' + kind : '');
 }
 
-// IDUNA SSO (2026-09-24): builds the "Sign in with IDUNA" link's href. redirect_uri is this
-// page's own URL with any existing hash/query stripped, so the return trip doesn't chain.
-// signup=1 (from GFD's own deep link, see the bootstrap block below) is forwarded through so
-// the SSO page can default to its register mode.
-function buildSsoURL() {
-  const redirect = location.origin + location.pathname;
-  const params = new URLSearchParams({ redirect_uri: redirect });
-  if (new URLSearchParams(location.search).get('signup') === '1') params.set('signup', '1');
-  return 'https://iam.okemily.com/?' + params.toString();
-}
-
-// Reads the token IDUNA's SSO page hands back via URL fragment
-// (#sso_token=...&player_id=...&display_name=...), stores it exactly like the old inline-form
-// login did, then scrubs the fragment so a refresh/share doesn't carry the token in the URL.
+// buildSsoURL()/handleIdunaSsoReturn() come from the shared js/iduna-sso.js (2026-09-25) --
+// signup=1 (from GFD's own deep link, see the bootstrap block below) is forwarded through so the
+// SSO page can default to its register mode.
+//
+// Real "sticky" bootstrap (2026-09-25, founder real-time: "the SSO should be sticky when i click
+// around it forgets im logged in"): a fresh SSO redirect return wins if present, but a shared
+// session from an EARLIER page visit (e.g. signed in on friends.html, then navigated here) is now
+// also recognized, not just this page's own prior visits.
 async function handleSsoReturn() {
-  const frag = new URLSearchParams(location.hash.slice(1));
-  const token = frag.get('sso_token');
-  const playerID = frag.get('player_id');
-  if (!token || !playerID) return false;
-  setToken(token);
-  setPlayerID(playerID);
-  history.replaceState(null, '', location.pathname + location.search);
-  setAuthMsg('Signed in as ' + (frag.get('display_name') || 'IDUNA account') + '.', 'ok');
+  const fresh = handleIdunaSsoReturn();
+  const session = fresh || getIdunaSession();
+  if (!session) return false;
+  if (fresh) setAuthMsg('Signed in as ' + (fresh.displayName || 'IDUNA account') + '.', 'ok');
   await afterLogin();
   return true;
 }
 
 function logout() {
-  setToken('');
-  setPlayerID('');
+  clearIdunaSession();
   characterID = '';
   document.getElementById('character-card').hidden = true;
   document.getElementById('catalog-card').hidden = true;
@@ -270,20 +262,16 @@ function escapeHtml(s) {
   return d.innerHTML;
 }
 
-document.getElementById('sso-login-link').href = buildSsoURL();
+document.getElementById('sso-login-link').href = buildSsoURL(
+  new URLSearchParams(location.search).get('signup') === '1' ? { signup: '1' } : null
+);
 document.getElementById('logout-btn').addEventListener('click', logout);
 
-// Real page-load bootstrap, in priority order: a token just handed back from IDUNA's SSO page
-// wins over a stale localStorage one (handleSsoReturn short-circuits via its own return value);
-// otherwise fall back to restoring a prior session exactly like before SSO existed.
-handleSsoReturn().then((handled) => {
-  if (handled) return;
-  if (getToken() && getPlayerID()) {
-    document.getElementById('logout-btn').hidden = false;
-    setAuthMsg('Restoring your session…');
-    afterLogin().then(() => setAuthMsg('')).catch(() => {});
-  }
-});
+// Real page-load bootstrap: handleSsoReturn() now covers both a token just handed back from
+// IDUNA's SSO page AND a sticky session carried over from another WOTAN page (see its own doc
+// comment above) -- either way it calls afterLogin() itself, so there's no separate fallback
+// branch needed here anymore.
+handleSsoReturn();
 </script>
 </body>
 </html>

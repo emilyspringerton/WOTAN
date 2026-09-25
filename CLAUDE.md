@@ -65,6 +65,26 @@ with `redirect_uri`, read the returned fragment) if the target API already accep
 JWT, or friends.html's pattern (SSO login, then exchange for a game-scoped token) if it's a
 game-scoped endpoint like DEADWEIGHT's — never add another inline credential form.
 
+**Shared, sticky session (2026-09-25)**: `js/iduna-sso.js` is the one shared module both pages
+load (`<script src="/js/iduna-sso.js">`) — `getIdunaSession()`/`setIdunaSession()`/
+`clearIdunaSession()`/`buildSsoURL()`/`handleIdunaSsoReturn()`. Before this, store.html and
+friends.html each kept their own separate, page-local "am I signed in" state and only ever
+checked it right after an SSO redirect landed on THAT specific page — navigating to the other page
+looked like being logged out even though the same origin's localStorage already had a valid
+session sitting in a different key. Every page's own `handleSsoReturn()` now checks a fresh SSO
+return FIRST, then falls back to the shared session from an earlier page visit, so signing in once
+stays signed in across the whole site. A new page should read `getIdunaSession()` on load in
+addition to (not instead of) handling its own fresh SSO return.
+
+**Unscoped identities are claimed on first use (2026-09-25)**: a player who registers generically
+(no game param — e.g. store.html/friends.html's own SSO register) used to dead-end everywhere
+per-game — friends.html said "no account for that game," and the DEADWEIGHT client's own
+claim-account flow said "email already taken" (true: that email already belonged to the unscoped
+row, with no way to ever use it for a game). IDUNA's `sso-exchange` and game-scoped `email-login`
+now both claim a never-scoped identity for the first game that legitimately authenticates against
+it — see `IDUNA/internal/http/handlers/game_online.go`'s `claimGamePlayer`. An identity already
+scoped to a DIFFERENT game still gets a real, distinct refusal, not silently reassigned.
+
 ## Real, current status
 
 - `decks.html` — **DEADWEIGHT Draft Decks** (2026-09-19): the unauthenticated deck browser. Reads IDUNA's public

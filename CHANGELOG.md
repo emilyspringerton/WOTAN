@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-25 (2)
+- fix(auth): **SSO session is now sticky across pages** (founder real-time: "the SSO should be
+  sticky when i click around it forgets im logged in"). New shared `js/iduna-sso.js`
+  (`getIdunaSession`/`setIdunaSession`/`clearIdunaSession`/`buildSsoURL`/`handleIdunaSsoReturn`),
+  loaded by both `store.html` and `friends.html`. Before this, each page kept its own separate
+  localStorage key and only ever recognized a session right after an SSO redirect landed on THAT
+  page -- navigating from one page to the other looked like being logged out. Both pages'
+  `handleSsoReturn()` now check a fresh SSO return first, then fall back to the shared session from
+  an earlier page visit; `friends.html` silently re-exchanges the shared session for a fresh
+  DEADWEIGHT token on every load rather than trusting a possibly-stale cached one. `logout()` on
+  either page now clears the shared session too, so logging out is sticky in the same way.
+- Related IDUNA-side fix (see `IDUNA` `5f7c9f9`/`bd3d7cc`): a generically-registered identity (no
+  game scope) used to dead-end -- "no account for that game" on friends.html, "email already
+  taken" on the DEADWEIGHT client's own claim-account flow, with no way out. `sso-exchange` and
+  game-scoped `email-login` now claim an unscoped identity for the first game that legitimately
+  uses it.
+
 ## 2026-09-25
 - feat(auth): **friends.html no longer collects a password of its own** (founder real-time: "make
   it work for Friends and Duels", the direct follow-up to 2026-09-24's store.html SSO cutover).
