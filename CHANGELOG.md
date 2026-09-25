@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-25 (3)
+- Add shankpit.html: basic SHANKPIT kills/deaths/K-D/sessions leaderboard, reading new IDUNA
+  endpoint GET /api/v1/shankpit/leaderboard off SHANKPIT's existing per-match write path (S550,
+  founder real-time: "add shankpit to WOTAN... if you have an iduna account you have a shankpit
+  account... for now we need basic shankpit match tracking")
+
 ## 2026-09-25 (2)
 - Add matches.html: real DEADWEIGHT leaderboard, recent-match list, and a round-by-round replay viewer (S547) driven by new IDUNA match-log endpoints (sess-20260923-1030-4a526255)
 - fix(auth): **SSO session is now sticky across pages** (founder real-time: "the SSO should be

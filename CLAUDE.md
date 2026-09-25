@@ -115,6 +115,17 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
   extra step store.html doesn't. Not live-verified in a real browser (no headless Chrome in this
   sandbox) — Node syntax-checked, and the backend exchange endpoint is proven end to end by real
   Go tests (`IDUNA`'s `TestSSOExchange_*`), but the actual click-through hasn't been screenshotted.
+- `shankpit.html` — **SHANKPIT Leaderboard** (S550, 2026-09-25, founder real-time: "add shankpit to
+  WOTAN... if you have an iduna account you have a shankpit account... for now we need basic
+  shankpit match tracking"). Basic kill/death/K-D/sessions leaderboard, unauthenticated, reading a
+  new public `GET /api/v1/shankpit/leaderboard` (`IDUNA/internal/http/handlers/
+  shankpit_leaderboard.go`) that sources directly from the existing `players` table columns
+  SHANKPIT already writes to (`kills`/`deaths`/`sessions`, via `players.go`'s `handleSessionEnd`
+  under the existing `shankpit.match.write` permission — SHANKPIT match tracking was already real,
+  it just had no WOTAN-facing leaderboard read yet, same gap REDGARDEN's `matches.html` closed
+  first). No new IDUNA account type: any `players` row already carries these columns, so "IDUNA
+  account = SHANKPIT account" needed no code change, only this page. Real, named, deferred: SHANKPIT
+  and BIG_O premium keys ("those will be for premium") — not part of this basic pass.
 - Deploy: `~/wotan-deploy.sh` rsyncs this repo to `/var/www/wotan` (no build step).
 
 ## Related

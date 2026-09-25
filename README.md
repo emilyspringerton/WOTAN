@@ -25,6 +25,12 @@ across every page. Dark-only by design.
   (`DEADWEIGHT/tools/replay_dump.c`) replays the match through DEADWEIGHT's actual `core/match.c`,
   verified 300/300 clean against the most recent live matches. See `NORTHSTAR.md` for the full
   account (why DEADWEIGHT over D2/other games, what's deferred).
+- **`/shankpit.html` — SHANKPIT Leaderboard** (S550, 2026-09-25, open to everyone, no account):
+  a basic kills/deaths/K-D/sessions leaderboard, reading a new public
+  `GET /api/v1/shankpit/leaderboard` off SHANKPIT's already-existing per-match write path
+  (`players.kills`/`deaths`/`sessions`, gated by `shankpit.match.write`). "If you have an IDUNA
+  account you have a SHANKPIT account" — no new account type needed, only this read. SHANKPIT and
+  BIG_O premium keys are named as a real future phase, not built here.
 - `/store.html` — the BRAWLPIT hat store. Login is a real redirect to IDUNA's own hosted SSO
   page (`iam.okemily.com`) — this page has no password field of its own.
 - **`/profile.html` — public DEADWEIGHT player profiles** (no login): look up any player by
