@@ -36,20 +36,23 @@
   <h1>Friends &amp; Duels</h1>
   <p class="tagline">DEADWEIGHT friends and friendly challenges. <a class="back" href="/profile.html">Look up a profile</a></p>
 
-  <!-- Separate credential system from store.html's IAM login: this is DEADWEIGHT's own per-game
-       player account (POST /api/v1/games/deadweight/email-login), the same identity friends and
-       duels are keyed to (players.player_id). A guest-only account has no email/password yet --
-       set one first via the DEADWEIGHT client's own "link email" (guest-upgrade) flow. -->
+  <!-- IDUNA SSO (2026-09-25, same treatment as store.html's SECTION 543 -- founder: "make it
+       work for Friends and Duels"): no email/password form on this page anymore. Friends and
+       duels are keyed to DEADWEIGHT's own per-game player identity (players.player_id, scoped
+       game='deadweight'), which is the SAME players/player_credentials rows IDUNA's general SSO
+       login already authenticates against -- but the generic SSO token IDUNA hands back isn't
+       shaped for a game-scoped endpoint (no player_id/game/permissions claims), so this page
+       exchanges it for a real DEADWEIGHT player token via a new IDUNA endpoint
+       (POST /api/v1/games/deadweight/sso-exchange) right after the SSO redirect returns -- see
+       handleSsoReturn() below. A guest-only account has no email/password yet -- set one first
+       via the DEADWEIGHT client's own "link email" (guest-upgrade) flow; signing in here won't
+       create one. -->
   <div class="card" id="auth-card">
-    <p id="auth-status">Log in with your DEADWEIGHT account email/password to manage friends and duels.
-      (No email/password yet? Link one from inside the DEADWEIGHT client first -- guest accounts alone
-      can't sign in here.)</p>
-    <label for="email">Email</label>
-    <input type="email" id="email" autocomplete="username">
-    <label for="password">Password</label>
-    <input type="password" id="password" autocomplete="current-password">
+    <p id="auth-status">Sign in with your IDUNA account to manage friends and duels.
+      (No DEADWEIGHT account linked yet? Link an email from inside the DEADWEIGHT client first --
+      guest accounts alone can't sign in here.)</p>
     <div>
-      <button id="login-btn">Log in</button>
+      <a class="button" id="sso-login-link" href="#">Sign in with IDUNA</a>
       <button class="secondary" id="logout-btn" hidden>Log out</button>
     </div>
     <div class="msg" id="auth-msg"></div>
@@ -131,20 +134,47 @@ function escapeHtml(s) {
   return d.innerHTML;
 }
 
-async function doLogin() {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  if (!email || !password) { setMsg('auth-msg', 'Email and password required.', 'error'); return; }
+// IDUNA SSO (2026-09-25): builds the "Sign in with IDUNA" link's href, redirecting back to this
+// page's own URL with any existing hash/query stripped so the return trip doesn't chain. Matches
+// store.html's own buildSsoURL() exactly (no signup=1 forwarding here -- this page has no deep
+// link that wants the SSO page to default to register mode).
+function buildSsoURL() {
+  const redirect = location.origin + location.pathname;
+  return 'https://iam.okemily.com/?' + new URLSearchParams({ redirect_uri: redirect }).toString();
+}
+
+// Reads the token IDUNA's SSO page hands back via URL fragment (#sso_token=...&player_id=...),
+// then exchanges it for a real DEADWEIGHT-scoped player token (the generic SSO token has no
+// player_id/game/permissions claims, so it can't authenticate against a game-scoped endpoint
+// directly -- see the auth-card doc comment above and IDUNA's own sso-exchange handler). Scrubs
+// the fragment either way so a refresh/share doesn't carry the raw SSO token in the URL.
+async function handleSsoReturn() {
+  const frag = new URLSearchParams(location.hash.slice(1));
+  const ssoToken = frag.get('sso_token');
+  if (!ssoToken) return false;
+  history.replaceState(null, '', location.pathname + location.search);
   setMsg('auth-msg', 'Working…');
   try {
-    const body = await api('/email-login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    const res = await fetch('/api/v1/games/' + GAME + '/sso-exchange', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + ssoToken },
+    });
+    let body = null;
+    try { body = await res.json(); } catch (e) { /* no body */ }
+    if (!res.ok) {
+      const msg = (body && body.error) ||
+        'No DEADWEIGHT account is linked to this IDUNA identity -- link one from inside the DEADWEIGHT client first.';
+      setMsg('auth-msg', msg, 'error');
+      return true;
+    }
     setToken(body.token);
     setPlayerID(body.player_id);
-    setMsg('auth-msg', 'Logged in as ' + body.display_name + '.', 'ok');
+    setMsg('auth-msg', 'Signed in as ' + (body.display_name || 'IDUNA account') + '.', 'ok');
     await afterLogin();
   } catch (e) {
     setMsg('auth-msg', e.message, 'error');
   }
+  return true;
 }
 
 function logout() {
@@ -374,15 +404,21 @@ async function respondDuel(id, action) {
   }
 }
 
-document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('sso-login-link').href = buildSsoURL();
 document.getElementById('logout-btn').addEventListener('click', logout);
 document.getElementById('add-btn').addEventListener('click', sendRequest);
 
-if (getToken() && getPlayerID()) {
-  document.getElementById('logout-btn').hidden = false;
-  setMsg('auth-msg', 'Restoring your session…');
-  afterLogin().then(() => setMsg('auth-msg', '')).catch(() => {});
-}
+// Real page-load bootstrap, same priority order as store.html: a token just handed back from
+// IDUNA's SSO page (via sso-exchange) wins over a stale localStorage one; otherwise fall back to
+// restoring a prior session exactly like before SSO existed.
+handleSsoReturn().then((handled) => {
+  if (handled) return;
+  if (getToken() && getPlayerID()) {
+    document.getElementById('logout-btn').hidden = false;
+    setMsg('auth-msg', 'Restoring your session…');
+    afterLogin().then(() => setMsg('auth-msg', '')).catch(() => {});
+  }
+});
 </script>
 </body>
 </html>

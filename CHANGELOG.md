@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-25
+- feat(auth): **friends.html no longer collects a password of its own** (founder real-time: "make
+  it work for Friends and Duels", the direct follow-up to 2026-09-24's store.html SSO cutover).
+  Removed the inline email/password form; a "Sign in with IDUNA" link now sends the browser to
+  IDUNA's own SSO page, same as store.html. Genuinely different underneath, though: DEADWEIGHT
+  friends/duels are keyed to a game-scoped player token (`player_id`/`game`/`permissions` claims),
+  which the generic SSO JWT isn't shaped for -- so `handleSsoReturn()` now exchanges the SSO token
+  for a real DEADWEIGHT token via a new IDUNA endpoint, `POST /api/v1/games/deadweight/
+  sso-exchange` (see `IDUNA` `50655f5`), before storing it exactly like the old inline form did. An
+  IDUNA identity with no DEADWEIGHT account linked gets a real, honest error message pointing at
+  the DEADWEIGHT client's own "link email" flow, not a silent new registration. See `WOTAN/
+  CLAUDE.md`'s "Auth -- IDUNA as SSO" section for the full rationale. Node-syntax-checked; the
+  backend round trip is proven end to end by IDUNA's own `TestSSOExchange_*` tests; the actual
+  browser click-through was not screenshotted (no headless Chrome in this sandbox).
+
 ## 2026-09-24 (5)
 - feat(auth): **store.html no longer collects a password of its own** (founder real-time:
   "instead of putting your password into page on wotan iduna needs to become the SSO"). Removed

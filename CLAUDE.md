@@ -33,18 +33,37 @@ shared topbar markup rather than re-declaring `:root`/base styles. `button`/`.se
 rules also match a `.button` class, so a plain `<a>` can be styled like a button (2026-09-24,
 added for store.html's "Sign in with IDUNA" link).
 
-## Auth — IDUNA as SSO (standing, 2026-09-24)
+## Auth — IDUNA as SSO (standing, 2026-09-24; live end to end since 2026-09-25)
 
-`store.html` does not render its own email/password form. It links to IDUNA's own hosted login
-page (`https://iam.okemily.com/?redirect_uri=<this page's URL>`, real cross-domain redirect —
-see `IDUNA/internal/http/handlers/sso_login.go`), which hands a JWT back via a URL fragment on
-return (`#sso_token=...&player_id=...`). Any new page on this site that needs an IDUNA login
-should follow the same pattern (link out with `redirect_uri`, read the returned fragment) rather
-than adding another inline form — that's the whole point of the SSO page existing.
-`iam.okemily.com`'s DNS/cert are not live yet (see `IDUNA/ops/nginx/iam-okemily.conf` +
-`sudo-queue/91-iam-okemily-sso-domain.sh`); until then the same route is reachable via any
-caller's own same-origin `/api/` proxy. `friends.html`'s own login form is unrelated — it
-authenticates DEADWEIGHT accounts, a separate credential system from IDUNA platform accounts.
+No page on this site renders its own email/password form. Every page links to IDUNA's own hosted
+login page (`https://iam.okemily.com/?redirect_uri=<this page's URL>`, real cross-domain redirect
+— see `IDUNA/internal/http/handlers/sso_login.go`), which hands a JWT back via a URL fragment on
+return (`#sso_token=...&player_id=...`). `iam.okemily.com` is live (DNS via Terraform + nginx +
+cert, `IDUNA/ops/nginx/iam-okemily.conf`) — a real nginx double-query-string bug that corrupted
+the redirect was found and fixed live (dropped `$is_args$args` from the rewrite, `IDUNA` `3781d3c`).
+
+Two real consumer patterns exist, not one:
+- **`store.html`** uses the SSO token directly — WOTAN hats are IDUNA-native (GFD character +
+  Flow balance), so the generic SSO JWT is already the right shape.
+- **`friends.html`** (2026-09-25) needs a second step: DEADWEIGHT friends/duels are keyed to a
+  *game-scoped* player token (`player_id`/`game`/`permissions` claims, minted by
+  `internal/http/handlers/game_online.go`'s `playerToken`), which the generic SSO JWT is NOT
+  shaped for (no `player_id`/`game`/`permissions` claims) — it fails `draftPlayerClaims` outright
+  even though it's authenticating the exact same underlying `players` row. `friends.html` reads
+  the SSO fragment same as store.html, then exchanges it via a new endpoint,
+  `POST /api/v1/games/deadweight/sso-exchange` (bearer = the generic SSO token) → a real
+  DEADWEIGHT `playerToken`, which it stores as `wotan_dw_token` exactly like the old inline form
+  used to. No new player is ever minted by this exchange — an IDUNA identity with no DEADWEIGHT
+  account linked (`players` row with `game='deadweight'`) gets a real 404, matching the page's own
+  existing "guest accounts alone can't sign in here, link one from inside the DEADWEIGHT client
+  first" framing. See `IDUNA/internal/http/handlers/game_online.go`'s `ssoExchange` for the real
+  rationale and `game_online_test.go`'s `TestSSOExchange_*` for the live-proven round trip
+  (register → guest-upgrade → generic SSO login → exchange → real `friendsList` call succeeds).
+
+Any new page on this site that needs an IDUNA login should follow store.html's pattern (link out
+with `redirect_uri`, read the returned fragment) if the target API already accepts a generic IDUNA
+JWT, or friends.html's pattern (SSO login, then exchange for a game-scoped token) if it's a
+game-scoped endpoint like DEADWEIGHT's — never add another inline credential form.
 
 ## Real, current status
 
@@ -60,8 +79,14 @@ authenticates DEADWEIGHT accounts, a separate credential system from IDUNA platf
 - `store.html` — real, code-complete WOTAN_HAT_STORE_NORTHSTAR.md Phase 2 store page (2026-09-04):
   resolves the player's GFD character, real hat catalog/buy/equip against IDUNA's live Phase 1
   endpoints, all via this repo's own `/api/` nginx proxy. Login is IDUNA's own hosted SSO page
-  (2026-09-24) — see "Design system" below and `IDUNA/internal/http/handlers/sso_login.go` —
-  not an inline form on this page anymore.
+  (2026-09-24) — see "Auth — IDUNA as SSO" above and `IDUNA/internal/http/handlers/sso_login.go`
+  — not an inline form on this page anymore.
+- `friends.html` — real friends list/requests + duel challenges against IDUNA's live
+  `game_social.go` endpoints. Login is IDUNA's own hosted SSO page too (2026-09-25), exchanged for
+  a real DEADWEIGHT player token — see "Auth — IDUNA as SSO" above for why this page needs an
+  extra step store.html doesn't. Not live-verified in a real browser (no headless Chrome in this
+  sandbox) — Node syntax-checked, and the backend exchange endpoint is proven end to end by real
+  Go tests (`IDUNA`'s `TestSSOExchange_*`), but the actual click-through hasn't been screenshotted.
 - Deploy: `~/wotan-deploy.sh` rsyncs this repo to `/var/www/wotan` (no build step).
 
 ## Related
