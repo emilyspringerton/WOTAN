@@ -65,6 +65,14 @@ with `redirect_uri`, read the returned fragment) if the target API already accep
 JWT, or friends.html's pattern (SSO login, then exchange for a game-scoped token) if it's a
 game-scoped endpoint like DEADWEIGHT's — never add another inline credential form.
 
+**A third real consumer (2026-09-28)**: `DEADWEIGHT/` (the actual game client, not a stats page)
+follows friends.html's exact exchange pattern too, but as its own TS module (`web/src/sso.ts` in
+the source repo, `DEADWEIGHT/dist/sso.js` here) rather than sharing this site's plain-`<script>`
+`js/iduna-sso.js` — that file is DEADWEIGHT's own repo's build output, kept behaviorally identical
+on purpose, not a fork of this one to maintain separately by accident. If `js/iduna-sso.js`'s
+storage-key shape or fragment format ever changes, `DEADWEIGHT/docs/NATIVE_WASM_CLIENT_NORTHSTAR.md`
+needs the same update made in its own `sso.ts`.
+
 **Shared, sticky session (2026-09-25)**: `js/iduna-sso.js` is the one shared module both pages
 load (`<script src="/js/iduna-sso.js">`) — `getIdunaSession()`/`setIdunaSession()`/
 `clearIdunaSession()`/`buildSsoURL()`/`handleIdunaSsoReturn()`. Before this, store.html and
@@ -126,6 +134,13 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
   first). No new IDUNA account type: any `players` row already carries these columns, so "IDUNA
   account = SHANKPIT account" needed no code change, only this page. Real, named, deferred: SHANKPIT
   and BIG_O premium keys ("those will be for premium") — not part of this basic pass.
+- `DEADWEIGHT/` — **the real DEADWEIGHT game client** (2026-09-28), not a stats page: a plain copy
+  of `DEADWEIGHT/web/`'s built output (native wasm32 protocol codec, no Emscripten), signing in via
+  the same IDUNA SSO pattern as store.html/friends.html. See `README.md`'s own entry and
+  `DEADWEIGHT/docs/NATIVE_WASM_CLIENT_NORTHSTAR.md` for the full build/verification account.
+  **Not reachable live yet** — `ops/nginx-wotan.conf`'s `/DEADWEIGHT/ws` location and
+  `dw-ws-bridge.service` aren't installed on the box, and this directory hasn't been deployed via
+  `wotan-deploy.sh` either (both are real, named, human/sudo-gated steps, not silently skipped).
 - Deploy: `~/wotan-deploy.sh` rsyncs this repo to `/var/www/wotan` (no build step).
 
 ## Related
