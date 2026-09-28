@@ -197,8 +197,8 @@ function drawShip(c, x, y, dir, scale, color) {
     c.lineTo(-6, 22);
     c.lineTo(6, 10);
     c.closePath();
-    c.fillStyle = '#202432';
-    c.fill(); // Corporate Grey (C_PANEL)
+    c.fillStyle = '#3C404E';
+    c.fill(); // fx.c's DGR (Dim Grey, fx-specific -- NOT C_PANEL/Corporate Grey)
     c.strokeStyle = color;
     c.lineWidth = 2;
     c.stroke();
