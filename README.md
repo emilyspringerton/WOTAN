@@ -68,11 +68,17 @@ across every page. Dark-only by design.
   account) — same no-build-step convention as every other page here, just a directory of files
   instead of one HTML file. Linked from every page's nav ("Play"). **Live**: deployed via
   `~/wotan-deploy.sh` and curl-verified against the real domain — `https://wotan.okemily.com/
-  DEADWEIGHT/` and its JS/wasm all return 200. **Real, honest gap**: it can't play a match yet —
-  the WebSocket path (`ops/nginx-wotan.conf`'s `/DEADWEIGHT/ws` location + DEADWEIGHT's
-  `dw-ws-bridge.service`) genuinely needs sudo this sandbox doesn't have
-  (`DEADWEIGHT/sudo-queue/94-deadweight-wotan-ws-bridge.sh`, not yet run) — `curl .../DEADWEIGHT/
-  ws` still 404s live.
+  DEADWEIGHT/` and its JS/wasm all return 200. **Real, honest gap**: it can't play a match yet.
+  DEADWEIGHT's `dw-ws-bridge.service` is installed and running for real
+  (`~/sudo-queue/94-deadweight-wotan-ws-bridge.sh` was run), but `ops/nginx-wotan.conf`'s
+  `/DEADWEIGHT/ws` location still 404s live — `94`'s nginx-edit script anchored the new location
+  on "the last closing brace in the file," which landed it inside certbot's own appended
+  port-80-redirect server block instead of the real HTTPS-serving one (that block's own bare
+  `return 301` swallows every request before any location inside it is reached — diagnosed from
+  behavioral evidence, not a direct read of the root-owned live file). Fix queued:
+  `~/sudo-queue/95-fix-deadweight-ws-nginx-location.sh` (idempotent, anchored to the already-live
+  `/api/` location instead, unit-tested against a synthetic reproduction of the exact bug) — still
+  needs the same real sudo this sandbox doesn't have.
 
 ## How the deck browser gets its data
 

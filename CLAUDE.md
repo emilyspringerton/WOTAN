@@ -139,9 +139,15 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
   the same IDUNA SSO pattern as store.html/friends.html. See `README.md`'s own entry and
   `DEADWEIGHT/docs/NATIVE_WASM_CLIENT_NORTHSTAR.md` for the full build/verification account.
   **Live**: deployed via `wotan-deploy.sh`, curl-verified 200 against the real domain. **Can't play
-  a match yet** — `ops/nginx-wotan.conf`'s `/DEADWEIGHT/ws` location and `dw-ws-bridge.service`
-  genuinely need sudo this sandbox doesn't have, so that one path still 404s live
-  (`DEADWEIGHT/sudo-queue/94-deadweight-wotan-ws-bridge.sh`, not yet run).
+  a match yet** — `dw-ws-bridge.service` is installed and running for real
+  (`~/sudo-queue/94-deadweight-wotan-ws-bridge.sh` was run) but `ops/nginx-wotan.conf`'s
+  `/DEADWEIGHT/ws` location still 404s live: `94`'s nginx-edit anchored on "the last closing
+  brace in the file," which landed the location inside certbot's own appended port-80-redirect
+  server block instead of the real HTTPS one (a bare server-level `return 301` there swallows
+  every request before any location inside it is reached). Fixed by
+  `~/sudo-queue/95-fix-deadweight-ws-nginx-location.sh` (anchored to the known-good `/api/`
+  location instead, idempotent, unit-tested against a synthetic reproduction of the bug) — still
+  needs the same real sudo this sandbox doesn't have.
 - Deploy: `~/wotan-deploy.sh` rsyncs this repo to `/var/www/wotan` (no build step).
 
 ## Related
