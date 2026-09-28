@@ -59,19 +59,20 @@ across every page. Dark-only by design.
   no more "under construction" framing.
 - **`/DEADWEIGHT/` — the actual DEADWEIGHT game client** (2026-09-28, founder real-time: "WASM
   version needs to work with IDUNA sso seamlessly wotan.okemily.com/DEADWEIGHT for the client"): a
-  real, playable browser client — not a stats page like the others above — built on a native
+  real browser client — not a stats page like the others above — built on a native
   `wasm32-unknown-unknown` protocol codec (no Emscripten) and DEADWEIGHT's own hand-written TS
   rendering/networking. Signs in via the same `iam.okemily.com` SSO redirect as `store.html`/
   `friends.html`, exchanged for a real DEADWEIGHT player token
   (`POST /api/v1/games/deadweight/sso-exchange`). A plain copy of `DEADWEIGHT/web/`'s own built
   output (`DEADWEIGHT/docs/NATIVE_WASM_CLIENT_NORTHSTAR.md` has the full build/verification
   account) — same no-build-step convention as every other page here, just a directory of files
-  instead of one HTML file. Linked from every page's nav ("Play"). **Real, honest gap**: the
-  network path (`ops/nginx-wotan.conf`'s `/DEADWEIGHT/ws` location + DEADWEIGHT's
-  `dw-ws-bridge.service`) is written but not yet installed on the live box
-  (`DEADWEIGHT/sudo-queue/94-deadweight-wotan-ws-bridge.sh`, not yet run), and this directory
-  itself hasn't been rsynced to `/var/www/wotan` yet either — `wotan.okemily.com/DEADWEIGHT` isn't
-  actually reachable until both happen.
+  instead of one HTML file. Linked from every page's nav ("Play"). **Live**: deployed via
+  `~/wotan-deploy.sh` and curl-verified against the real domain — `https://wotan.okemily.com/
+  DEADWEIGHT/` and its JS/wasm all return 200. **Real, honest gap**: it can't play a match yet —
+  the WebSocket path (`ops/nginx-wotan.conf`'s `/DEADWEIGHT/ws` location + DEADWEIGHT's
+  `dw-ws-bridge.service`) genuinely needs sudo this sandbox doesn't have
+  (`DEADWEIGHT/sudo-queue/94-deadweight-wotan-ws-bridge.sh`, not yet run) — `curl .../DEADWEIGHT/
+  ws` still 404s live.
 
 ## How the deck browser gets its data
 

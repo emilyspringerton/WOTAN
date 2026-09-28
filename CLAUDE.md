@@ -138,9 +138,10 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
   of `DEADWEIGHT/web/`'s built output (native wasm32 protocol codec, no Emscripten), signing in via
   the same IDUNA SSO pattern as store.html/friends.html. See `README.md`'s own entry and
   `DEADWEIGHT/docs/NATIVE_WASM_CLIENT_NORTHSTAR.md` for the full build/verification account.
-  **Not reachable live yet** — `ops/nginx-wotan.conf`'s `/DEADWEIGHT/ws` location and
-  `dw-ws-bridge.service` aren't installed on the box, and this directory hasn't been deployed via
-  `wotan-deploy.sh` either (both are real, named, human/sudo-gated steps, not silently skipped).
+  **Live**: deployed via `wotan-deploy.sh`, curl-verified 200 against the real domain. **Can't play
+  a match yet** — `ops/nginx-wotan.conf`'s `/DEADWEIGHT/ws` location and `dw-ws-bridge.service`
+  genuinely need sudo this sandbox doesn't have, so that one path still 404s live
+  (`DEADWEIGHT/sudo-queue/94-deadweight-wotan-ws-bridge.sh`, not yet run).
 - Deploy: `~/wotan-deploy.sh` rsyncs this repo to `/var/www/wotan` (no build step).
 
 ## Related
