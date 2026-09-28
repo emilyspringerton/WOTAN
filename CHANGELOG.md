@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-28
+
+- Real DEADWEIGHT game client deployed under /DEADWEIGHT/ (plain copy of DEADWEIGHT/web's built native-wasm client), linked from every page's nav. New /DEADWEIGHT/ws nginx location for the WebSocket bridge (not yet installed on the live box). See README.md. (sess-20260923-1030-4a526255)
+
+
 ## 2026-09-25 (3)
 - Add shankpit.html: basic SHANKPIT kills/deaths/K-D/sessions leaderboard, reading new IDUNA
   endpoint GET /api/v1/shankpit/leaderboard off SHANKPIT's existing per-match write path (S550,
