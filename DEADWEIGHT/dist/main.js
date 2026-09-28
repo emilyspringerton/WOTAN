@@ -267,9 +267,9 @@ async function enterGame(idunaUrl, bridgeUrl, fallbackName) {
 }
 async function start() {
     await initWasmProto(); // must resolve before client.connect() ever calls into the wasm codec
-    const name = $('name').value.trim() || 'BrowserPlayer';
-    const idunaUrl = $('iduna-url').value.trim();
-    const bridgeUrl = $('bridge-url').value.trim();
+    const name = $('name').value.trim() || 'Runner';
+    const idunaUrl = resolveIdunaUrl();
+    const bridgeUrl = resolveBridgeUrl();
     const startBtn = $('start-btn');
     const acctStatus = $('account-status');
     startBtn.disabled = true;
@@ -299,8 +299,8 @@ async function signInWithIduna() {
         location.href = sso.buildSsoURL();
         return;
     }
-    const idunaUrl = $('iduna-url').value.trim();
-    const bridgeUrl = $('bridge-url').value.trim();
+    const idunaUrl = resolveIdunaUrl();
+    const bridgeUrl = resolveBridgeUrl();
     const acctStatus = $('account-status');
     const ssoBtn = $('sso-btn');
     ssoBtn.disabled = true;
@@ -319,25 +319,25 @@ async function signInWithIduna() {
         ssoBtn.disabled = false;
     }
 }
-// applyProductionDefaults fills in the iduna-url/bridge-url inputs for a real deployed copy of
-// this SAME index.html (e.g. wotan.okemily.com/DEADWEIGHT — no separate "prod" index.html forked
-// off this one, single source of truth like every other page in this repo) -- only when they're
-// still sitting at the checked-in localhost dev defaults AND the page isn't actually running on
-// localhost, so a real local dev server is never touched. Same-origin ('' base) reaches IDUNA
-// through the deploy's own nginx /api/ proxy (WOTAN/ops/nginx-wotan.conf), matching account.ts's
-// own documented same-origin/CORS-free convention; the bridge URL matches ops/systemd/
-// dw-ws-bridge.service + nginx's own /DEADWEIGHT/ws location exactly.
-function applyProductionDefaults() {
+// resolveIdunaUrl/resolveBridgeUrl replace the old iduna-url/bridge-url text inputs (founder
+// real-time, 2026-09-28: "we dont need IDUNA base URL or WebSocket bridge URL - we arent setting
+// up for multi server right this second its just the one server"). This is a single-server
+// production deploy, so both endpoints are hardcoded rather than user-configurable: same-origin
+// ('' base) reaches IDUNA through the deploy's own nginx /api/ proxy (WOTAN/ops/nginx-wotan.conf),
+// matching account.ts's own documented same-origin/CORS-free convention; the bridge URL matches
+// ops/systemd/dw-ws-bridge.service + nginx's own /DEADWEIGHT/ws location exactly. The
+// localhost/127.0.0.1 branch is the only exception, kept solely so `python3 -m http.server` local
+// dev against a local dw_server + ws-tcp-bridge still works without editing source.
+function resolveIdunaUrl() {
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-        return;
-    const idunaInput = $('iduna-url');
-    const bridgeInput = $('bridge-url');
-    if (idunaInput.value === 'http://localhost:8080')
-        idunaInput.value = '';
-    if (bridgeInput.value === 'ws://localhost:8765') {
-        const scheme = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        bridgeInput.value = scheme + '//' + location.host + '/DEADWEIGHT/ws';
-    }
+        return 'http://localhost:8080';
+    return '';
+}
+function resolveBridgeUrl() {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+        return 'ws://localhost:8765';
+    const scheme = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return scheme + '//' + location.host + '/DEADWEIGHT/ws';
 }
 // A fresh SSO redirect return lands here as soon as the page (re)loads, fragment intact --
 // complete the sign-in immediately rather than waiting for a click that was already made before
@@ -364,8 +364,8 @@ async function createAccount() {
     const name = $('create-name').value.trim();
     const email = $('create-email').value.trim();
     const password = $('create-password').value;
-    const idunaUrl = $('iduna-url').value.trim();
-    const bridgeUrl = $('bridge-url').value.trim();
+    const idunaUrl = resolveIdunaUrl();
+    const bridgeUrl = resolveBridgeUrl();
     const createBtn = $('create-account-btn');
     const msg = $('create-account-msg');
     if (!name || !account.isValidDisplayName(name)) {
@@ -397,10 +397,9 @@ $('sso-btn').addEventListener('click', signInWithIduna);
 $('create-account-btn').addEventListener('click', createAccount);
 $('pass-btn').addEventListener('click', () => selectSlot(-1));
 $('lockin-btn').addEventListener('click', lockIn);
-applyProductionDefaults();
 checkStickyIdunaSession();
 $('link-btn').addEventListener('click', async () => {
-    const idunaUrl = $('iduna-url').value.trim();
+    const idunaUrl = resolveIdunaUrl();
     const email = $('link-email').value.trim();
     const password = $('link-password').value;
     const msg = $('link-msg');
