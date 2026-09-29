@@ -5,7 +5,7 @@
 import { DeadweightClient } from './client.js';
 import { initWasmProto } from './wasmProto.js';
 import * as rules from './generated/CardRules.js';
-import * as fx from './fx.js';
+import * as fxWasm from './fxWasm.js';
 import * as account from './account.js';
 import * as social from './social.js';
 import * as sso from './sso.js';
@@ -26,13 +26,67 @@ let currentVault = 0;
 let lockMask = 0;
 let locked = false;
 let oppName = '';
-// "before" snapshot for the round about to resolve, captured at ROUND_START, consumed by the next
-// ROUND_RESULT's fx.computeTimeline() call -- see fx.ts's own header comment for the honest,
-// named gap this leaves (energy-delta and burn/regen status visuals are not wired up yet, the
-// wire protocol doesn't carry enough same-round information for either without deferring a round).
-let beforeArmorYou = 0, beforeArmorOpp = 0, beforeVaultYou = 0, beforeVaultOpp = 0;
-let fxDrawState = null;
-let fxRafHandle = 0;
+let matchSeed = 0;
+// "before" snapshot for the round about to resolve, captured at ROUND_START, consumed by the
+// ROUND_RESULT that follows it -- see fx_wasm.c's own wasm_fx_energy_estimate header comment for
+// why energy/status use a deferred, one-round-lagged scheme instead (docs/WIRE_PROTOCOL.md's
+// ROUND_RESULT carries no energy-delta or post-round-status field at all -- the real, structural
+// reason -- so this mirrors apps/gui/main.c's own real fx_finish_round/pend_valid/rs_energy
+// pattern exactly: a round's animation only actually starts once the NEXT ROUND_START confirms
+// what its energy/status outcome was, or MATCH_END confirms there is no next round).
+let beforeHullYou = 0, beforeHullOpp = 0, beforeArmorYou = 0, beforeArmorOpp = 0, beforeVaultYou = 0, beforeVaultOpp = 0;
+let rsEnergyYou = 0, rsEnergyOpp = 0;
+let lastStatusYou = 0, lastStatusOpp = 0;
+let pendRound = null;
+let fxTickHandle = 0;
+let fxLastTs = 0;
+// Mirrors apps/gui/main.c's own persistent A.rv_you/A.rv_opp/A.have_reveal/A.rv_round/A.rv_dy/
+// A.rv_do -- fed to fxWasm.tick() every frame so fx_draw_arena can draw its own "LAST ROUND" idle
+// reveal (or "PICK A CARD OR PASS" before the first one) exactly like the Windows client, instead
+// of leaving the canvas blank between rounds (part of the founder's real-time bug report,
+// 2026-09-28: "it doesnt show the card text on the cards when you reveal it").
+let haveReveal = false, rvYou = -1, rvOpp = -1, rvRound = 0, rvDmgYou = 0, rvDmgOpp = 0;
+// Round countdown, mirrors apps/gui/main.c's A.deadline_at (SDL_GetTicks() + deadline_ms) exactly,
+// just on the wall clock instead of SDL's tick counter -- 0 = no deadline (fast-forward servers
+// send deadlineMs 0). Founder real-time, 2026-09-29: "we are missing the round timer add that to
+// the display".
+let roundDeadlineAt = 0;
+function updateRoundTimer() {
+    const el = $('round-timer');
+    if (!roundDeadlineAt) {
+        el.textContent = '';
+        return;
+    }
+    const leftMs = Math.max(0, roundDeadlineAt - Date.now());
+    el.textContent = `${Math.ceil(leftMs / 1000)}s`;
+    el.classList.toggle('low', leftMs < 5000);
+}
+// A live UTC clock, independent of match state -- founder real-time, 2026-09-29: "add ... the UTC
+// time". Ticks once a second; started immediately below, not gated on connecting.
+function updateUtcClock() {
+    $('utc-clock').textContent = new Date().toISOString().slice(11, 19) + ' UTC';
+}
+updateUtcClock();
+setInterval(updateUtcClock, 1000);
+function flushPendRound(energyNextYou, energyNextOpp, statusAfterYou, statusAfterOpp, lockAfter, lethal) {
+    if (!pendRound)
+        return;
+    pendRound.energyNextYou = energyNextYou;
+    pendRound.energyNextOpp = energyNextOpp;
+    pendRound.statusAfterYou = statusAfterYou;
+    pendRound.statusAfterOpp = statusAfterOpp;
+    pendRound.lockAfter = lockAfter;
+    pendRound.lethal = lethal;
+    fxWasm.beginRound(pendRound);
+    pendRound = null;
+}
+function fxTickLoop(ts) {
+    fxTickHandle = requestAnimationFrame(fxTickLoop);
+    const dt = fxLastTs ? ts - fxLastTs : 16;
+    fxLastTs = ts;
+    fxWasm.tick(dt, $('fx-canvas'), { you: rvYou, opp: rvOpp, have: haveReveal, round: rvRound, dmgYou: rvDmgYou, dmgOpp: rvDmgOpp });
+    updateRoundTimer();
+}
 // Duel Phase 2 (S537): set by playDuel() right before a duel's PLAY button, consumed (and
 // cleared) the next time the client reaches 'ready' -- either immediately, if it's already
 // connected, or once WELCOME arrives if the duel was clicked before connect() finished.
@@ -43,6 +97,21 @@ function log(line) {
     row.textContent = line;
     el.appendChild(row);
     el.scrollTop = el.scrollHeight;
+}
+// core/match.h's DW_ST_BURN=1/DW_ST_REGEN=2/DW_ST_HIDDEN=4 -- surfaced here so a persistent status
+// tick (which silently adds to next round's "took"/"dealt" with no card of its own) is actually
+// visible in the log instead of looking like unexplained damage. Found live, 2026-09-29: a player
+// died to a Defense-mirror round that dealt 0 combat damage -- the real killer was a burn DOT from
+// two rounds earlier that never showed anywhere on screen or in this log.
+function statusLabel(bits) {
+    const parts = [];
+    if (bits & 1)
+        parts.push('BURNING');
+    if (bits & 2)
+        parts.push('REGEN');
+    if (bits & 4)
+        parts.push('HIDDEN');
+    return parts.length ? ` [${parts.join('+')}]` : '';
 }
 function cardLabel(id) {
     if (id === -1)
@@ -129,6 +198,17 @@ function sideText(armor, vault) {
         return 'A? $?';
     return `A${armor} $${vault}`;
 }
+// Founder real-time, 2026-09-29: after a "dealt 0" round turned out to be correct (the opponent's
+// banked armor fully absorbed a winning triangle matchup -- see docs/CARD_MODE_RULES.md), the text
+// log itself had no way to show that without cross-referencing the HUD side-text. Same hidden
+// sentinels as sideText()/pipsHtml() (docs/WIRE_PROTOCOL.md: energy_opp/armor_opp == 255,
+// vault_opp == -128 while Merkle Blindness is active).
+function meterLabel(energy, armor, vault) {
+    const e = energy === 255 ? '?' : `${energy}`;
+    const a = armor === 255 ? '?' : `${armor}`;
+    const v = vault === -128 ? '?' : `${vault}`;
+    return `energy ${e}, armor ${a}, credits ${v}`;
+}
 function pipsHtml(energy, hidden) {
     if (hidden)
         return '<span style="opacity:0.7;">? (hidden)</span>';
@@ -154,23 +234,42 @@ function renderBars(f) {
     $('hbar-you-side').textContent = sideText(f.armorYou, f.vaultYou);
     $('epips-you').innerHTML = pipsHtml(f.energyYou, false);
 }
+// Founder real-time bug report, 2026-09-28: "i can get killt and it doesnt show my health go to
+// the bottom." Root cause: the hull/armor/vault bars above only ever refresh from renderBars(),
+// called on ROUND_START -- but the round that ends a match is never followed by another
+// ROUND_START, so a lethal hit's own hull change never reached the DOM at all. apps/gui/main.c's
+// own DW_S_MATCH_END handler doesn't have this gap: it calls fx_targets(0) to push the meters to
+// the final round's real post-round values immediately, before that round's own animation plays
+// (main.c:541-546). This is the same push, for the DOM bars this client draws instead of SDL2 ones.
+function applyFinalMeters(hullYou, hullOpp, armorYou, armorOpp, vaultYou, vaultOpp) {
+    const startHull = rules.startHull();
+    const oppFrac = Math.max(0, hullOpp) / startHull;
+    $('hbar-opp-fill').style.width = `${Math.min(1, oppFrac) * 100}%`;
+    $('hbar-opp-fill').classList.toggle('low', hullOpp * 3 <= startHull);
+    $('hbar-opp-text').textContent = `${oppName || 'OPP'} ${Math.max(0, hullOpp)}/${startHull}`;
+    $('hbar-opp-side').textContent = sideText(armorOpp, vaultOpp);
+    const youFrac = Math.max(0, hullYou) / startHull;
+    $('hbar-you-fill').style.width = `${Math.min(1, youFrac) * 100}%`;
+    $('hbar-you-fill').classList.toggle('low', hullYou * 3 <= startHull);
+    $('hbar-you-text').textContent = `YOU ${Math.max(0, hullYou)}/${startHull}`;
+    $('hbar-you-side').textContent = sideText(armorYou, vaultYou);
+}
 function setStatus(s) {
     $('status').textContent = s;
 }
-function runFxAnimation(timeline, input) {
-    const canvas = $('fx-canvas');
-    const ctx2d = canvas.getContext('2d');
-    if (fxRafHandle)
-        cancelAnimationFrame(fxRafHandle);
-    fxDrawState = fx.beginRound(canvas, timeline, input);
-    const step = () => {
-        if (!fxDrawState)
-            return;
-        const stillRunning = fx.drawFrame(ctx2d, canvas.width, canvas.height, fxDrawState);
-        if (stillRunning)
-            fxRafHandle = requestAnimationFrame(step);
-    };
-    fxRafHandle = requestAnimationFrame(step);
+// Rings = this player's total DEADWEIGHT match wins -- IDUNA's existing game_player_stats.wins
+// (social.getProfile, already public/no-token, the same call the Friends panel below already
+// makes), not a new counter. Founder real-time, 2026-09-29: "for now you cant do anything with
+// them but have it show the rings in the interface next to the utc clock". Best-effort: a failed
+// read leaves the last-known count on screen rather than erroring out over a cosmetic badge.
+async function refreshRings() {
+    if (!currentAccount)
+        return;
+    try {
+        const p = await social.getProfile(idunaBaseUrl, currentAccount.playerID);
+        $('rings-count').textContent = `${p.wins}`;
+    }
+    catch { /* cosmetic only -- see comment above */ }
 }
 // enterGame is start()'s own real tail, extracted (2026-09-25) so createAccount() below can
 // reach the exact same "connected and playing" state without duplicating the client wiring --
@@ -180,18 +279,45 @@ async function enterGame(idunaUrl, bridgeUrl, fallbackName) {
     idunaBaseUrl = idunaUrl;
     $('setup').style.display = 'none';
     $('game').style.display = 'block';
-    if (currentAccount)
+    // Real bug, found live (2026-09-28, founder repro: connect then immediately click Queue):
+    // the button used to start enabled and only got disabled *after* being clicked, so a click
+    // that landed before the server's WELCOME (IDUNA token verification is a real network round
+    // trip, not instant) sent QUEUE while the connection was still S_NEEDAUTH/S_VERIFYING on the
+    // server side -- an automatic DW_ERR_BAD_STATE (code 4), which also closes the connection
+    // (send_error always sets close_after_flush). Disabled here, at the very start of connecting,
+    // and re-enabled only by the onState('ready') handler below -- the same instant WELCOME
+    // actually arrives.
+    $('queue-btn').disabled = true;
+    if (currentAccount) {
         initSocial();
+        refreshRings();
+    }
     cardsData = await (await fetch('./src/generated/cards.json')).json();
     log(`loaded ${cardsData.cards.length}-card catalog (v${cardsData.version})`);
+    // The real round-resolution animation/audio engine (apps/gui/fx.c + apps/gui/sfx.c, compiled
+    // unmodified to wasm -- see fxWasm.ts's own header comment for scope/honest limits). Started
+    // here (inside enterGame's own click-driven call chain) so resetAudioClock()'s AudioContext
+    // creation happens on a real user gesture, satisfying browser autoplay policy.
+    await fxWasm.initFxWasm($('fx-canvas'));
+    fxWasm.resetAudioClock();
+    fxLastTs = 0;
+    if (!fxTickHandle)
+        fxTickHandle = requestAnimationFrame(fxTickLoop);
     client = new DeadweightClient(bridgeUrl, {
         onState(s) {
             setStatus(s);
+            const queueBtn = $('queue-btn');
             if (s === 'ready' && pendingMatchToken) {
                 const tok = pendingMatchToken;
                 pendingMatchToken = null;
                 client.queue(0, tok);
-                $('queue-btn').disabled = true;
+                queueBtn.disabled = true;
+            }
+            else {
+                // Only 'ready' means the server has actually WELCOMEd this connection -- every
+                // other state (connecting/queued/in_match/error/closed) must keep this disabled,
+                // see enterGame's own header comment on the ERROR-4 race this closes.
+                queueBtn.disabled = s !== 'ready';
             }
         },
         onLog(line) {
@@ -202,25 +328,53 @@ async function enterGame(idunaUrl, bridgeUrl, fallbackName) {
         },
         onMatchFound(f) {
             oppName = f.oppName;
+            matchSeed = f.seed;
+            fxWasm.resetMatch();
+            pendRound = null;
+            haveReveal = false;
+            rvYou = -1;
+            rvOpp = -1;
+            rvRound = 0;
+            rvDmgYou = 0;
+            rvDmgOpp = 0;
+            roundDeadlineAt = 0;
+            const banner = $('end-banner');
+            banner.classList.remove('show');
+            banner.textContent = '';
             log(`MATCH_FOUND vs ${f.oppName} (${f.oppKind === 1 ? 'bot' : 'human'}), seat ${f.seat}, seed ${f.seed}`);
             $('opp-name').textContent = `${f.oppName} (${f.oppKind === 1 ? 'bot' : 'human'})`;
             $('match').style.display = 'block';
         },
         onRoundStart(f) {
+            // This ROUND_START is the "next round start" apps/gui/main.c's own fx_finish_round
+            // waits for -- it's what actually STARTS the previous round's animation, now that its
+            // real energy delta and post-round status are knowable (see this file's own header
+            // comment above and fx_wasm.c's wasm_fx_energy_estimate comment for the full why).
+            flushPendRound(f.energyYou, f.energyOpp, f.statusYou, f.statusOpp, f.lockMask, false);
+            fxWasm.setRedline(f.hullYou, f.hullOpp);
+            fxWasm.statusChanged(f.statusYou, f.statusOpp, f.lockMask, true);
+            fxWasm.setMeters(f.hullYou, f.hullOpp, f.armorYou, f.armorOpp === 255 ? 0 : f.armorOpp, f.energyYou, f.energyOpp === 255 ? 0 : f.energyOpp, f.vaultYou, f.vaultOpp === -128 ? 0 : f.vaultOpp, false);
             currentHand = f.hand;
             currentEnergy = f.energyYou;
             currentVault = f.vaultYou;
             lockMask = f.lockMask;
             locked = false;
             selectedSlot = null;
+            roundDeadlineAt = f.deadlineMs ? Date.now() + f.deadlineMs : 0;
+            beforeHullYou = f.hullYou;
+            beforeHullOpp = f.hullOpp;
             beforeArmorYou = f.armorYou;
             beforeArmorOpp = f.armorOpp;
             beforeVaultYou = f.vaultYou;
             beforeVaultOpp = f.vaultOpp;
+            rsEnergyYou = f.energyYou;
+            rsEnergyOpp = f.energyOpp;
+            lastStatusYou = f.statusYou;
+            lastStatusOpp = f.statusOpp;
             renderBars(f);
             renderHand();
             updateActionButtons();
-            log(`round ${f.round} start: hull ${f.hullYou}/${f.hullOpp}, energy ${f.energyYou}, vault ${f.vaultYou}`);
+            log(`round ${f.round} start: hull ${f.hullYou}/${f.hullOpp} | you: ${meterLabel(f.energyYou, f.armorYou, f.vaultYou)}${statusLabel(f.statusYou)} | opp: ${meterLabel(f.energyOpp, f.armorOpp, f.vaultOpp)}${statusLabel(f.statusOpp)}`);
         },
         onPlayReject(f) {
             // Mirrors apps/gui/main.c's own on-reject handling exactly: DW_REJ_ALREADY_LOCKED (4)
@@ -235,27 +389,75 @@ async function enterGame(idunaUrl, bridgeUrl, fallbackName) {
             log(`play rejected (reason ${f.reason}) — try again`);
         },
         onRoundResult(f) {
-            log(`round ${f.round} result: you played ${cardLabel(f.cardYou)}, opp played ${cardLabel(f.cardOpp)} — dealt ${f.dmgToOpp}, took ${f.dmgToYou}, hull now ${f.hullYou}/${f.hullOpp}`);
-            const input = {
+            // lastStatusYou/Opp is the status this round STARTED with (set in onRoundStart) -- if
+            // you were already burning/regenerating going in, some of this round's dealt/took total
+            // is that tick, not the card clash. Flagged here rather than silently folded into the
+            // number so a death like the one above is traceable from the log alone.
+            const tickNote = (lastStatusYou & 1) || (lastStatusOpp & 1) ? ` (burn ticking${lastStatusYou & 1 ? ': you' : ''}${lastStatusYou & 1 && lastStatusOpp & 1 ? ' + ' : ''}${lastStatusOpp & 1 ? 'opp' : ''})` : '';
+            log(`round ${f.round} result: you played ${cardLabel(f.cardYou)}, opp played ${cardLabel(f.cardOpp)} — dealt ${f.dmgToOpp}, took ${f.dmgToYou}, hull now ${f.hullYou}/${f.hullOpp}${tickNote}`);
+            // Mirrors apps/gui/main.c's own DW_S_ROUND_RESULT handling exactly: A.rv_you/A.rv_opp/
+            // A.rv_dy/A.rv_do/A.rv_round/A.have_reveal update immediately here, not deferred with
+            // the rest of pendRound -- fx_draw_arena's idle "LAST ROUND" panel needs to show this
+            // round's real result right away, even before the animation that plays it starts.
+            haveReveal = true;
+            rvYou = f.effYou >= 0 ? f.effYou : f.cardYou;
+            rvOpp = f.effOpp >= 0 ? f.effOpp : f.cardOpp;
+            rvDmgYou = f.dmgToYou;
+            rvDmgOpp = f.dmgToOpp;
+            rvRound = f.round;
+            // Defensive flush matching apps/gui/main.c's own safety net (DW_S_ROUND_RESULT: "if
+            // (A.pend_valid) fx_finish_round(0, NULL)") -- the wire protocol's own state machine
+            // never actually lets two ROUND_RESULTs arrive without a ROUND_START between them, so
+            // this should be a no-op in practice, not the normal path.
+            if (pendRound)
+                flushPendRound(null, null, pendRound.statusBeforeYou, pendRound.statusBeforeOpp, 0, false);
+            pendRound = {
+                round: f.round,
                 cardYou: f.cardYou, cardOpp: f.cardOpp, effYou: f.effYou, effOpp: f.effOpp,
-                cancelledYou: !!(f.flagsYou & 1), cancelledOpp: !!(f.flagsOpp & 1),
                 dmgYou: f.dmgToYou, dmgOpp: f.dmgToOpp, healYou: f.healYou, healOpp: f.healOpp,
+                hullBeforeYou: beforeHullYou, hullAfterYou: f.hullYou,
+                hullBeforeOpp: beforeHullOpp, hullAfterOpp: f.hullOpp,
                 armorBeforeYou: beforeArmorYou, armorAfterYou: f.armorYou,
                 armorBeforeOpp: beforeArmorOpp, armorAfterOpp: f.armorOpp,
                 vaultBeforeYou: beforeVaultYou, vaultAfterYou: f.vaultYou,
                 vaultBeforeOpp: beforeVaultOpp, vaultAfterOpp: f.vaultOpp,
-                energyDeltaYou: 0, energyDeltaOpp: 0, // honest gap -- see fx.ts's own header comment
-                newStatusYou: false, newStatusOpp: false, // honest gap -- see fx.ts's own header comment
-                disabledYou: !!(f.flagsOpp & 8), disabledOpp: !!(f.flagsYou & 8),
-                swapped: !!((f.flagsYou & 16) || (f.flagsOpp & 16)),
+                rsEnergyYou, rsEnergyOpp,
+                energyNextYou: null, energyNextOpp: null, // filled in by flushPendRound once known
+                flagsYou: f.flagsYou, flagsOpp: f.flagsOpp,
+                // statusBefore is this round's *incoming* status -- the status_you/status_opp its
+                // own ROUND_START carried (captured into lastStatusYou/Opp there).
+                statusBeforeYou: lastStatusYou, statusBeforeOpp: lastStatusOpp,
+                statusAfterYou: 0, statusAfterOpp: 0, // filled in by flushPendRound once known
+                lockAfter: 0, lethal: false, seed: (matchSeed ^ (f.round * 2654435761)) >>> 0,
             };
-            const timeline = fx.computeTimeline(input);
-            log(`fx: scenario=${fx.scenarioName(timeline)} win=${timeline.win} crit=${timeline.crit} total=${Math.round(timeline.totalMs)}ms`);
-            runFxAnimation(timeline, input);
         },
         onMatchEnd(f) {
             const outcome = f.result === 1 ? 'WIN' : f.result === 0 ? 'LOSS' : 'DRAW';
+            roundDeadlineAt = 0;
+            fxWasm.matchEnd(f.result);
             log(`MATCH_END: ${outcome} (reason ${f.reason})`);
+            // Big, prominent VICTORY/DEFEAT/DRAW text -- apps/gui/main.c's own S_END screen
+            // (text_c(W/2, 220, 6, ...)) already does this on desktop; the browser client only
+            // ever had the small #status line, which the founder found wasn't showing it either
+            // way. Synced with fx_match_end's own particle burst + sfx_match_end audio above.
+            const banner = $('end-banner');
+            banner.textContent = f.result === 1 ? 'VICTORY' : f.result === 0 ? 'DEFEAT' : 'DRAW';
+            banner.style.color = f.result === 1 ? 'var(--good)' : f.result === 0 ? 'var(--bad)' : 'var(--dim)';
+            banner.classList.add('show');
+            if (f.result === 1)
+                refreshRings();
+            if (pendRound) {
+                // The literal "I got killed and it didn't show my health" bug -- see
+                // applyFinalMeters's own header comment for the full why.
+                applyFinalMeters(pendRound.hullAfterYou, pendRound.hullAfterOpp, pendRound.armorAfterYou, pendRound.armorAfterOpp, pendRound.vaultAfterYou, pendRound.vaultAfterOpp);
+                fxWasm.setMeters(pendRound.hullAfterYou, pendRound.hullAfterOpp, pendRound.armorAfterYou, pendRound.armorAfterOpp === 255 ? 0 : pendRound.armorAfterOpp, rsEnergyYou, rsEnergyOpp === 255 ? 0 : rsEnergyOpp, pendRound.vaultAfterYou, pendRound.vaultAfterOpp === -128 ? 0 : pendRound.vaultAfterOpp, false);
+                fxWasm.setRedline(pendRound.hullAfterYou, pendRound.hullAfterOpp);
+            }
+            // No further ROUND_START is coming -- finish the last round's animation now, with an
+            // unknown energy delta and an unchanged status, matching apps/gui/main.c's own
+            // DW_S_MATCH_END handling exactly (A.pend.lethal = 1; fx_finish_round(0, NULL);).
+            if (pendRound)
+                flushPendRound(null, null, pendRound.statusBeforeYou, pendRound.statusBeforeOpp, 0, true);
             setStatus(`match over: ${outcome}`);
             $('requeue').style.display = 'inline-block';
         },
@@ -267,7 +469,12 @@ async function enterGame(idunaUrl, bridgeUrl, fallbackName) {
 }
 async function start() {
     await initWasmProto(); // must resolve before client.connect() ever calls into the wasm codec
-    const name = $('name').value.trim() || 'Runner';
+    // Empty, not a hardcoded fallback -- apps/gui/main.c only ever sends a name when --name was
+    // passed on the CLI, otherwise blank, letting IDUNA's own randomGuestName() assign a real
+    // in-universe callsign ("Runner-A7B2" style). Hardcoding 'Runner' here silently bypassed that
+    // shared generator for every guest who left the field blank (founder real-time, 2026-09-29:
+    // "it needs to use account names like the windows client does random in universe names").
+    const name = $('name').value.trim();
     const idunaUrl = resolveIdunaUrl();
     const bridgeUrl = resolveBridgeUrl();
     const startBtn = $('start-btn');
@@ -281,7 +488,16 @@ async function start() {
         $('link-email-box').style.display = currentAccount.emailLinked ? 'none' : 'block';
     }
     catch (e) {
-        acctStatus.textContent = 'IDUNA account error: ' + e.message + ' — connecting unauthenticated (only works against a --no-auth server).';
+        const msg = e.message;
+        acctStatus.textContent = 'IDUNA account error: ' + msg + ' — connecting unauthenticated (only works against a --no-auth server).';
+        // Real bug, found live (2026-09-28): this error only ever showed up in #account-status,
+        // which the founder's own bug report never included -- so a failed bootstrap (e.g. the
+        // real IDUNA guest-signup cap: 3 new accounts/IP/24h) looked identical to "the game is
+        // just broken": queue-btn correctly stayed greyed out, then the connection silently died
+        // ~10s later (server-side fix: expire_timers() in apps/server/main.c now sends
+        // DW_ERR_AUTH instead of closing silently). Logging it here too puts the real reason in
+        // the one panel that actually gets pasted into a bug report.
+        log('account: ' + msg);
         currentAccount = null;
     }
     startBtn.disabled = false;
