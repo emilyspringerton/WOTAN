@@ -1,5 +1,8 @@
 # WOTAN
 
+**Deployed (2026-10-04): GKE.** `wotan.okemily.com` is served by a static nginx pod (`ops/docker/wotan.Dockerfile`, `scripts/build-image.sh`) behind the edge Gateway; `/api/` goes to in-cluster IDUNA and `/DEADWEIGHT/ws` to the DEADWEIGHT bridge. `ops/nginx-wotan.conf` is the retired box config.
+
+
 `wotan.okemily.com` — the online social tournament site for EINHORN_INDUSTRIAL, and (2026-09-24) the real front door:
 `index.html` no longer defers to `OKEMILY/tournaments.html`, it's the other way around now (that page keeps its own
 distinct live content — REDGARDEN leaderboard, hero stats, GFD Battlegrounds demo, mailing list — and links forward to
