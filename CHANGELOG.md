@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-04
+
+- K8S-MV-03: wotan.okemily.com moved to GKE (static nginx pod; /api -> IDUNA and /DEADWEIGHT/ws -> bridge as Gateway path routes). Cert: *.okemily.com. (sess-20260923-1030-4a526255)
+
+
 ## 2026-09-28
 
 - Real DEADWEIGHT game client deployed under /DEADWEIGHT/ (plain copy of DEADWEIGHT/web's built native-wasm client), linked from every page's nav. New /DEADWEIGHT/ws nginx location for the WebSocket bridge (not yet installed on the live box). See README.md. (sess-20260923-1030-4a526255)
