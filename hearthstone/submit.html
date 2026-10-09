@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Share a deck &mdash; WOTAN Hearthstone</title>
+<meta name="description" content="Paste a Hearthstone deck export or a deck code, preview it, and publish it.">
+<meta name="theme-color" content="#f8f3ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+</head>
+<body class="hs">
+<header id="wotan-nav" data-skin="hs" data-section="submit"></header>
+<main class="hs-wrap" id="main">
+  <section class="hs-hero">
+    <div>
+      <p class="hs-eyebrow">Share a deck</p>
+      <h1 class="hs-h1">Paste it in</h1>
+      <p class="hs-lede">Copy a deck from Hearthstone and paste it here: the full export with card names, or just the bare deck code. We read it as you type.</p>
+    </div>
+  </section>
+  <div class="hs-submit">
+    <form id="form" class="hs-panel" novalidate>
+      <label class="hs-field"><span class="hs-label">Deck export or code</span>
+        <textarea class="hs-textarea mono" id="text" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Paste the export block, or a code like AAECAf0G..."></textarea></label>
+      <div class="hs-actions" style="margin:-.4rem 0 1.2rem"><button type="button" class="hs-btn sm ghost" id="example">Try an example</button><button type="button" class="hs-btn sm ghost" id="clear">Clear</button></div>
+      <label class="hs-field"><span class="hs-label">Title</span>
+        <input class="hs-input" id="title" maxlength="80" autocomplete="off" placeholder="Name your deck"></label>
+      <label class="hs-field"><span class="hs-label">Description <span class="hs-count">(optional)</span></span>
+        <textarea class="hs-textarea" id="desc" maxlength="500" rows="3" placeholder="How does it play? Mulligan tips, matchups, swaps."></textarea>
+        <span class="hs-count" id="desc-count">0 / 500</span></label>
+      <div class="hs-actions"><button type="submit" class="hs-btn solid lg" id="publish" disabled>Publish deck</button></div>
+      <div id="auth-line" style="margin-top:.8rem"></div>
+      <p class="hs-msg err" id="pub-err" role="alert" hidden></p>
+    </form>
+    <aside class="hs-panel hs-preview" id="preview" aria-live="polite" aria-label="Preview">
+      <h2 class="hs-h3">Preview</h2>
+      <p class="hs-meta" id="preview-empty">Your deck will appear here once there is something to read.</p>
+      <div id="preview-body"></div>
+    </aside>
+  </div>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/hs-api.js"></script>
+<script src="/js/hs-ui.js"></script>
+<script src="/js/hs-page-submit.js"></script>
+</body>
+</html>

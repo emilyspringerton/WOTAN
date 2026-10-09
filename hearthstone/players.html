@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Players &mdash; WOTAN Hearthstone</title>
+<meta name="description" content="Find Hearthstone players on WOTAN.">
+<meta name="theme-color" content="#f8f3ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+</head>
+<body class="hs">
+<header id="wotan-nav" data-skin="hs" data-section="players"></header>
+<main class="hs-wrap narrow" id="main">
+  <section class="hs-hero">
+    <div>
+      <p class="hs-eyebrow">Players</p>
+      <h1 class="hs-h1">Find a player</h1>
+      <p class="hs-lede">Everyone who has claimed a handle. Open a profile to see their decks and wall.</p>
+    </div>
+  </section>
+  <div class="hs-filters">
+    <div class="hs-filter-row" style="grid-template-columns:1fr">
+      <label class="hs-field" style="margin:0"><span class="hs-label">Search by handle</span>
+        <span class="hs-search"><input class="hs-input" id="q" type="search" placeholder="Start typing a handle" autocomplete="off" maxlength="20"></span></label>
+      <label class="hs-field" style="margin:0"><span class="hs-label">Order</span>
+        <select class="hs-select" id="sort"><option value="followed">Most followed</option><option value="new">Newest</option></select></label>
+    </div>
+  </div>
+  <div class="hs-list" id="list" aria-busy="true"></div>
+  <div class="hs-more" id="more" hidden><button type="button" class="hs-btn" id="more-btn">Show more players</button></div>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/hs-api.js"></script>
+<script src="/js/hs-ui.js"></script>
+<script src="/js/hs-page-players.js"></script>
+</body>
+</html>

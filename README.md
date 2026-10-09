@@ -12,6 +12,22 @@ here). Plain static HTML/CSS/JS, no build step. See `CLAUDE.md` for status and r
 violet primary accent, a gold secondary accent, one shared stylesheet (`css/wotan-theme.css`)
 across every page. Dark-only by design.
 
+## Hearthstone decks (2026-10-09)
+
+**`/hearthstone/` — shared Hearthstone decks + basic socials**, a second game section next to DEADWEIGHT, in IDUNA's classic cream/gold
+style (the DEADWEIGHT pages stay neon-dark, so it's obvious which game you're in; a DEADWEIGHT | HEARTHSTONE switch sits in the shared topbar).
+Tabs: **Decks** (browse/search/filter by class, format, sort), **Submit** (paste a deck export or a bare deck code; live parse preview;
+publish), **Feed** (global + following wall feed), **Players**; plus deck detail (copy code, mana curve, like, comments) and profile pages
+(handle + short bio, wall, their decks, follow). Reading is open to everyone; posting needs an IDUNA sign-in and a one-time handle claim.
+Backed by IDUNA's new `/api/v1/hs/*` (see `HEARTHSTONE_NORTHSTAR.md` for the API contract, data model and the honest scope).
+**Limits:** card names come only from the pasted text — a bare code shows `Card #id` placeholders; there is no card art or card database yet
+(`hs_cards` exists, empty — the founder's explicit last step). Verified with a headless-Chromium run of these pages against the real IDUNA
+binary; not verified on touch devices or the production SSO round trip.
+
+**One sign-in control**: every page now uses the shared topbar (`js/wotan-nav.js`) with a single account widget — "Sign in" when signed out,
+"@handle ▾" when signed in. Pages no longer render their own Sign-in buttons, and `iam.okemily.com` offers "Continue as <name>" to a browser that
+already signed in.
+
 ## What is live
 
 - **`/decks.html` — DEADWEIGHT Draft Decks** (open to everyone, no account): every deck drafted in DEADWEIGHT's draft

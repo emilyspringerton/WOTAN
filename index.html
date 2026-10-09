@@ -9,26 +9,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/wotan-theme.css">
+<link rel="stylesheet" href="/css/wotan-hs.css">
 <style>
   .wrap { padding-top: 4rem; }
   .card:nth-of-type(1) { border-color: var(--gold); }
 </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="topbar-in">
-    <a class="brand" href="/">WOTAN<small>EINHORN_INDUSTRIAL</small></a>
-    <nav class="site-nav" aria-label="Main">
-      <a href="/" aria-current="page">Home</a>
-      <a href="/DEADWEIGHT/">Play</a>
-      <a href="/decks.html">Draft Decks</a>
-      <a href="/matches.html">Matches</a>
-      <a href="/shankpit.html">SHANKPIT</a>
-      <a href="/store.html">Hat Store</a>
-      <a href="/friends.html">Friends &amp; Duels</a>
-    </nav>
-  </div>
-</header>
+<header id="wotan-nav" data-skin="dw" data-section="home"></header>
 <div class="wrap">
   <h1>WOTAN</h1>
   <p class="tagline">The online social tournament site &mdash; decks, hats, player profiles, friends, and friendly-challenge duels.</p>
@@ -45,6 +33,12 @@
     <p><a class="back" href="/decks.html"><b>Draft Decks</b></a> &mdash; every deck drafted in DEADWEIGHT's
     draft queue, with win rates and per-card records. Hover any card to see it full size. Open to
     everyone, no account needed.</p>
+  </div>
+  <div class="card">
+    <p><a class="back" href="/hearthstone/"><b>Hearthstone Decks</b></a> &mdash; the other half of the deck
+    library: Hearthstone decks shared by players as readable lists and pasteable deck codes, with likes,
+    comments, player profiles and a wall. A lighter, cream-and-gold section of its own; switch between it and
+    DEADWEIGHT from the game switch in the top bar. Browsing is open to everyone.</p>
   </div>
   <div class="card">
     <p><a class="back" href="/matches.html"><b>Matches</b></a> &mdash; the real leaderboard (rating/W-L-D)
@@ -64,5 +58,7 @@
     that page isn't going away, it just isn't the front door anymore.</p>
   </div>
 </div>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
 </body>
 </html>

@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/wotan-theme.css">
+<link rel="stylesheet" href="/css/wotan-hs.css">
 <style>
   .wrap { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1.25rem 5rem; }
   h1 { font-size: 2rem; margin: 0 0 .25rem; line-height: 1.15; }
@@ -119,21 +120,7 @@
 </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="topbar-in">
-    <a class="brand" href="/">WOTAN<small>EINHORN_INDUSTRIAL</small></a>
-    <nav class="site-nav" aria-label="Main">
-      <a href="/">Home</a>
-      <a href="/DEADWEIGHT/">Play</a>
-      <a href="/decks.html" aria-current="page">Draft Decks</a>
-      <a href="/matches.html">Matches</a>
-      <a href="/shankpit.html">SHANKPIT</a>
-      <a href="/store.html">Hat Store</a>
-      <a href="/friends.html">Friends &amp; Duels</a>
-    </nav>
-    <button class="signin" type="button" disabled title="Sign-in is coming: tournaments and deck tools will need an account. Browsing stays open.">Sign in (soon)</button>
-  </div>
-</header>
+<header id="wotan-nav" data-skin="dw" data-section="decks"></header>
 
 <main class="wrap">
   <h1>Draft Decks</h1>
@@ -220,6 +207,8 @@
 
 <div id="tip" role="tooltip" aria-hidden="true"></div>
 
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
 <script>
 (function () {
   'use strict';

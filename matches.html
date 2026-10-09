@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/wotan-theme.css">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<script src="/js/iduna-sso.js"></script>
 <style>
   /* Visual language: WOTAN's own neon-brutalist theme (kind colors --offense/--operations/--defense
      already shared tokens, same ones decks.html's card chips use) + okemily.com/live-match.html's
@@ -112,20 +114,7 @@
 </style>
 </head>
 <body>
-<header class="topbar">
-  <div class="topbar-in">
-    <a class="brand" href="/">WOTAN<small>EINHORN_INDUSTRIAL</small></a>
-    <nav class="site-nav" aria-label="Main">
-      <a href="/">Home</a>
-      <a href="/DEADWEIGHT/">Play</a>
-      <a href="/decks.html">Draft Decks</a>
-      <a href="/matches.html" aria-current="page">Matches</a>
-      <a href="/shankpit.html">SHANKPIT</a>
-      <a href="/store.html">Hat Store</a>
-      <a href="/friends.html">Friends &amp; Duels</a>
-    </nav>
-  </div>
-</header>
+<header id="wotan-nav" data-skin="dw" data-section="matches"></header>
 <div class="wrap wide">
   <h1>DEADWEIGHT Matches</h1>
   <p class="tagline">Real match stats and a round-by-round replay &mdash; every hand, every card, every hull swing, replayed
@@ -390,5 +379,6 @@
   onHash();
   setInterval(function () { if (!location.hash) loadRecent(); }, 15000); // light auto-refresh of the recent list, same spirit as live-match.html's poll
 </script>
+<script src="/js/wotan-nav.js"></script>
 </body>
 </html>

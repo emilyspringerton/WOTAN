@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decks &mdash; WOTAN Hearthstone</title>
+<meta name="description" content="Browse, search and share Hearthstone decks. Paste a deck code, read the list, leave a comment.">
+<meta name="theme-color" content="#f8f3ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+</head>
+<body class="hs">
+<header id="wotan-nav" data-skin="hs" data-section="decks"></header>
+<main class="hs-wrap" id="main">
+  <section class="hs-hero">
+    <div>
+      <p class="hs-eyebrow">Hearthstone</p>
+      <h1 class="hs-h1">Deck library</h1>
+      <p class="hs-lede">Decks shared by players, as lists you can read and codes you can paste straight into the game. Filter by class and format, or search by title, player or card name.</p>
+    </div>
+    <div class="hs-actions"><a class="hs-btn solid lg" href="/hearthstone/submit.html">Share a deck</a></div>
+  </section>
+
+  <form class="hs-filters" id="filters" role="search" aria-label="Filter decks" onsubmit="return false">
+    <div>
+      <span class="hs-label" id="cls-label">Class</span>
+      <div class="hs-chips" id="class-chips" role="group" aria-labelledby="cls-label"></div>
+    </div>
+    <div class="hs-filter-row">
+      <label class="hs-field" style="margin:0"><span class="hs-label">Search</span>
+        <span class="hs-search"><input class="hs-input" id="q" type="search" placeholder="Title, player or card" autocomplete="off" maxlength="80"></span></label>
+      <label class="hs-field" style="margin:0"><span class="hs-label">Format</span>
+        <select class="hs-select" id="format"><option value="">All formats</option></select></label>
+      <label class="hs-field" style="margin:0"><span class="hs-label">Sort</span>
+        <select class="hs-select" id="sort">
+          <option value="new">Newest</option><option value="top">Most liked</option><option value="trending">Trending</option>
+        </select></label>
+    </div>
+  </form>
+
+  <p class="hs-meta" id="count" aria-live="polite"></p>
+  <div class="hs-grid" id="grid" aria-busy="true"></div>
+  <div class="hs-more" id="more" hidden><button type="button" class="hs-btn" id="more-btn">Show more decks</button></div>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/hs-api.js"></script>
+<script src="/js/hs-ui.js"></script>
+<script src="/js/hs-page-decks.js"></script>
+</body>
+</html>

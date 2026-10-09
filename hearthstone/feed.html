@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feed &mdash; WOTAN Hearthstone</title>
+<meta name="description" content="Wall posts from Hearthstone players on WOTAN.">
+<meta name="theme-color" content="#f8f3ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+</head>
+<body class="hs">
+<header id="wotan-nav" data-skin="hs" data-section="feed"></header>
+<main class="hs-wrap narrow" id="main">
+  <section class="hs-hero">
+    <div>
+      <p class="hs-eyebrow">Feed</p>
+      <h1 class="hs-h1">What players are saying</h1>
+      <p class="hs-lede">Short notes from player walls. Follow people to keep up with them.</p>
+    </div>
+  </section>
+  <div class="hs-tabs" role="tablist" aria-label="Feed">
+    <button class="hs-tab" role="tab" id="tab-all" aria-selected="true" aria-controls="panel">All</button>
+    <button class="hs-tab" role="tab" id="tab-following" aria-selected="false" aria-controls="panel">Following</button>
+  </div>
+  <div id="composer-slot"></div>
+  <div id="panel" role="tabpanel" aria-labelledby="tab-all" aria-busy="true"></div>
+  <div class="hs-more" id="more" hidden><button type="button" class="hs-btn" id="more-btn">Older posts</button></div>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/hs-api.js"></script>
+<script src="/js/hs-ui.js"></script>
+<script src="/js/hs-social.js"></script>
+<script src="/js/hs-page-feed.js"></script>
+</body>
+</html>

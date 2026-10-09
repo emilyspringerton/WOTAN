@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-09
+
+- Hearthstone deck section (`/hearthstone/`: Decks, Submit, Feed, Players, deck detail, profile) + shared topbar with DEADWEIGHT | HEARTHSTONE switch and one account widget (`js/wotan-nav.js`) on every page; store/friends no longer render their own Sign-in buttons. IDUNA `/api/v1/hs/*` backs it. See `HEARTHSTONE_NORTHSTAR.md`. README updated. (sess-20261008-0123-53e30776)
+
 ## 2026-10-04
 
 - K8S-MV-03: wotan.okemily.com moved to GKE (static nginx pod; /api -> IDUNA and /DEADWEIGHT/ws -> bridge as Gateway path routes). Cert: *.okemily.com. (sess-20260923-1030-4a526255)
