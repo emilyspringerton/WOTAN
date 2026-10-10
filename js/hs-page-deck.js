@@ -20,6 +20,35 @@
     window.addEventListener('wotan:me', function () { /* topbar finished its own /me; our `who` already awaited the same promise */ });
   }
 
+  function rec(r) { return r.wins + '–' + r.losses + (r.ties ? '–' + r.ties : '') + ' · ' + Math.round((r.winrate || 0) * 100) + '%'; }
+
+  // Private page of my own deck: my record, the public win rate, and the projected global one. My games only
+  // enter the public number when I choose to share them.
+  function statsPanel(d) {
+    var mine = d.mine, proj = d.projected;
+    var btn = h('button', { type: 'button', 'class': 'hs-btn ' + (d.stats_shared ? 'ghost' : 'solid'),
+      text: d.stats_shared ? 'Stop sharing my stats' : 'Share my stats for this deck',
+      on: { click: async function (ev) {
+        await UI.withBusy(ev.currentTarget, async function () {
+          try { await (d.stats_shared ? HS.del : HS.put)('/decks/' + d.id + '/share'); location.reload(); } catch (e) { UI.toast(e.message, 'err'); }
+        });
+      } } });
+    function row(label, r, hint) {
+      return h('div', { style: { margin: '.55rem 0' } },
+        h('div', { 'class': 'hs-meta', text: label }),
+        h('div', { 'class': 'hs-h3', text: r.games ? rec(r) + ' · ' + r.games + (r.games === 1 ? ' game' : ' games') : 'No games yet' }),
+        hint ? h('div', { 'class': 'hs-hint', text: hint }) : null);
+    }
+    return h('div', { 'class': 'hs-panel' },
+      h('h2', { 'class': 'hs-h3', text: 'Win–loss' }),
+      row('My record with this exact deck', mine, 'Private to you.'),
+      row('Public win rate', { games: d.games, wins: d.wins, losses: d.losses, ties: d.ties, winrate: d.winrate },
+        'Only players who chose to share their stats are counted, so private practice never moves it.'),
+      row('Projected global win rate', proj, 'The public record plus every private record for this deck. Shown only here.'),
+      h('p', { 'class': 'hs-hint', text: d.stats_shared ? 'Your record is included in the public win rate.' : 'Your record is not in the public win rate yet.' }),
+      btn);
+  }
+
   function render(d, who) {
     document.title = (d.title || 'Deck') + ' — WOTAN Hearthstone';
     UI.clear(root); root.setAttribute('aria-busy', 'false');
@@ -56,7 +85,7 @@
       titleEl,
       h('p', { 'class': 'hs-meta', style: { 'margin-top': '.5rem' } }, 'by ', UI.handleLink(author), ' · ', UI.ago(d.created_at)),
       d.private ? h('p', { 'class': 'hs-note', text: 'Private: only you can see this deck. It was synced from your tracker; publish it when you are ready to share it.' }) : null,
-      d.games ? h('p', { 'class': 'hs-meta', style: { 'margin-top': '.4rem' }, text: d.wins + '–' + d.losses + (d.ties ? '–' + d.ties : '') + ' · ' + Math.round(d.winrate * 100) + '% win rate over ' + d.games + (d.games === 1 ? ' tracked game' : ' tracked games') + (d.private ? ' (everyone holding this exact deck privately)' : ' (published deck)') }) : null,
+      d.games && !d.mine ? h('p', { 'class': 'hs-meta', style: { 'margin-top': '.4rem' }, text: rec(d) + ' win rate over ' + d.games + (d.games === 1 ? ' tracked game' : ' tracked games') }) : null,
       descEl, headActions));
 
     // left: card list
@@ -69,6 +98,7 @@
     // right: curve + code
     var curve = UI.costCurve(cards, true);
     var side = h('aside', { 'class': 'hs-side', 'data-class': UI.classKey(d.class) },
+      d.mine ? statsPanel(d) : null,
       curve ? h('div', { 'class': 'hs-panel' }, h('h2', { 'class': 'hs-h3', text: 'Mana curve' }), curve) : null,
       h('div', { 'class': 'hs-panel' },
         h('h2', { 'class': 'hs-h3', text: 'Deck code' }),
