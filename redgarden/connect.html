@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0e1a14">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-rg.css">
+<title>Connect — WOTAN Redgarden</title>
+<meta name="description" content="Pick a name or sign in with IDUNA so the REDGARDEN client can save your progress.">
+<meta name="robots" content="noindex">
+<style>
+  .rg-form { display: grid; gap: .8rem; max-width: 26rem; }
+  .rg-form label { display: grid; gap: .3rem; font-size: .85rem; color: var(--rg-soft); }
+  .rg-form input { padding: .6rem .75rem; border-radius: 6px; border: 1px solid var(--rg-line); background: var(--rg-raise); color: var(--rg-ink); font: inherit; }
+  .rg-msg { min-height: 1.4rem; font-size: .9rem; }
+  .rg-msg.err { color: #ff8b94; }
+  .rg-btn.ghost { background: transparent; border: 1px solid var(--rg-line); color: var(--rg-ink); }
+  .rg-btn.ghost:hover { background: var(--rg-raise); }
+  .rg-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+  details.rg-panel summary { cursor: pointer; font-weight: 700; }
+</style>
+</head>
+<body class="rg" data-page="connect">
+<header id="wotan-nav" data-skin="rg" data-section="play"></header>
+<main class="rg-wrap narrow" id="main">
+  <section class="rg-hero">
+    <div>
+      <p class="rg-eyebrow">Redgarden</p>
+      <h1 class="rg-h1">Connect the game</h1>
+      <p class="rg-lede" id="lede">Pick a name to play as, or sign in with the IDUNA account you already have. Your results are saved under it.</p>
+    </div>
+  </section>
+
+  <div class="rg-msg" id="msg" role="status" aria-live="polite"></div>
+
+  <section class="rg-panel" id="new" style="margin-bottom:1rem">
+    <h2 class="rg-h2">New player</h2>
+    <form class="rg-form" id="f-new" autocomplete="off">
+      <label>Name <input id="name" maxlength="16" placeholder="Leave empty for a random name" autocomplete="nickname"></label>
+      <div class="rg-row"><button class="rg-btn" type="submit" id="b-new">Play as this name</button></div>
+    </form>
+  </section>
+
+  <section class="rg-panel" id="back">
+    <h2 class="rg-h2">I already have an account</h2>
+    <div class="rg-row" style="margin-bottom:.9rem">
+      <a class="rg-btn" id="sso" href="#">Sign in with IDUNA</a>
+    </div>
+    <details>
+      <summary>Use email + password instead</summary>
+      <form class="rg-form" id="f-login" style="margin-top:.8rem">
+        <label>Email <input id="le" type="email" autocomplete="username"></label>
+        <label>Password <input id="lp" type="password" autocomplete="current-password"></label>
+        <div class="rg-row"><button class="rg-btn ghost" type="submit">Sign in</button></div>
+      </form>
+    </details>
+  </section>
+
+  <section class="rg-panel" id="save" hidden style="margin-top:1rem">
+    <h2 class="rg-h2">Save your progress</h2>
+    <p class="rg-note">Your account is a guest account right now. Add an email and password and you can sign in again on any machine. Skip this and the account lives only on this computer; lose it and it is gone.</p>
+    <form class="rg-form" id="f-save">
+      <label>Email <input id="se" type="email" autocomplete="email"></label>
+      <label>Password (8+ characters) <input id="sp" type="password" autocomplete="new-password"></label>
+      <div class="rg-row">
+        <button class="rg-btn" type="submit">Save progress and continue</button>
+        <button class="rg-btn ghost" type="button" id="skip">Skip for now</button>
+      </div>
+    </form>
+  </section>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/rg-connect.js"></script>
+</body>
+</html>

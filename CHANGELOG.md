@@ -3,6 +3,7 @@
 ## 2026-10-10
 
 - REDGARDEN is the third game tab (game switch: Deadweight | Hearthstone | Redgarden): `/redgarden/` leaderboard (search), `/redgarden/heroes.html` hero win rates, `/redgarden/u.html?id=` per-player profile (heroes played, recent matches), `/redgarden/play.html`. Own garden-green skin (`css/wotan-rg.css`); the account menu opens the REDGARDEN profile on this tab, so profiles stay separate per game. Reads IDUNA's public `/api/v1/redgarden/*`.
+- `/redgarden/connect.html`: the browser half of the REDGARDEN client's IDUNA login (pick a name -> guest account, add an email to save progress, or sign in with IDUNA / email), then hands the result to the game over a loopback callback.
 - Tracker page: one-time installer command that puts a "WOTAN Hearthstone Tracker" icon on the Desktop and Start menu; the icon always runs the newest uplink (the old paste-every-time command is under "Run once without installing").
 - Win/loss per exact deck: a record only enters the public win rate when its player shares it (publishing shares; "Share my stats for this deck" on a private deck does it without publishing). Private pages show my record, the public rate and the projected global rate. Identical public decks are one deck named by the first publisher.
 - Deck library has a "My private decks" tab (public library is public-only); publishing a deck requires a handle.
