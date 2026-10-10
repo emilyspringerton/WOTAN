@@ -1,5 +1,5 @@
-// WOTAN shared topbar: wordmark, game switch (DEADWEIGHT | HEARTHSTONE), section tabs and the ONE
-// account widget for the whole site. Mount point: <header id="wotan-nav" data-skin="hs|dw"
+// WOTAN shared topbar: wordmark, game switch (DEADWEIGHT | HEARTHSTONE | REDGARDEN), section tabs and the ONE
+// account widget for the whole site. Mount point: <header id="wotan-nav" data-skin="hs|dw|rg"
 // data-section="decks"></header>. Needs /js/iduna-sso.js loaded first (getIdunaSession, buildSsoURL,
 // clearIdunaSession, handleIdunaSsoReturn) and /css/wotan-hs.css (the .wn-* rules).
 //
@@ -13,7 +13,8 @@
   var mount = document.getElementById('wotan-nav');
   if (!mount) return;
 
-  var skin = mount.getAttribute('data-skin') === 'dw' ? 'dw' : 'hs';
+  var skinAttr = mount.getAttribute('data-skin');
+  var skin = skinAttr === 'dw' ? 'dw' : (skinAttr === 'rg' ? 'rg' : 'hs');
   var section = mount.getAttribute('data-section') || '';
 
   var TABS = {
@@ -23,6 +24,11 @@
       ['feed', 'Feed', '/hearthstone/feed.html'],
       ['players', 'Players', '/hearthstone/players.html'],
       ['tracker', 'Tracker', '/hearthstone/tracker.html']
+    ],
+    rg: [
+      ['board', 'Leaderboard', '/redgarden/'],
+      ['heroes', 'Heroes', '/redgarden/heroes.html'],
+      ['play', 'Play', '/redgarden/play.html']
     ],
     dw: [
       ['home', 'Home', '/'],
@@ -115,10 +121,11 @@
 
     var sw = el('div', { 'class': 'wn-switch', role: 'group', 'aria-label': 'Game' }, [
       el('a', { href: '/decks.html', text: 'Deadweight', 'aria-current': skin === 'dw' ? 'true' : null }),
-      el('a', { href: '/hearthstone/', text: 'Hearthstone', 'aria-current': skin === 'hs' ? 'true' : null })
+      el('a', { href: '/hearthstone/', text: 'Hearthstone', 'aria-current': skin === 'hs' ? 'true' : null }),
+      el('a', { href: '/redgarden/', text: 'Redgarden', 'aria-current': skin === 'rg' ? 'true' : null })
     ]);
 
-    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : 'WOTAN sections' });
+    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : 'WOTAN sections') });
     TABS[skin].forEach(function (t) {
       tabs.appendChild(el('a', { href: t[2], text: t[1], 'aria-current': t[0] === section ? 'page' : null }));
     });
@@ -153,12 +160,22 @@
       el('span', { text: label })
     ]);
     var menu = el('div', { 'class': 'wn-menu', id: 'wn-menu', role: 'menu', hidden: true });
-    if (!handle) menu.appendChild(el('div', { 'class': 'wn-menu-who', text: 'No Hearthstone handle yet' }));
-    menu.appendChild(el('a', {
-      role: 'menuitem',
-      href: handle ? '/hearthstone/u.html?h=' + encodeURIComponent(handle) : '/hearthstone/u.html',
-      text: handle ? 'My profile' : 'Claim your handle'
-    }));
+    if (skin === 'rg') {
+      // Profiles are per game: on the REDGARDEN tab the account menu opens the REDGARDEN profile
+      // (keyed by the IDUNA player id), never the Hearthstone handle page.
+      menu.appendChild(el('a', {
+        role: 'menuitem',
+        href: '/redgarden/u.html?id=' + encodeURIComponent(s.playerID || ''),
+        text: 'My REDGARDEN profile'
+      }));
+    } else {
+      if (!handle) menu.appendChild(el('div', { 'class': 'wn-menu-who', text: 'No Hearthstone handle yet' }));
+      menu.appendChild(el('a', {
+        role: 'menuitem',
+        href: handle ? '/hearthstone/u.html?h=' + encodeURIComponent(handle) : '/hearthstone/u.html',
+        text: handle ? 'My profile' : 'Claim your handle'
+      }));
+    }
     menu.appendChild(el('hr'));
     var out = el('button', { type: 'button', role: 'menuitem', text: 'Sign out' });
     out.addEventListener('click', function () {

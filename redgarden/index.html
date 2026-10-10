@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0e1a14">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-rg.css">
+<title>Leaderboard — WOTAN Redgarden</title>
+<meta name="description" content="REDGARDEN (Knights of the Void) player leaderboard on WOTAN.">
+</head>
+<body class="rg" data-page="board">
+<header id="wotan-nav" data-skin="rg" data-section="board"></header>
+<main class="rg-wrap" id="main">
+  <section class="rg-hero">
+    <div>
+      <p class="rg-eyebrow">Redgarden</p>
+      <h1 class="rg-h1">Leaderboard</h1>
+      <p class="rg-lede">Every player with a reported REDGARDEN match. Open a profile for heroes played and recent results.</p>
+    </div>
+    <div class="rg-stats"><div><b id="s-players">–</b><span>Players</span></div><div><b id="s-matches">–</b><span>Matches</span></div></div>
+  </section>
+  <input class="rg-search" id="q" type="search" placeholder="Search by name" autocomplete="off" maxlength="24" aria-label="Search players">
+  <div class="rg-panel" id="board" aria-live="polite"></div>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/rg-pages.js"></script>
+</body>
+</html>
