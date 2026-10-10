@@ -81,6 +81,8 @@
     var base = location.origin;
     $('cmd').value = 'powershell -NoProfile -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-RestMethod \'' +
       base + '/api/v1/hs/live/uplink.ps1\'))) -Base \'' + base + '\'"';
+    $('icmd').value = 'powershell -NoProfile -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-RestMethod \'' +
+      base + '/api/v1/hs/live/install.ps1\'))) -Base \'' + base + '\'"';
   }
 
   async function loadPrefs() {
@@ -99,9 +101,11 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     showCommand();
-    $('copy').addEventListener('click', function () {
-      var t = $('cmd'); t.select();
-      try { document.execCommand('copy'); $('copied').textContent = 'Copied.'; } catch (e) { $('copied').textContent = 'Press Ctrl+C.'; }
+    [['copy', 'cmd', 'copied'], ['icopy', 'icmd', 'icopied']].forEach(function (ids) {
+      $(ids[0]).addEventListener('click', function () {
+        var t = $(ids[1]); t.select();
+        try { document.execCommand('copy'); $(ids[2]).textContent = 'Copied.'; } catch (e) { $(ids[2]).textContent = 'Press Ctrl+C.'; }
+      });
     });
     if (!HS.hasSession()) { showSignIn(); return; }
     $('connect').hidden = false;

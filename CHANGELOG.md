@@ -2,6 +2,7 @@
 
 ## 2026-10-10
 
+- Tracker page: one-time installer command that puts a "WOTAN Hearthstone Tracker" icon on the Desktop and Start menu; the icon always runs the newest uplink (the old paste-every-time command is under "Run once without installing").
 - Win/loss per exact deck: a record only enters the public win rate when its player shares it (publishing shares; "Share my stats for this deck" on a private deck does it without publishing). Private pages show my record, the public rate and the projected global rate. Identical public decks are one deck named by the first publisher.
 - Deck library has a "My private decks" tab (public library is public-only); publishing a deck requires a handle.
 - Decks played in the tracker sync into the deck library when the game ends: private by default (publish per deck, or turn on "Publish decks instantly" on the tracker page), a changed deck is saved as a copy, and each deck shows its tracked win rate.

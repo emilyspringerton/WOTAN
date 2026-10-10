@@ -43,9 +43,13 @@
 
   <section class="hs-panel" id="connect" hidden>
     <h2 class="hs-h3 trk-h">Connect your PC</h2>
-    <p class="hs-meta">Open PowerShell on the PC that runs Hearthstone and paste this command. It opens your browser to <b>sign in with IAM</b> (the same login as this site and the EDGE.GAME client), then streams your game&rsquo;s log lines (read-only) to your private tracker here. It signs in again by itself if the session expires.</p>
-    <textarea class="hs-textarea trk-cmd" id="cmd" readonly spellcheck="false"></textarea>
-    <p><button class="hs-btn sm" id="copy" type="button">Copy</button> <span class="hs-meta" id="copied"></span></p>
+    <p class="hs-meta"><b>One time only:</b> open PowerShell on the PC that runs Hearthstone and paste this. It puts a <b>WOTAN Hearthstone Tracker</b> icon on your Desktop (and Start menu). From then on, just double-click the icon before you play. It always runs the newest tracker, signs you in with IAM in your browser, and streams your game&rsquo;s log lines (read-only) to your private tracker here.</p>
+    <textarea class="hs-textarea trk-cmd" id="icmd" readonly spellcheck="false" style="min-height:4rem"></textarea>
+    <p><button class="hs-btn sm" id="icopy" type="button">Copy</button> <span class="hs-meta" id="icopied"></span></p>
+    <details><summary class="hs-meta">Run once without installing</summary>
+      <textarea class="hs-textarea trk-cmd" id="cmd" readonly spellcheck="false"></textarea>
+      <p><button class="hs-btn sm" id="copy" type="button">Copy</button> <span class="hs-meta" id="copied"></span></p>
+    </details>
   </section>
 
   <section class="hs-panel" id="prefs" hidden>
