@@ -24,7 +24,7 @@
     document.title = (d.title || 'Deck') + ' — WOTAN Hearthstone';
     UI.clear(root); root.setAttribute('aria-busy', 'false');
     var author = d.author && d.author.handle;
-    var mine = !!(who.me && who.me.handle && author && who.me.handle.toLowerCase() === author.toLowerCase());
+    var mine = !!d.can_edit || !!(who.me && who.me.handle && author && who.me.handle.toLowerCase() === author.toLowerCase());
 
     var titleEl = h('h1', { 'class': 'hs-h1', text: d.title || 'Untitled deck' });
     var descEl = h('p', { 'class': 'hs-desc', text: d.description || '', hidden: !d.description });
@@ -32,6 +32,12 @@
       h('button', { type: 'button', 'class': 'hs-btn solid', text: 'Copy deck code', on: { click: function () { UI.copyWithToast(d.deckstring, 'Deck code'); } } }),
       UI.likeButton({ liked: d.liked_by_me, count: d.likes, path: '/decks/' + d.id + '/like' }));
     if (mine) {
+      var vis = h('button', { type: 'button', 'class': 'hs-btn ' + (d.private ? 'solid' : 'ghost'), text: d.private ? 'Publish deck' : 'Make private', on: { click: async function (ev) {
+        await UI.withBusy(ev.currentTarget, async function () {
+          try { await HS.patch('/decks/' + d.id, { private: !d.private }); location.reload(); } catch (e) { UI.toast(e.message, 'err'); }
+        });
+      } } });
+      headActions.appendChild(vis);
       headActions.appendChild(h('button', { type: 'button', 'class': 'hs-btn ghost', text: 'Edit', on: { click: function () { editForm(d, titleEl, descEl); } } }));
       headActions.appendChild(h('button', { type: 'button', 'class': 'hs-btn danger', text: 'Delete', on: { click: async function (ev) {
         if (!confirm('Delete this deck? This cannot be undone.')) return;
@@ -45,6 +51,8 @@
       h('div', { 'class': 'hs-deck-top' }, UI.classBadge(d.class || 'Unknown'), UI.fmtBadge(d.format), d.year ? h('span', { 'class': 'hs-meta', text: d.year }) : null),
       titleEl,
       h('p', { 'class': 'hs-meta', style: { 'margin-top': '.5rem' } }, 'by ', UI.handleLink(author), ' · ', UI.ago(d.created_at)),
+      d.private ? h('p', { 'class': 'hs-note', text: 'Private: only you can see this deck. It was synced from your tracker; publish it when you are ready to share it.' }) : null,
+      d.games ? h('p', { 'class': 'hs-meta', style: { 'margin-top': '.4rem' }, text: Math.round(d.winrate * 100) + '% win rate · ' + d.wins + ' of ' + d.games + (d.games === 1 ? ' tracked game' : ' tracked games') }) : null,
       descEl, headActions));
 
     // left: card list

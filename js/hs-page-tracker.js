@@ -42,6 +42,13 @@
     while (wl.firstChild) wl.removeChild(wl.firstChild);
     (st.warnings || []).forEach(function (w) { wl.appendChild(el('li', '', w)); });
     wl.hidden = !(st.warnings && st.warnings.length);
+    var sy = $('synced');
+    if (st.library_deck_id) {
+      while (sy.firstChild) sy.removeChild(sy.firstChild);
+      sy.appendChild(document.createTextNode('Last game saved to your library: '));
+      var a = el('a', '', 'open deck'); a.href = '/hearthstone/deck.html?id=' + encodeURIComponent(st.library_deck_id);
+      sy.appendChild(a); sy.hidden = false;
+    }
     paintList($('left'), st.left, false);
     paintList($('drawn'), st.drawn, true);
     $('drawn-n').textContent = st.drawn_total ? '(' + st.drawn_total + ')' : '';
@@ -76,6 +83,20 @@
       base + '/api/v1/hs/live/uplink.ps1\'))) -Base \'' + base + '\'"';
   }
 
+  async function loadPrefs() {
+    var box = $('autopub');
+    try {
+      var s = await HS.get('/settings');
+      box.checked = !!s.auto_publish;
+      $('prefs').hidden = false;
+      box.addEventListener('change', async function () {
+        var want = box.checked;
+        try { var r = await HS.put('/settings', { auto_publish: want }); box.checked = !!r.auto_publish; }
+        catch (e) { box.checked = !want; }
+      });
+    } catch (e) { /* settings are optional; the tracker works without them */ }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     showCommand();
     $('copy').addEventListener('click', function () {
@@ -84,6 +105,7 @@
     });
     if (!HS.hasSession()) { showSignIn(); return; }
     $('connect').hidden = false;
+    loadPrefs();
     start();
   });
 })();

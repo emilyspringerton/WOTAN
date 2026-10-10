@@ -2,6 +2,7 @@
 
 ## 2026-10-10
 
+- Decks played in the tracker sync into the deck library when the game ends: private by default (publish per deck, or turn on "Publish decks instantly" on the tracker page), a changed deck is saved as a copy, and each deck shows its tracked win rate.
 - Hearthstone live deck tracker page (private per player): token mint, uplink command, cards-left view (sess-20261009-1745-ee80b668)
 
 

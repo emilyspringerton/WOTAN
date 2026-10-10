@@ -175,7 +175,8 @@
   function deckCard(d) {
     var a = d.author && d.author.handle;
     var card = h('article', { 'class': 'hs-deck', 'data-class': classKey(d.class) },
-      h('div', { 'class': 'hs-deck-top' }, classBadge(d.class || 'Unknown'), fmtBadge(d.format), d.year ? h('span', { 'class': 'hs-meta', text: d.year }) : null),
+      h('div', { 'class': 'hs-deck-top' }, classBadge(d.class || 'Unknown'), fmtBadge(d.format), d.year ? h('span', { 'class': 'hs-meta', text: d.year }) : null,
+        d.private ? h('span', { 'class': 'hs-badge warn', text: 'Private', title: 'Only you can see this deck' }) : null),
       h('h3', { 'class': 'hs-deck-title' }, h('a', { href: deckURL(d.id), text: d.title || 'Untitled deck' })),
       h('div', { 'class': 'hs-deck-by' }, 'by ', handleLink(a), ' · ', ago(d.created_at)),
       costCurve(d.cards, false),
@@ -183,6 +184,7 @@
         h('span', { 'class': 'hs-stats' },
           h('span', { text: '♥ ' + (d.likes || 0), title: 'Likes' }),
           h('span', { text: (d.comments || 0) + (d.comments === 1 ? ' comment' : ' comments') }),
+          d.games ? h('span', { text: Math.round(d.winrate * 100) + '% win · ' + d.games + (d.games === 1 ? ' game' : ' games'), title: 'Tracked games with this deck' }) : null,
           d.card_count ? h('span', { text: d.card_count + ' cards' }) : null),
         d.deckstring ? h('button', { type: 'button', 'class': 'hs-btn sm ghost', text: 'Copy code', 'aria-label': 'Copy deck code for ' + (d.title || 'deck'),
           on: { click: function () { copyWithToast(d.deckstring, 'Deck code'); } } }) : null));
