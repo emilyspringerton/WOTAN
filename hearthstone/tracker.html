@@ -42,13 +42,9 @@
 
   <section class="hs-panel" id="connect" hidden>
     <h2 class="hs-h3 trk-h">Connect your PC</h2>
-    <p class="hs-meta">Open PowerShell on the PC that runs Hearthstone and paste this command. It reads the game&rsquo;s log files (read-only) and sends the new lines here. The token in it expires in 12 hours and only works for uploading your tracker data.</p>
-    <p><button class="hs-btn solid" id="mint" type="button">Get my command</button></p>
-    <div id="cmd-wrap" hidden>
-      <textarea class="hs-textarea trk-cmd" id="cmd" readonly spellcheck="false"></textarea>
-      <p><button class="hs-btn sm" id="copy" type="button">Copy</button> <span class="hs-meta" id="copied"></span></p>
-    </div>
-    <p class="hs-msg err" id="connect-err" role="alert" hidden></p>
+    <p class="hs-meta">Open PowerShell on the PC that runs Hearthstone and paste this command. It opens your browser to <b>sign in with IAM</b> (the same login as this site and the EDGE.GAME client), then streams your game&rsquo;s log lines (read-only) to your private tracker here. It signs in again by itself if the session expires.</p>
+    <textarea class="hs-textarea trk-cmd" id="cmd" readonly spellcheck="false"></textarea>
+    <p><button class="hs-btn sm" id="copy" type="button">Copy</button> <span class="hs-meta" id="copied"></span></p>
   </section>
 
   <section id="signin" class="hs-panel" hidden>

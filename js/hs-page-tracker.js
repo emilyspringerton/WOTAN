@@ -64,19 +64,16 @@
     try { $('signin-link').href = typeof buildSsoURL === 'function' ? buildSsoURL() : 'https://iam.okemily.com/'; } catch (e) { /* keep # */ }
   }
 
-  async function mint() {
-    var err = $('connect-err'); err.hidden = true;
-    try {
-      var r = await HS.post('/live/token', {});
-      var base = location.origin;
-      var cmd = 'powershell -NoProfile -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-RestMethod \'' +
-        base + '/api/v1/hs/live/uplink.ps1\'))) -Token \'' + r.token + '\' -Base \'' + base + '\'"';
-      $('cmd').value = cmd; $('cmd-wrap').hidden = false;
-    } catch (e) { err.textContent = e.message; err.hidden = false; }
+  // The uplink signs in with IAM itself (loopback OAuth, same pattern as the EDGE.GAME client), so the
+  // command carries no secret and is the same for everyone.
+  function showCommand() {
+    var base = location.origin;
+    $('cmd').value = 'powershell -NoProfile -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-RestMethod \'' +
+      base + '/api/v1/hs/live/uplink.ps1\'))) -Base \'' + base + '\'"';
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    $('mint').addEventListener('click', mint);
+    showCommand();
     $('copy').addEventListener('click', function () {
       var t = $('cmd'); t.select();
       try { document.execCommand('copy'); $('copied').textContent = 'Copied.'; } catch (e) { $('copied').textContent = 'Press Ctrl+C.'; }
