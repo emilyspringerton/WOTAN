@@ -2,6 +2,7 @@
 
 ## 2026-10-10
 
+- Win/loss pools per exact deck: identical private decks share one record; a public deck counts only public games; identical public decks are one deck named by the first publisher.
 - Deck library has a "My private decks" tab (public library is public-only); publishing a deck requires a handle.
 - Decks played in the tracker sync into the deck library when the game ends: private by default (publish per deck, or turn on "Publish decks instantly" on the tracker page), a changed deck is saved as a copy, and each deck shows its tracked win rate.
 - Hearthstone live deck tracker page (private per player): token mint, uplink command, cards-left view (sess-20261009-1745-ee80b668)

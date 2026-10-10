@@ -34,7 +34,11 @@
     if (mine) {
       var vis = h('button', { type: 'button', 'class': 'hs-btn ' + (d.private ? 'solid' : 'ghost'), text: d.private ? 'Publish deck' : 'Make private', on: { click: async function (ev) {
         await UI.withBusy(ev.currentTarget, async function () {
-          try { await HS.patch('/decks/' + d.id, { private: !d.private }); location.reload(); } catch (e) { UI.toast(e.message, 'err'); }
+          try {
+            var r = await HS.patch('/decks/' + d.id, { private: !d.private });
+            if (r && r.merged_into) { UI.toast(r.message || 'Merged into the published deck.'); setTimeout(function () { location.href = '/hearthstone/deck.html?id=' + r.merged_into; }, 900); }
+            else location.reload();
+          } catch (e) { UI.toast(e.message, 'err'); }
         });
       } } });
       headActions.appendChild(vis);
@@ -52,7 +56,7 @@
       titleEl,
       h('p', { 'class': 'hs-meta', style: { 'margin-top': '.5rem' } }, 'by ', UI.handleLink(author), ' · ', UI.ago(d.created_at)),
       d.private ? h('p', { 'class': 'hs-note', text: 'Private: only you can see this deck. It was synced from your tracker; publish it when you are ready to share it.' }) : null,
-      d.games ? h('p', { 'class': 'hs-meta', style: { 'margin-top': '.4rem' }, text: Math.round(d.winrate * 100) + '% win rate · ' + d.wins + ' of ' + d.games + (d.games === 1 ? ' tracked game' : ' tracked games') }) : null,
+      d.games ? h('p', { 'class': 'hs-meta', style: { 'margin-top': '.4rem' }, text: d.wins + '–' + d.losses + (d.ties ? '–' + d.ties : '') + ' · ' + Math.round(d.winrate * 100) + '% win rate over ' + d.games + (d.games === 1 ? ' tracked game' : ' tracked games') + (d.private ? ' (everyone holding this exact deck privately)' : ' (published deck)') }) : null,
       descEl, headActions));
 
     // left: card list
