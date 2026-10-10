@@ -131,3 +131,16 @@ Decks drafted before the 2026-09-19 Offense/Operations/Defense retheme were arch
 
 `~/wotan-deploy.sh` (rsync to `/var/www/wotan`). Accounts (tournaments, deck tools) are planned; the header's "Sign in"
 button is deliberately disabled until they exist.
+
+## Hearthstone live deck tracker (2026-10-10)
+`/hearthstone/tracker.html` shows the cards left in the deck you are playing, live and **private to
+your IDUNA account**. How it works: the page mints an upload-scoped token for your own identity
+(`POST /api/v1/hs/live/token`, 12 h, can only POST `live/lines`) and shows a one-line PowerShell
+command; the script tails your Hearthstone `Logs\Hearthstone_*\Decks.log` + `Power.log` (read-only)
+and streams new lines to IDUNA, which runs the HRIP PARENA tracker over the current game and serves
+the result to that same account only (`GET /api/v1/hs/live/state`). The queued deck comes from
+Hearthstone's own `Decks.log` ("Finding Game With Deck" + deck code), so no setup per game.
+Status: server side + page live and verified (build, privacy, counts); the PowerShell uplink has
+been dry-run on a real Windows PC against the live server but not yet used for a full real game.
+Deploy: pushing to `main` builds `wotan:<sha>` (`.github/workflows/deploy.yml`) and the in-cluster
+gitops-autodeploy cron rolls it out through the PARENA-rendered manifests (`WOTAN_TAG`).
