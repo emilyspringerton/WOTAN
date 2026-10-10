@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-10
+
+- Hearthstone live deck tracker page (private per player): token mint, uplink command, cards-left view (sess-20261009-1745-ee80b668)
+
+
 ## 2026-10-09
 
 - Hearthstone deck section (`/hearthstone/`: Decks, Submit, Feed, Players, deck detail, profile) + shared topbar with DEADWEIGHT | HEARTHSTONE switch and one account widget (`js/wotan-nav.js`) on every page; store/friends no longer render their own Sign-in buttons. IDUNA `/api/v1/hs/*` backs it. See `HEARTHSTONE_NORTHSTAR.md`. README updated. (sess-20261008-0123-53e30776)
