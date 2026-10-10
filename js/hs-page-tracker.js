@@ -52,7 +52,7 @@
       paint(st);
     } catch (e) {
       if (e.status === 401) { stop(); showSignIn(); return; }
-      $('status').textContent = 'Reconnecting…';
+      $('status').textContent = 'Reconnecting… (showing the last data received)';
     }
   }
   function start() { if (!timer) { poll(); timer = setInterval(poll, 1500); } }
