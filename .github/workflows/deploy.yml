@@ -1,0 +1,37 @@
+name: Build and push image
+
+# K8S-CD-01 (same pattern as IDUNA's deploy.yml): build the static-site image and push it to Artifact
+# Registry on every push to main, auth via Workload Identity (no stored key; see
+# EMILY/gitops/CI_SETUP.md). The in-cluster gitops-autodeploy CronJob notices the newest `wotan` tag,
+# bumps WOTAN_TAG in EMILY/gitops/tags.env, re-renders the PARENA manifests and gitops-sync applies
+# them -- this workflow never talks to the cluster.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md']
+  workflow_dispatch: {}
+
+concurrency:
+  group: wotan-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auth to GCP (Workload Identity, no stored key)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_CI_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build + push
+        run: scripts/build-image.sh "$(git rev-parse --short HEAD)"
