@@ -38,6 +38,10 @@
     $('left-n').textContent = String(st.left_total || 0);
     $('deck-size').textContent = String(st.deck ? st.deck.size : 30);
     $('note').textContent = st.note || '';
+    var wl = $('warn');
+    while (wl.firstChild) wl.removeChild(wl.firstChild);
+    (st.warnings || []).forEach(function (w) { wl.appendChild(el('li', '', w)); });
+    wl.hidden = !(st.warnings && st.warnings.length);
     paintList($('left'), st.left, false);
     paintList($('drawn'), st.drawn, true);
     $('drawn-n').textContent = st.drawn_total ? '(' + st.drawn_total + ')' : '';

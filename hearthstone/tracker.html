@@ -27,6 +27,7 @@
   .trk-row.dim { opacity: .55; }
   .trk-cmd { width: 100%; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .8rem; min-height: 6.5rem; }
   .trk-h { margin: 0 0 .5rem; }
+  .trk-warn { margin: .6rem 0 .8rem; padding: .6rem .9rem .6rem 1.6rem; border: 1px solid var(--hs-warn); border-radius: var(--hs-radius-sm); background: var(--hs-raise); color: var(--hs-ink); font-size: .92rem; }
 </style>
 </head>
 <body class="hs">
@@ -57,6 +58,7 @@
       <h2 class="hs-h3 trk-h" id="deck-name">&mdash;</h2>
       <div class="trk-big"><span id="left-n">0</span><small> / <span id="deck-size">30</span> cards left</small></div>
       <p class="hs-meta" id="note"></p>
+      <ul class="trk-warn" id="warn" hidden></ul>
       <ul class="trk-list" id="left"></ul>
     </section>
     <aside>
