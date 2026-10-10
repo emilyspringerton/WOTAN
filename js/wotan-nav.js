@@ -21,7 +21,8 @@
       ['decks', 'Decks', '/hearthstone/'],
       ['submit', 'Submit', '/hearthstone/submit.html'],
       ['feed', 'Feed', '/hearthstone/feed.html'],
-      ['players', 'Players', '/hearthstone/players.html']
+      ['players', 'Players', '/hearthstone/players.html'],
+      ['tracker', 'Tracker', '/hearthstone/tracker.html']
     ],
     dw: [
       ['home', 'Home', '/'],

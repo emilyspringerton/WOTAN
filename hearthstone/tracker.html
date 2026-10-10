@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deck tracker &mdash; WOTAN Hearthstone</title>
+<meta name="description" content="Live cards-left tracker for the deck you are playing. Private to your account.">
+<meta name="theme-color" content="#f8f3ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<style>
+  .trk { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+  @media (max-width: 860px) { .trk { grid-template-columns: 1fr; } }
+  .trk-big { font-family: var(--hs-display); font-size: 3.2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .trk-big small { font-size: 1.1rem; color: var(--hs-faint); font-family: var(--hs-ui); }
+  .trk-status { display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; margin: .2rem 0 .8rem; color: var(--hs-soft); font-size: .92rem; }
+  .trk-dot { width: .6rem; height: .6rem; border-radius: 50%; background: var(--hs-faint); display: inline-block; }
+  .trk-dot.on { background: var(--hs-ok); } .trk-dot.game { background: var(--hs-gold-bright); }
+  .trk-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .25rem; }
+  .trk-row { display: grid; grid-template-columns: 2.1rem 1fr 2.4rem; gap: .5rem; align-items: center;
+             background: var(--hs-raise); border: 1px solid var(--hs-line); border-radius: var(--hs-radius-sm); padding: .3rem .5rem; }
+  .trk-cost { font-weight: 600; color: var(--hs-gold-deep); text-align: center; font-variant-numeric: tabular-nums; }
+  .trk-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .trk-count { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .trk-row.dim { opacity: .55; }
+  .trk-cmd { width: 100%; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .8rem; min-height: 6.5rem; }
+  .trk-h { margin: 0 0 .5rem; }
+</style>
+</head>
+<body class="hs">
+<header id="wotan-nav" data-skin="hs" data-section="tracker"></header>
+<main class="hs-wrap" id="main">
+  <section class="hs-hero">
+    <div>
+      <p class="hs-eyebrow">Live &middot; private to you</p>
+      <h1 class="hs-h1">Deck tracker</h1>
+      <p class="hs-lede">Play Hearthstone as normal. Your cards left update as you draw. Only you can see this page&rsquo;s data: it is tied to your IDUNA sign-in, and the uplink on your PC can only upload your own game.</p>
+    </div>
+  </section>
+
+  <section class="hs-panel" id="connect" hidden>
+    <h2 class="hs-h3 trk-h">Connect your PC</h2>
+    <p class="hs-meta">Open PowerShell on the PC that runs Hearthstone and paste this command. It reads the game&rsquo;s log files (read-only) and sends the new lines here. The token in it expires in 12 hours and only works for uploading your tracker data.</p>
+    <p><button class="hs-btn solid" id="mint" type="button">Get my command</button></p>
+    <div id="cmd-wrap" hidden>
+      <textarea class="hs-textarea trk-cmd" id="cmd" readonly spellcheck="false"></textarea>
+      <p><button class="hs-btn sm" id="copy" type="button">Copy</button> <span class="hs-meta" id="copied"></span></p>
+    </div>
+    <p class="hs-msg err" id="connect-err" role="alert" hidden></p>
+  </section>
+
+  <section id="signin" class="hs-panel" hidden>
+    <p>Sign in with IDUNA to use the tracker. <a id="signin-link" href="#">Sign in</a></p>
+  </section>
+
+  <div class="trk" id="live" hidden>
+    <section class="hs-panel">
+      <div class="trk-status"><span class="trk-dot" id="dot"></span><span id="status">Waiting&hellip;</span></div>
+      <h2 class="hs-h3 trk-h" id="deck-name">&mdash;</h2>
+      <div class="trk-big"><span id="left-n">0</span><small> / <span id="deck-size">30</span> cards left</small></div>
+      <p class="hs-meta" id="note"></p>
+      <ul class="trk-list" id="left"></ul>
+    </section>
+    <aside>
+      <section class="hs-panel">
+        <h2 class="hs-h3 trk-h">Drawn <span class="hs-meta" id="drawn-n"></span></h2>
+        <ul class="trk-list" id="drawn"></ul>
+      </section>
+      <section class="hs-panel">
+        <h2 class="hs-h3 trk-h">Opponent revealed <span class="hs-meta" id="opp-name"></span></h2>
+        <ul class="trk-list" id="opp"></ul>
+      </section>
+    </aside>
+  </div>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/hs-api.js"></script>
+<script src="/js/hs-ui.js"></script>
+<script src="/js/hs-page-tracker.js"></script>
+</body>
+</html>
