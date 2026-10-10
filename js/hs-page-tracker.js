@@ -28,6 +28,8 @@
     $('live').hidden = false;
     var dot = $('dot'), status = $('status');
     dot.className = 'trk-dot' + (st.in_game ? ' game' : (st.connected ? ' on' : ''));
+    var age = st.updated_at ? Math.max(0, Math.round((Date.now() - Date.parse(st.updated_at)) / 1000)) : null;
+    var ageTxt = age === null ? '' : ' \u00b7 PC last sent ' + (age < 90 ? age + 's' : Math.round(age / 60) + 'm') + ' ago';
     if (!st.connected) status.textContent = 'Waiting for your PC.';
     else if (st.in_game) status.textContent = 'In game · turn ' + st.turn;
     else if (st.deck) status.textContent = 'Connected · queued deck ready';
