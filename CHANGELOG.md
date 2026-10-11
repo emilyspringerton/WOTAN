@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-11
+
+- Terms of Service (`terms.html`) and Privacy Policy (`privacy.html`): real, plain-English pages describing what WOTAN actually does today (IDUNA SSO sign-in, decks/social/leaderboards/friends-duels, the Flow-based cosmetic hat store, no real-money payments yet) -- explicitly flagged as not lawyer-reviewed, same honesty convention as `EMILY_FOR_BUSINESS/LICENSE.md`. Contact address is a placeholder (`legal@wotan.okemily.com`) pending a real inbox.
+- Sitewide cookie notice + legal footer (`js/cookie-consent.js`), added to every page including `DEADWEIGHT/index.html` (which loads neither `iduna-sso.js` nor `wotan-nav.js`, so this file is fully self-contained): a dismissible top banner ("by continuing to use this site, you consent to cookies," links to Terms/Privacy, remembered via `localStorage`) plus a permanent small footer with the same two links so they stay reachable after the banner is dismissed. Inserted as the first child of `<body>` (not `position:fixed`) so it pushes the existing sticky topbar down instead of overlapping it.
+- Honesty note folded into the Privacy Policy itself: WOTAN's own pages keep you signed in via browser local storage, not traditional cookies -- only IDUNA's own hosted login/admin pages set real HttpOnly session cookies. The banner still says "cookies" (the founder's own requested wording, and the common umbrella term) but the policy text is precise about which mechanism is actually in play.
+  session: sess-20261009-1745-ee80b668
+
 ## 2026-10-10
 
 - REDGARDEN is the third game tab (game switch: Deadweight | Hearthstone | Redgarden): `/redgarden/` leaderboard (search), `/redgarden/heroes.html` hero win rates, `/redgarden/u.html?id=` per-player profile (heroes played, recent matches), `/redgarden/play.html`. Own garden-green skin (`css/wotan-rg.css`); the account menu opens the REDGARDEN profile on this tab, so profiles stay separate per game. Reads IDUNA's public `/api/v1/redgarden/*`.

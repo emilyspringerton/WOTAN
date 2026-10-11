@@ -269,5 +269,6 @@ handleSsoReturn();
 (function () { try { var s = getIdunaSession(); if (s) { var el = document.getElementById('auth-status'); if (el) el.textContent = 'Signed in' + (s.displayName ? ' as ' + s.displayName : '') + '.'; } } catch (e) {} })();
 </script>
 <script src="/js/wotan-nav.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>
