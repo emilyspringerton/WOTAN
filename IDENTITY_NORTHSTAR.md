@@ -165,3 +165,9 @@ best-of and per-region lines.
 ## 11. Not verifiable here
 Real Blizzard/Twitch OAuth round trips (need registered apps — human step); live leaderboard shape; Windows
 uplink; MySQL. Code is tested through injectable exchange/userinfo seams exactly like `sso_google.go`.
+
+## 12. Build status (2026-10-12)
+- **Built, pushed:** IDUNA `6bfe293` (ID-A backend: migration `202610130001`, Battle.net login+link, Twitch link, identities/prefs/upload-keys/exchange API, ingest BattleTag binding, gates + grace + perms, Back Office `/admin/identities` incl. merge, 18 `TestIdentity_*`); IDUNA `7b3aab5` (uplink `-Key/-SaveKey/-ForgetKey` in `hsUplinkScript`, Battle.net primary on hosted login page); WOTAN `cebacb7` / HRIP `c318368` (ID-B front end, 23/23 affordance test).
+- **Contract as built:** link results return as URL **fragment** `#linked=<provider>` / `#link_error=<code>` (front end accepts query or fragment); link-start accepts `?access_token=` (302) or Bearer (JSON `authorize_url`); errors `{error, code}`; gate failures `403 battlenet_required`.
+- **Deviations from this doc:** grandfathered unlinked uploaders in grace keep pre-identity ingest; grace in `player_identity_grace`; extra `identity_audit_log` and `hs_games.unverified_tag`; shared auth also refuses `hs-live-upload` / `iduna-oauth-state` tokens; merge also refuses exclusive-club conflicts.
+- **Not built:** IDENT-03 rank-verification job. **Not verified:** real OAuth round trips, Twitch empty `scope=`, MySQL, PowerShell, browser.
