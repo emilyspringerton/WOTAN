@@ -116,6 +116,13 @@
         h('h1', { 'class': 'hs-h1', text: '@' + p.handle }), bioEl, actions),
       nums));
 
+    // Club badges (Phase 2). Optional: js/club-badges.js is loaded by u.html; absent or failing, nothing renders.
+    if (window.ClubBadges) {
+      var badgeHolder = h('div', { 'aria-live': 'polite' });
+      root.appendChild(badgeHolder);
+      window.ClubBadges.mount(badgeHolder, p.handle);
+    }
+
     // tabs
     var tabDecks = h('button', { 'class': 'hs-tab', role: 'tab', id: 'tab-decks', 'aria-selected': 'true', 'aria-controls': 'tabpanel', text: 'Decks' });
     var tabWall = h('button', { 'class': 'hs-tab', role: 'tab', id: 'tab-wall', 'aria-selected': 'false', 'aria-controls': 'tabpanel', text: 'Wall' });

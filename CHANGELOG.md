@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12
+
+- Clubs (WOTAN Phase 2, front end, chunk P2-C): `/clubs/` directory with search/sort and create-club dialog; `c.html` public tier-shaped club page (role badges, rank with explicit "unverified" mark, featured decks, generic not-found); `w.html` members workspace (roster wall, strategy feed with post/comment/pin, win-rate matrix + contributor board with graceful empty state when analytics 404); `manage.html` admin console with every affordance computed only from `GET /clubs/{id}/me` perms[] (disabled-with-reason Remove, invite provisioning with one-time copy link, join-request queue, tier selector with Go dark/Reveal memory, exclusive conflict list, join policy, contributor toggle, role dropdowns, branding, featured-deck picker, audit log, ownership transfer, type-the-slug delete); `join.html#token` (fragment stripped on load; peek -> confirm -> join, with handle_required / exclusive_conflict / invite_expired / invite_used messages); `settings.html` (my clubs, sync target via `PUT /api/v1/hs/me/sync-target`, show-on-roster/show-badge toggles, self-declared BattleTag/region/rank). New `js/club-api.js`, `club-perms.js`, `club-ui.js`, `club-badges.js`, `club-page-*.js`, `css/wotan-clubs.css`; "Clubs" tab in the shared nav and "My clubs & sync" in the account menu; club badges on `hearthstone/u.html`. Coded to `CLUBS_NORTHSTAR.md` §7.4 with the IDUNA backend landing in parallel: verified only by `scripts/clubs-affordance-test.js` (plain node, DOM/fetch stub), not in a browser and not against the real API. README updated.
+  session: sess-20261009-1745-ee80b668
+
 ## 2026-10-11
 
 - Terms of Service (`terms.html`) and Privacy Policy (`privacy.html`): real, plain-English pages describing what WOTAN actually does today (IDUNA SSO sign-in, decks/social/leaderboards/friends-duels, the Flow-based cosmetic hat store, no real-money payments yet) -- explicitly flagged as not lawyer-reviewed, same honesty convention as `EMILY_FOR_BUSINESS/LICENSE.md`. Contact address is a placeholder (`legal@wotan.okemily.com`) pending a real inbox.

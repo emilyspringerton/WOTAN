@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clubs &mdash; WOTAN Clubs</title>
+<meta name="description" content="Browse Hearthstone clubs and teams on WOTAN.">
+<meta name="theme-color" content="#f8f3ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-clubs.css">
+</head>
+<body class="hs">
+<header id="wotan-nav" data-skin="hs" data-section="clubs"></header>
+<main class="hs-wrap club-wrap" id="main">
+  <section class="hs-hero">
+    <div>
+      <p class="hs-eyebrow">Clubs</p>
+      <h1 class="hs-h1">Find your club</h1>
+      <p class="hs-lede">Teams, practice groups and communities. Secret clubs never appear here.</p>
+    </div>
+    <div class="hs-actions"><button type="button" class="hs-btn solid lg" id="create-btn">Create a club</button></div>
+  </section>
+  <p id="create-hint" hidden></p>
+  <div class="hs-filters">
+    <div class="hs-filter-row" style="grid-template-columns:1fr">
+      <label class="hs-field" style="margin:0"><span class="hs-label">Search clubs</span>
+        <span class="hs-search"><input class="hs-input" id="q" type="search" placeholder="Name or tagline" autocomplete="off" maxlength="40"></span></label>
+      <label class="hs-field" style="margin:0"><span class="hs-label">Order</span>
+        <select class="hs-select" id="sort"><option value="prestige">Prestige</option><option value="new">Newest</option><option value="members">Most members</option></select></label>
+    </div>
+  </div>
+  <div class="club-grid" id="list" aria-busy="true"></div>
+  <div class="hs-more" id="more" hidden><button type="button" class="hs-btn" id="more-btn">Show more clubs</button></div>
+  <dialog class="club-dialog" id="create-dlg" aria-labelledby="create-title"></dialog>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/hs-api.js"></script>
+<script src="/js/hs-ui.js"></script>
+<script src="/js/club-api.js"></script>
+<script src="/js/club-perms.js"></script>
+<script src="/js/club-ui.js"></script>
+<script src="/js/club-page-index.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

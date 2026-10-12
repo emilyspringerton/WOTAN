@@ -23,12 +23,14 @@
       ['submit', 'Submit', '/hearthstone/submit.html'],
       ['feed', 'Feed', '/hearthstone/feed.html'],
       ['players', 'Players', '/hearthstone/players.html'],
-      ['tracker', 'Tracker', '/hearthstone/tracker.html']
+      ['tracker', 'Tracker', '/hearthstone/tracker.html'],
+      ['clubs', 'Clubs', '/clubs/']
     ],
     rg: [
       ['board', 'Leaderboard', '/redgarden/'],
       ['heroes', 'Heroes', '/redgarden/heroes.html'],
-      ['play', 'Play', '/redgarden/play.html']
+      ['play', 'Play', '/redgarden/play.html'],
+      ['clubs', 'Clubs', '/clubs/']
     ],
     dw: [
       ['home', 'Home', '/'],
@@ -37,7 +39,8 @@
       ['matches', 'Matches', '/matches.html'],
       ['shankpit', 'SHANKPIT', '/shankpit.html'],
       ['store', 'Hat Store', '/store.html'],
-      ['friends', 'Friends & Duels', '/friends.html']
+      ['friends', 'Friends & Duels', '/friends.html'],
+      ['clubs', 'Clubs', '/clubs/']
     ]
   };
 
@@ -176,6 +179,8 @@
         text: handle ? 'My profile' : 'Claim your handle'
       }));
     }
+    // Clubs (Phase 2): my clubs, tracker sync target, roster toggles. Not on the REDGARDEN tab (profiles are per game).
+    if (skin !== 'rg') menu.appendChild(el('a', { role: 'menuitem', href: '/clubs/settings.html', text: 'My clubs & sync' }));
     menu.appendChild(el('hr'));
     var out = el('button', { type: 'button', role: 'menuitem', text: 'Sign out' });
     out.addEventListener('click', function () {

@@ -144,3 +144,24 @@ Status: server side + page live and verified (build, privacy, counts); the Power
 been dry-run on a real Windows PC against the live server but not yet used for a full real game.
 Deploy: pushing to `main` builds `wotan:<sha>` (`.github/workflows/deploy.yml`) and the in-cluster
 gitops-autodeploy cron rolls it out through the PARENA-rendered manifests (`WOTAN_TAG`).
+
+## Clubs (Phase 2) — front end built to contract, backend landing in IDUNA (2026-10-12)
+`/clubs/` is the group layer over Hearthstone: a directory with search and sort, a public tier-shaped
+club page (`c.html?s=slug`: roster with role badges and an explicit "unverified" mark on self-declared
+ranks, featured decks), a members workspace (`w.html`: roster wall, strategy feed with post/comment/pin,
+win-rate matrix and contributor board), an admin console (`manage.html`: invites, join requests,
+role changes, privacy tier with Go dark/Reveal, exclusive toggle, join policy, branding, featured decks,
+audit log, ownership transfer, type-the-slug delete), invite redemption (`join.html#token`, token
+stripped from the address bar on load) and `settings.html` (my clubs, tracker sync target, roster/badge
+toggles, self-declared rank). Club badges also appear on `hearthstone/u.html` profiles.
+- **Status, honestly**: written strictly against the API contract in `CLUBS_NORTHSTAR.md` §7.4. The Go
+  backend is built in IDUNA in parallel and was **not available to test against**: nothing here has run
+  against a real server, and field names the contract leaves loose (rank fields, matrix cells, conflict
+  lists) are read tolerantly rather than known.
+- **What is verified**: `node scripts/clubs-affordance-test.js` (plain node, no deps) table-tests the
+  permission -> affordance rules in `js/club-perms.js` and runs the real page scripts inside a tiny DOM
+  and fetch stub: per-role console contents, disabled-with-reason buttons, XSS-safe feed rendering,
+  graceful analytics 404, join-token handling. It is not a browser.
+- **Not verified**: real-browser rendering, layout, touch behaviour, or the live API round trip (no
+  headless Chromium on the build machine). Verified legend rank has no data source yet; ranks always show as unverified.
+- Files: `clubs/*.html`, `js/club-{api,perms,ui,badges}.js`, `js/club-page-*.js`, `css/wotan-clubs.css`.

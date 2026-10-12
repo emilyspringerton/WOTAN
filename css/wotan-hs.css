@@ -132,8 +132,8 @@
   .wn-tabs a { border-radius: var(--wn-radius); border-bottom: 0; }
   .wn-tabs a[aria-current="page"] { background: color-mix(in srgb, var(--wn-accent) 26%, transparent); border-radius: var(--wn-radius); }
 }
-/* DEADWEIGHT skin has 7 tabs: below 1360px let them take their own row instead of clipping off-screen. */
-@media (min-width: 900px) and (max-width: 1359px) {
+/* DEADWEIGHT skin has 8 tabs (incl. Clubs): below 1480px let them take their own row instead of clipping off-screen. */
+@media (min-width: 900px) and (max-width: 1479px) {
   #wotan-nav[data-skin="dw"] .wn-in { flex-wrap: wrap; }
   #wotan-nav[data-skin="dw"] .wn-tabs { order: 3; flex: 1 1 100%; margin-top: -.15rem; }
 }
