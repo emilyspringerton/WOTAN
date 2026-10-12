@@ -157,7 +157,13 @@ best-of and per-region lines.
 
 ## 10. Open questions (provisional)
 - **IQ-1** Grace window for existing club creators/uploaders: 30 days (provisional).
-- **IQ-2** Should Twitch be allowed as a *login* door later? Provisional: no, per chat; revisit with streamer demand.
+- **IQ-2** ~~Should Twitch be allowed as a *login* door later? Provisional: no, per chat; revisit with streamer demand.~~
+  **Resolved 2026-10-12** (founder real-time, confirmed via IDUNA task): yes — Twitch is now a real
+  login door (`loginDoorProviders` in `IDUNA/internal/http/handlers/identity.go`), same shape as
+  Battle.net/Google (mints a session JWT via `finishLogin`). Still zero OAuth scopes either way —
+  I8 (never the stream key, never email) is unaffected by the door being open. `IDUNA/main.go`'s
+  `SSOLoginHandler` now also has a `TwitchEnabled` button, gated the same way as Google/Battle.net
+  on `TWITCH_CLIENT_ID`/`TWITCH_CLIENT_SECRET`. See `EMILY/BACKLOG.md` SECTION 610 `IDENT-06`.
 - **IQ-3** Self-serve player merge vs operator-assisted only? Provisional: operator-assisted in v1.
 - **IQ-4** Show BattleTag publicly ever? Provisional: opt-in only.
 - **IQ-5** Region for Battle.net OAuth endpoint: single global (`oauth.battle.net`) provisional; CN excluded.
@@ -238,7 +244,7 @@ Not built yet. Needs, as a new IDUNA cron (not request-path):
 
 Still provisional, not re-confirmed since first written:
 - IQ-1: 30-day grace window for existing club creators/uploaders — keep, or change the number?
-- IQ-2: Twitch as a login door (not just link) later — still "no, revisit with streamer demand"?
+- IQ-2: **resolved 2026-10-12**, see §10 — Twitch is now a login door, built in IDUNA.
 - IQ-3: self-serve player merge vs. operator-assisted-only in v1 — still operator-assisted-only?
 - IQ-4: ever show BattleTag publicly — still opt-in only?
 - IQ-5: single global `oauth.battle.net` endpoint (CN excluded) — still fine?
