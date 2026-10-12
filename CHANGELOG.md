@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-10-12
+- docs: IDENTITY_NORTHSTAR.md §13 — concrete next-steps runbook for Battle.net OAuth (register app + exact redirect URI gotcha, rank-verification job spec, open-question checklist); no code changes, IDENT-01/02 already built (sess-20261009-1745-ee80b668)
 - Identity federation, front end (WOTAN Phase 2b, chunk ID-B): `/account/` page (linked Battle.net/Google/Twitch with last-door unlink guards, privacy toggles, tracker upload keys with one-time reveal, install one-liners in inline and save-once forms, accepted/rejected counters); "Competitive Verification Required" gate modal + grace banner reused by the tracker install-command copy and club creation (`js/identity-gate.js`); Twitch display name (opt-in) and "Leaderboard-matched" rank wording in club rosters/feeds; "Account & linked accounts" in the shared nav menu. All identity endpoints isolated in `js/identity-api.js`. Coded to `IDENTITY_NORTHSTAR.md` §4/§8 while IDUNA ID-A lands in parallel: verified only by `scripts/identity-affordance-test.js` (plain node stub), not in a browser and not against the real API. HRIP uplink key-exchange (`-Key`/`-SaveKey` DPAPI) delivered as `HRIP/tracker/uplink/uplink-key.patch`, not applied, PowerShell not run. README/CLAUDE.md updated.
   session: sess-20261009-1745-ee80b668
 
