@@ -145,7 +145,7 @@ been dry-run on a real Windows PC against the live server but not yet used for a
 Deploy: pushing to `main` builds `wotan:<sha>` (`.github/workflows/deploy.yml`) and the in-cluster
 gitops-autodeploy cron rolls it out through the PARENA-rendered manifests (`WOTAN_TAG`).
 
-## Clubs (Phase 2) — front end built to contract, backend landing in IDUNA (2026-10-12)
+## Clubs (Phase 2) — built end to end, IDUNA backend + Back Office live in code (2026-10-12)
 `/clubs/` is the group layer over Hearthstone: a directory with search and sort, a public tier-shaped
 club page (`c.html?s=slug`: roster with role badges and an explicit "unverified" mark on self-declared
 ranks, featured decks), a members workspace (`w.html`: roster wall, strategy feed with post/comment/pin,
@@ -154,10 +154,11 @@ role changes, privacy tier with Go dark/Reveal, exclusive toggle, join policy, b
 audit log, ownership transfer, type-the-slug delete), invite redemption (`join.html#token`, token
 stripped from the address bar on load) and `settings.html` (my clubs, tracker sync target, roster/badge
 toggles, self-declared rank). Club badges also appear on `hearthstone/u.html` profiles.
-- **Status, honestly**: written strictly against the API contract in `CLUBS_NORTHSTAR.md` §7.4. The Go
-  backend is built in IDUNA in parallel and was **not available to test against**: nothing here has run
-  against a real server, and field names the contract leaves loose (rank fields, matrix cells, conflict
-  lists) are read tolerantly rather than known.
+- **Status, honestly**: the front end is written to the contract in `CLUBS_NORTHSTAR.md` §7.4 and the IDUNA
+  backend now exists to it (`IDUNA` `1dbc354` core, `ccc14ca` telemetry/rank/analytics, `db8ca8d` Back Office
+  `/admin/clubs`, `9078894` shared-auth hardening). Backend is proven by Go handler tests on SQLite, not yet
+  deployed; **this static site has never been run against that API in a browser**. Deploy needs IDUNA rebuilt
+  with migration `202610120001_wotan_clubs.sql`.
 - **What is verified**: `node scripts/clubs-affordance-test.js` (plain node, no deps) table-tests the
   permission -> affordance rules in `js/club-perms.js` and runs the real page scripts inside a tiny DOM
   and fetch stub: per-role console contents, disabled-with-reason buttons, XSS-safe feed rendering,

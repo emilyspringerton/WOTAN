@@ -95,6 +95,12 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
 
 ## Real, current status
 
+- `clubs/` — **Clubs (teams), Phase 2** (2026-10-12, see `CLUBS_NORTHSTAR.md`): directory, tier-shaped public page,
+  members workspace, manager console, invite join flow, settings/sync target. Backend is IDUNA
+  `internal/http/handlers/clubs*.go` + `internal/clubs` (authz) + Back Office `/admin/clubs`; authorization is
+  `permission + club_id` evaluated server-side from membership rows, not from the JWT. Rank is self-declared
+  (always "unverified"). Built and handler-tested, **not yet deployed or browser-verified** (see the doc's §12).
+
 - `hearthstone/` — **Hearthstone decks + socials** (2026-10-09, see `HEARTHSTONE_NORTHSTAR.md`): IDUNA-style (cream/gold) skin
   (`css/wotan-hs.css`, `body.hs`) for `index.html` (Decks), `deck.html`, `submit.html`, `feed.html`, `players.html`, `u.html`; shared
   `js/wotan-nav.js` topbar (game switch + the ONE account widget, `data-skin="hs|dw"`) now used by every page. **Standing rule: pages never

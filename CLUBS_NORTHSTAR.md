@@ -403,3 +403,31 @@ Wave 1 = A ∥ C. Wave 2 = B ∥ D (after A is committed; they touch disjoint fi
 `HEARTHSTONE_NORTHSTAR.md` (Phase 1 HS decks/socials) · `NORTHSTAR.md` (DEADWEIGHT match stats) ·
 `IDUNA/internal/http/handlers/hs_social.go` (conventions this phase copies) · `HRIP/tracker/README.md`
 (uplink) · `IDUNA/docs/iam-spec.md` (roles/permissions model).
+
+## 12. Build status (2026-10-12)
+
+Built, in code and committed: P2-A core (IDUNA `1dbc354`), P2-C front end (WOTAN `5c17ab1`), P2-B telemetry /
+rank / analytics (IDUNA `ccc14ca`), P2-D Back Office console (IDUNA `db8ca8d`), plus a shared-middleware fix so
+`aud=wotan-club` tokens are refused by `RequireAuth`/`RequireCookieAuth` (IDUNA `9078894`).
+
+**Verified for real**: `go build`/`go vet` clean; `internal/clubs` authz table tests; 15 `TestClub*` handler
+integration tests (every role, denial matrix, §4.2 cross-tenant isolation, exclusive conflicts, invite
+replay/expiry, last-manager, stale membership after removal); P2-B ingest/leak/analytics/rank tests; 10
+`TestAdminClubs_*` tests through the real cookie+`iduna.admin` stack; front-end `scripts/clubs-affordance-test.js`
+23/23. The 9 failing `game_online` ticket tests and the `nock` door-script test fail identically on the
+pre-Phase-2 commit `80fd135` (checked) -- not caused by this work.
+
+**Not verified**: any real browser rendering (no Chromium here); the static site against the real API; the
+migration on MySQL (only SQLite exercised); the PowerShell uplink changes on Windows (substring/Go tests only);
+production load; the `iduna:wotan.club.*` event mirror (tests ran with `EventLog=nil`).
+
+**Deviations from this doc's contract** (all backend-side, front end already tolerant): routes live under
+`/api/v1/clubs/` including `GET /clubs/me/clubs` and `GET /clubs/users/{handle}/clubs` (`/api/v1/users/` is
+taken); `PUT visibility` accepts `{reveal:true}`; invite response is `{id,url,role,expires_at,bound_handle}`;
+platform admins have no implicit override on member endpoints -- only the reasoned, audited `/clubs/admin/*`
+and `/admin/clubs` paths; admin reads require `?reason=`; a deleted club's slug is not reusable; featured decks
+capped at 12; `wotan.club.create` is implicit for any signed-in sub with an HS handle (players get no
+role-based permissions in IDUNA today -- `player_permissions` is explicit per-account grants).
+
+**Known follow-ups**: verified legend rank (§8); Back Office cross-club reports queue index; PARENA
+replacement of the plain-Go `internal/clubs` authz stopgap (labelled in code); a headless-browser pass.
