@@ -431,3 +431,9 @@ role-based permissions in IDUNA today -- `player_permissions` is explicit per-ac
 
 **Known follow-ups**: verified legend rank (§8); Back Office cross-club reports queue index; PARENA
 replacement of the plain-Go `internal/clubs` authz stopgap (labelled in code); a headless-browser pass.
+
+## 13. Identity federation (Phase 2b)
+
+Linked accounts (Battle.net / Google / Twitch), upload keys bound to a verified BattleTag, and the new gates on
+club creation and tracker download are specified in `IDENTITY_NORTHSTAR.md`. It tightens §6 (ingest attributes
+games to a linked tag; unverified-tag games are `private` only) and the implicit `wotan.club.create` grant.
