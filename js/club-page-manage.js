@@ -116,7 +116,7 @@
       }
     }
     return h('div', { 'class': 'club-member', style: { 'margin-bottom': '.5rem' } },
-      h('div', { 'class': 'who' }, CUI.handleOf(m) ? UI.handleLink(CUI.handleOf(m)) : h('span', { 'class': 'hs-meta', text: 'former member' }),
+      h('div', { 'class': 'who' }, CUI.nameLink(m),
         CUI.roleBadge(target.role), target.is_owner ? h('span', { 'class': 'hs-badge plain', text: 'Owner' }) : null, target.is_me ? h('span', { 'class': 'hs-meta', text: '(you)' }) : null),
       h('div', { 'class': 'rk' }, CUI.rankBadge(m)),
       acts.children.length ? acts : null);

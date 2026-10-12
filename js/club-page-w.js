@@ -131,7 +131,7 @@
     var cWrap = null, cCount = typeof p.comments === 'number' ? p.comments : (typeof p.comment_count === 'number' ? p.comment_count : 0);
     var cBtn = h('button', { type: 'button', 'class': 'hs-btn sm ghost', text: commentLabel(cCount), 'aria-expanded': 'false' });
     function commentLabel(n) { return n ? n + (n === 1 ? ' comment' : ' comments') : 'Comment'; }
-    el.appendChild(h('div', { 'class': 'hs-post-head' }, author ? UI.handleLink(author) : h('span', { text: 'former member' }), h('span', { 'class': 'hs-meta', text: UI.ago(p.created_at) }), pinMark));
+    el.appendChild(h('div', { 'class': 'hs-post-head' }, CUI.nameLink(p, author), h('span', { 'class': 'hs-meta', text: UI.ago(p.created_at) }), pinMark));
     el.appendChild(h('div', { 'class': 'hs-post-body', text: p.body || '' }));
     if (p.pinned_deck_id) el.appendChild(h('p', { 'class': 'hs-meta' }, 'Pinned deck: ', h('a', { href: UI.deckURL(p.pinned_deck_id), text: 'open deck' })));
     var actions = h('div', { 'class': 'hs-post-actions' }, cBtn);
@@ -197,7 +197,7 @@
   function commentNode(c) {
     var a = CUI.handleOf(c);
     return h('div', { 'class': 'hs-comment' },
-      h('div', { 'class': 'hs-comment-head' }, a ? UI.handleLink(a) : h('span', { text: 'former member' }), h('span', { 'class': 'hs-meta', text: UI.ago(c.created_at) })),
+      h('div', { 'class': 'hs-comment-head' }, CUI.nameLink(c, a), h('span', { 'class': 'hs-meta', text: UI.ago(c.created_at) })),
       h('div', { 'class': 'hs-comment-body', text: c.body || '' }));
   }
 
@@ -261,7 +261,7 @@
         if (typeof wins === 'number' && typeof games === 'number') tail.push(wins + ' wins / ' + games + ' games');
         else if (typeof wins === 'number') tail.push(wins + ' wins');
         else if (typeof games === 'number') tail.push(games + ' games');
-        return h('div', null, a ? UI.handleLink(a) : h('span', { 'class': 'hs-meta', text: 'former member' }), h('span', { 'class': 'hs-meta', text: tail.join(' ') }));
+        return h('div', null, CUI.nameLink(c, a), h('span', { 'class': 'hs-meta', text: tail.join(' ') }));
       })));
     } catch (e) {
       if (e.status === 404 || e.status === 501) unavailable(box, 'Contributor board');

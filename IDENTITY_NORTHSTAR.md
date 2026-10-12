@@ -150,6 +150,8 @@ best-of and per-region lines.
 |---|---|---|
 | ID-A | Migration + identity resolution + Battle.net SSO + Twitch link + identities API + upload keys + exchange + ingest tag binding + gates + permissions + `/admin/identities` + tests | IDUNA |
 | ID-B | WOTAN: login-page order (IDUNA-hosted SSO page button), Linked accounts + Upload keys in settings, tracker gate modal, uplink installer/exchange, Twitch display name & badges, affordance test | WOTAN + HRIP uplink |
+
+> **ID-B status (2026-10-12):** built except the IDUNA-hosted SSO login page order (IDUNA-side, not in this repo). Front end is untested in a browser and against the real API; the uplink change is an unapplied patch (`HRIP/tracker/uplink/uplink-key.patch`) because the script is embedded in IDUNA `hs_live.go`.
 | ID-C | Rank-verification job | IDUNA (follow-up, needs live leaderboard shape) |
 | ID-D | Deploy + register Battle.net/Twitch apps (human), real OAuth round trip | founder/ops |
 

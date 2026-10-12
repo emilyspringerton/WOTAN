@@ -1,0 +1,19 @@
+/* Identity federation UI (account page, verification gate, grace banner). Uses the --hs-* tokens from
+   wotan-hs.css; safe to load alone on pages that do not load wotan-clubs.css. */
+dialog.id-dialog { border: 1px solid var(--hs-line-strong); border-radius: var(--hs-radius); padding: 1.2rem; max-width: min(34rem, 94vw); width: 100%; background: var(--hs-panel); color: var(--hs-ink); box-shadow: 0 20px 50px -20px rgba(0,0,0,.5); }
+dialog.id-dialog::backdrop { background: rgba(40, 34, 26, .5); }
+dialog.id-dialog .hs-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+.id-banner { margin: .8rem 0; padding: .65rem .9rem; border: 1px solid var(--hs-warn); border-radius: var(--hs-radius-sm); background: var(--hs-raise); font-size: .93rem; }
+.id-grace { margin: .6rem 0; padding: .55rem .8rem; border-left: 3px solid var(--hs-warn); background: var(--hs-raise); border-radius: var(--hs-radius-sm); font-size: .93rem; }
+.id-group { margin: 1rem 0 1.4rem; }
+.id-group > h3 { margin: 0 0 .3rem; }
+.id-keybox { font-family: ui-monospace, Menlo, Consolas, monospace; min-width: 0; flex: 1 1 18rem; }
+.id-reveal { margin: 1rem 0; padding: .9rem 1rem; border: 1px solid var(--hs-gold); border-radius: var(--hs-radius); background: var(--hs-raise); }
+.id-cmd { margin: 1rem 0; }
+.id-cmd textarea { width: 100%; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .8rem; min-height: 4.5rem; }
+.id-key.revoked { opacity: .6; }
+.id-rej { color: var(--hs-warn); }
+.id-rej-note { margin-top: .6rem; }
+.id-saveonce { margin-top: 1rem; }
+.id-tw { display: inline-block; margin-right: .25em; font-size: .85em; color: #6441a5; font-weight: 700; }
+.club-rank.ok .vf.matched { letter-spacing: .06em; }

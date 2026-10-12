@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-identity.css">
 <style>
   .trk { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
   @media (max-width: 860px) { .trk { grid-template-columns: 1fr; } }
@@ -41,11 +42,14 @@
     </div>
   </section>
 
+  <div id="id-grace" hidden></div>
+
   <section class="hs-panel" id="connect" hidden>
     <h2 class="hs-h3 trk-h">Connect your PC</h2>
     <p class="hs-meta"><b>One time only:</b> open PowerShell on the PC that runs Hearthstone and paste this. It puts a <b>WOTAN Hearthstone Tracker</b> icon on your Desktop (and Start menu). From then on, just double-click the icon before you play. It always runs the newest tracker, signs you in with IAM in your browser, and streams your game&rsquo;s log lines (read-only) to your private tracker here.</p>
     <textarea class="hs-textarea trk-cmd" id="icmd" readonly spellcheck="false" style="min-height:4rem"></textarea>
     <p><button class="hs-btn sm" id="icopy" type="button">Copy</button> <span class="hs-meta" id="icopied"></span></p>
+    <p class="hs-meta">Prefer not to sign in every time? <a href="/account/#keys">Create an upload key</a> in your account settings; the installer can store it encrypted on your PC.</p>
     <details><summary class="hs-meta">Run once without installing</summary>
       <textarea class="hs-textarea trk-cmd" id="cmd" readonly spellcheck="false"></textarea>
       <p><button class="hs-btn sm" id="copy" type="button">Copy</button> <span class="hs-meta" id="copied"></span></p>
@@ -88,6 +92,8 @@
 <script src="/js/wotan-nav.js"></script>
 <script src="/js/hs-api.js"></script>
 <script src="/js/hs-ui.js"></script>
+<script src="/js/identity-api.js"></script>
+<script src="/js/identity-gate.js"></script>
 <script src="/js/hs-page-tracker.js"></script>
 <script src="/js/cookie-consent.js"></script>
 </body>

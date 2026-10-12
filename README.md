@@ -166,3 +166,25 @@ toggles, self-declared rank). Club badges also appear on `hearthstone/u.html` pr
 - **Not verified**: real-browser rendering, layout, touch behaviour, or the live API round trip (no
   headless Chromium on the build machine). Verified legend rank has no data source yet; ranks always show as unverified.
 - Files: `clubs/*.html`, `js/club-{api,perms,ui,badges}.js`, `js/club-page-*.js`, `css/wotan-clubs.css`.
+
+## Linked accounts, upload keys, verification gate (Phase 2b, chunk ID-B, 2026-10-12) — front end only
+`/account/` is the identity settings page (account menu: "Account & linked accounts"): **linked accounts**
+(Battle.net, one per Battle.net account you play on; Google; Twitch; unlink with disabled-with-reason guards driven
+by the server's `can_unlink`), **privacy** toggles (show Twitch name, show BattleTag; both off by default) and
+**tracker upload keys** (create, one-time reveal with copy button, both install one-liners, revoke, accepted and
+"rejected: BattleTag not linked" counters with the explanation). A **"Competitive Verification Required"** modal
+(`js/identity-gate.js`) gates the tracker install-command copy and club creation when no Battle.net identity is linked,
+with a "Continue for now" path and banner during the 30-day grace window. Club rosters show the Twitch name (with a
+Twitch mark) only for players who opted in, and rank badges say "Leaderboard-matched" instead of "verified".
+- **Contract**: coded to `IDENTITY_NORTHSTAR.md` §4/§8; every endpoint path lives in `js/identity-api.js` only.
+- **Status, honestly**: the IDUNA backend (chunk ID-A) was being built in parallel and is **not deployed**; Battle.net
+  and Twitch OAuth apps are not registered (human step, chunk ID-D). This static front end has **never run in a
+  browser or against the real API**. Verified only by `node scripts/identity-affordance-test.js` (plain node, DOM and
+  fetch stub: rendering, gating, one-time reveal, API calls made, XSS-safe text, wiring) plus the unchanged clubs test.
+- **Assumption the backend must meet**: link starts are full-page navigations that cannot carry an Authorization header,
+  so the front end passes the session token as `access_token=` on the start URL (`IDAPI.CONFIG.linkTokenParam`), and
+  expects the callback to redirect back to `redirect_uri` with `?linked=<provider>` or `?link_error=<code>`.
+- **Uplink**: the PowerShell uplink is served by IDUNA (`hs_live.go`), not from this repo. The `-Key`/`-SaveKey`
+  (DPAPI) key-exchange change is delivered as a patch in `HRIP/tracker/uplink/uplink-key.patch`, **not applied and not
+  run** (no PowerShell here).
+- Files: `account/index.html`, `js/identity-{api,gate,page-account}.js`, `css/wotan-identity.css`, `scripts/identity-affordance-test.js`.

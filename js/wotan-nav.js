@@ -181,6 +181,8 @@
     }
     // Clubs (Phase 2): my clubs, tracker sync target, roster toggles. Not on the REDGARDEN tab (profiles are per game).
     if (skin !== 'rg') menu.appendChild(el('a', { role: 'menuitem', href: '/clubs/settings.html', text: 'My clubs & sync' }));
+    // Identity federation: linked accounts (Battle.net/Google/Twitch), privacy, tracker upload keys. Site-wide.
+    menu.appendChild(el('a', { role: 'menuitem', href: '/account/', text: 'Account & linked accounts' }));
     menu.appendChild(el('hr'));
     var out = el('button', { type: 'button', role: 'menuitem', text: 'Sign out' });
     out.addEventListener('click', function () {

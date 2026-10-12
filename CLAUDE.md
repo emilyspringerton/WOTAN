@@ -101,6 +101,15 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
   `permission + club_id` evaluated server-side from membership rows, not from the JWT. Rank is self-declared
   (always "unverified"). Built and handler-tested, **not yet deployed or browser-verified** (see the doc's §12).
 
+- `account/` — **Identity federation, Phase 2b front end (chunk ID-B, 2026-10-12, see `IDENTITY_NORTHSTAR.md`)**: linked accounts
+  (Battle.net xN / Google / Twitch), privacy toggles, tracker upload keys, and the "Competitive Verification Required" gate
+  (`js/identity-gate.js`, reused by tracker.html's install-command copy and the club-create flow). **All identity/upload-key API
+  paths live in `js/identity-api.js` only** (also display-name and rank-wording helpers: Twitch name only on opt-in,
+  "Leaderboard-matched" not "verified"). Account-menu entry is in `wotan-nav.js`; no page renders its own Sign-in button.
+  Backend is IDUNA chunk ID-A (parallel, not deployed); never run in a browser; verified only by
+  `scripts/identity-affordance-test.js`. Link starts pass the session as `access_token=` because navigations cannot carry a
+  header (a backend assumption, see README). Uplink key exchange is a patch in `HRIP/tracker/uplink/`, not applied.
+
 - `hearthstone/` — **Hearthstone decks + socials** (2026-10-09, see `HEARTHSTONE_NORTHSTAR.md`): IDUNA-style (cream/gold) skin
   (`css/wotan-hs.css`, `body.hs`) for `index.html` (Decks), `deck.html`, `submit.html`, `feed.html`, `players.html`, `u.html`; shared
   `js/wotan-nav.js` topbar (game switch + the ONE account widget, `data-skin="hs|dw"`) now used by every page. **Standing rule: pages never

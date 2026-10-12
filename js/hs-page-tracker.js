@@ -102,11 +102,15 @@
   document.addEventListener('DOMContentLoaded', function () {
     showCommand();
     [['copy', 'cmd', 'copied'], ['icopy', 'icmd', 'icopied']].forEach(function (ids) {
-      $(ids[0]).addEventListener('click', function () {
+      $(ids[0]).addEventListener('click', async function () {
+        // Downloading the tracker needs a linked Battle.net account (IDENTITY_NORTHSTAR section 5). UX gate only:
+        // the server enforces the same rule; during the 30-day grace window the modal offers "Continue for now".
+        if (window.IDGate && !(await window.IDGate.require({ action: 'download the tracker' }))) return;
         var t = $(ids[1]); t.select();
         try { document.execCommand('copy'); $(ids[2]).textContent = 'Copied.'; } catch (e) { $(ids[2]).textContent = 'Press Ctrl+C.'; }
       });
     });
+    if (window.IDGate) window.IDGate.banner($('id-grace'));
     if (!HS.hasSession()) { showSignIn(); return; }
     $('connect').hidden = false;
     loadPrefs();

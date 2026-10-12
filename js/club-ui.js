@@ -37,6 +37,18 @@
   }
   function roleOfMember(m) { return P.isOwner(m) && !m.role ? 'manager' : P.roleOf(m && m.role); }
 
+  // Display name for a person: Twitch name with a Twitch mark when the player opted in (IDENTITY_NORTHSTAR I9),
+  // else the @handle. Falls back to the plain handle link if js/identity-api.js is absent. `fallbackHandle`
+  // is for list items where the handle was already extracted from a nested field.
+  function nameLink(obj, fallbackHandle) {
+    var hd = (obj && handleOf(obj)) || fallbackHandle || '';
+    if (!hd) return h('span', { 'class': 'hs-meta', text: 'former member' });
+    var dn = window.IDAPI ? window.IDAPI.displayName(Object.assign({}, obj || {}, { handle: hd })) : null;
+    if (!dn || !dn.twitch) return UI.handleLink(hd);
+    return h('a', { href: '/hearthstone/u.html?h=' + encodeURIComponent(hd), title: 'Twitch name (WOTAN handle @' + hd + ')' },
+      h('span', { 'class': 'id-tw', 'aria-label': 'Twitch', text: '\u25B6' }), h('span', { text: dn.text }));
+  }
+
   // ---- badges ----
   function tierBadge(tier) {
     var t = P.normTier(tier);
@@ -53,9 +65,11 @@
   function rankBadge(m) {
     var r = rankOf(m);
     if (!r.legend) return h('span', { 'class': 'club-rank none', text: 'Unranked' });
-    return h('span', { 'class': 'club-rank ' + (r.verified ? 'ok' : 'unv'), title: r.verified ? 'Rank verified' : 'Self-declared rank, not verified' },
+    // "Leaderboard-matched", never "verified": the match is a name match against the public leaderboard, not proof.
+    var lbl = window.IDAPI ? window.IDAPI.rankLabel(r.verified) : (r.verified ? 'Leaderboard-matched' : 'unverified');
+    return h('span', { 'class': 'club-rank ' + (r.verified ? 'ok' : 'unv'), title: r.verified ? 'Matched to a public Hearthstone leaderboard entry for a linked BattleTag' : 'Self-declared rank, not verified' },
       h('b', { text: 'Legend #' + r.legend }), r.region ? h('span', { 'class': 'rg', text: r.region }) : null,
-      h('span', { 'class': 'vf', text: r.verified ? 'verified' : 'unverified' }));
+      h('span', { 'class': 'vf' + (r.verified ? ' matched' : ''), text: lbl }));
   }
 
   function memberRow(m, extra) {
@@ -63,10 +77,10 @@
     var r = rankOf(m);
     return h('div', { 'class': 'club-member' },
       h('div', { 'class': 'who' },
-        hd ? UI.handleLink(hd) : h('span', { 'class': 'hs-meta', text: 'former member' }),
+        nameLink(m),
         roleBadge(roleOfMember(m)), P.isOwner(m) ? ownerBadge() : null),
       h('div', { 'class': 'rk' }, rankBadge(m),
-        r.battletag ? h('span', { 'class': 'bt', text: r.battletag + (r.btVerified ? ' ✓' : ''), title: r.btVerified ? 'BattleTag ownership verified' : 'Self-declared BattleTag' }) : null),
+        r.battletag ? h('span', { 'class': 'bt', text: r.battletag + (r.btVerified ? ' ✓' : ''), title: r.btVerified ? 'BattleTag linked via Battle.net' : 'Self-declared BattleTag' }) : null),
       extra || null);
   }
 
@@ -228,7 +242,7 @@
   window.CUI = {
     SLUG_RE: SLUG_RE, slugify: slugify,
     handleOf: handleOf, tierOf: tierOf, membersCount: membersCount, rankOf: rankOf, roleOfMember: roleOfMember,
-    tierBadge: tierBadge, roleBadge: roleBadge, rankBadge: rankBadge, memberRow: memberRow, clubCard: clubCard,
+    tierBadge: tierBadge, roleBadge: roleBadge, rankBadge: rankBadge, nameLink: nameLink, memberRow: memberRow, clubCard: clubCard,
     memberGate: memberGate, notFound: notFound, setBrand: setBrand, resolveClub: resolveClub, myRole: myRole, subnav: subnav,
     reasonButton: reasonButton, errMessage: errMessage, requireSession: requireSession, matchupMatrix: matchupMatrix
   };

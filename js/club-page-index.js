@@ -77,6 +77,7 @@
           await CLUB.post('', { name: name.value.trim(), slug: s, tagline: tag.value.trim(), privacy_tier: tier, is_exclusive: !!excl.checked });
           location.href = '/clubs/manage.html?s=' + encodeURIComponent(s);
         } catch (e) {
+          if (window.IDGate && window.IDGate.handleError(e, { action: 'create a club' })) { closeDlg(); return; }
           err.textContent = CUI.errMessage(e);
           err.hidden = false;
         }
@@ -92,7 +93,7 @@
   }
   function closeDlg() { if (typeof dlg.close === 'function') { try { dlg.close(); return; } catch (e) { /* ignore */ } } dlg.removeAttribute('open'); }
 
-  createBtn.addEventListener('click', function () {
+  createBtn.addEventListener('click', async function () {
     if (!CLUB.hasSession()) {
       UI.clear(hint);
       hint.hidden = false;
@@ -100,7 +101,10 @@
       UI.toast('Sign in from the top bar to create a club.', 'err');
       return;
     }
+    // Creating a club needs a linked Battle.net account (IDENTITY_NORTHSTAR section 5); UX gate only, the server enforces.
+    if (window.IDGate && !(await window.IDGate.require({ action: 'create a club' }))) return;
     openDlg();
   });
+  if (window.IDGate) window.IDGate.banner(UI.$('id-grace'));
   load(false);
 })();
