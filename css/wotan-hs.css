@@ -434,3 +434,52 @@ body.hs ::selection { background: color-mix(in srgb, var(--hs-gold) 40%, transpa
   body.hs *, body.hs *::before, body.hs *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .hs-deck:hover { transform: none; }
 }
+
+
+/* ---------------------------------------------------------------------------------------------
+   2026-10-15 chrome redesign (kanban #641): two rows on every page and skin.
+   Row 1 .wn-games -- white "GAMES" bar, each game with a one-line subtitle, active underlined gold.
+   Row 2 .wn-bar   -- navy brand bar: wordmark, section tabs, account widget (gold Sign in).
+   Overrides the per-skin custom properties inside .wn-bar so the account menu is dark too. */
+#wotan-nav { background: #fff; border-bottom: 0; }
+#wotan-nav .wn-games { background: #fff; border-bottom: 1px solid #e4e1ee; }
+.wn-games-in { max-width: 1280px; margin: 0 auto; display: flex; align-items: stretch; overflow-x: auto; scrollbar-width: none; }
+.wn-games-in::-webkit-scrollbar { display: none; }
+.wn-games-label {
+  font: 600 .72rem/1 var(--wn-display); letter-spacing: .2em; text-transform: uppercase; color: #5b5876;
+  display: inline-flex; align-items: center; padding: 0 1.4rem 0 2.5rem; font-family: "Barlow Condensed", var(--wn-display);
+}
+.wn-game {
+  display: inline-flex; flex-direction: column; justify-content: center; gap: .15rem; padding: .7rem 1.5rem;
+  border-left: 1px solid #ece9f3; border-bottom: 3px solid transparent; color: #1a1333; white-space: nowrap;
+}
+.wn-game:last-child { border-right: 1px solid #ece9f3; }
+.wn-game b { font: 700 1.05rem/1.1 "Barlow Condensed", var(--wn-display); letter-spacing: .1em; text-transform: uppercase; }
+.wn-game small { font: 400 .78rem/1.2 "Barlow", var(--wn-body); color: #6b6885; }
+.wn-game:hover { background: #f6f4fb; text-decoration: none; }
+.wn-game[aria-current="true"] { border-bottom-color: #f5b82e; }
+.wn-bar {
+  --wn-fg: #ffffff; --wn-dim: #d4cdea; --wn-line: #3a2d6b; --wn-accent: #f5b82e; --wn-accent-fg: #1a1233;
+  --wn-hover: #2f2466; --wn-pop: #241a50; --wn-focus: #f5b82e; --wn-shadow: 0 18px 50px rgba(3, 1, 10, .55);
+  background: #1c1446; color: #fff;
+}
+.wn-bar .wn-in { max-width: 1280px; padding: .55rem 2.5rem; gap: .5rem 2rem; flex-wrap: nowrap; }
+.wn-bar .wn-brand { font-family: "Barlow Condensed", var(--wn-display); font-weight: 700; font-size: 2rem; letter-spacing: .04em; color: #fff; padding: 0; }
+.wn-bar .wn-brand small { font-family: "Barlow", var(--wn-body); font-weight: 600; font-size: .66rem; letter-spacing: .2em; color: #b3a8d6; }
+.wn-bar .wn-tabs { order: 0; flex: 1 1 auto; border-top: 0; padding-top: 0; margin: 0 0 0 1rem; justify-content: center; gap: .4rem; }
+.wn-bar .wn-tabs a {
+  font: 600 1rem/1 "Barlow Condensed", var(--wn-display); letter-spacing: .1em; text-transform: uppercase; color: #fff;
+  padding: .7rem 1rem; border-radius: 8px; border-bottom: 0; min-height: 40px;
+}
+.wn-bar .wn-tabs a:hover { background: #2f2466; }
+.wn-bar .wn-tabs a[aria-current="page"] { background: #3a2d6b; font-weight: 700; }
+.wn-bar .wn-signin, .wn-bar .wn-user {
+  background: #f5b82e; border-color: #f5b82e; color: #1a1233; min-height: 44px; padding: 0 1.1rem;
+  font: 700 1rem/1 "Barlow", var(--wn-body); letter-spacing: 0; border-radius: 8px;
+}
+.wn-bar .wn-signin:hover, .wn-bar .wn-user:hover, .wn-bar .wn-user[aria-expanded="true"] { background: #ffc94d; }
+@media (max-width: 899px) {
+  .wn-bar .wn-in { flex-wrap: wrap; padding: .55rem 1rem; }
+  .wn-bar .wn-tabs { order: 3; flex: 1 1 100%; justify-content: flex-start; margin: 0; overflow-x: auto; }
+  .wn-games-label { padding-left: 1rem; }
+}

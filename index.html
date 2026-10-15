@@ -7,65 +7,153 @@
 <meta name="description" content="WOTAN: EINHORN_INDUSTRIAL's online social tournament site — decks, hats, player profiles, friends and duels.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/wotan-theme.css">
 <link rel="stylesheet" href="/css/wotan-hs.css">
 <style>
-  .wrap { padding-top: 4rem; }
-  .card:nth-of-type(1) { border-color: var(--gold); }
+  /* Home (kanban #641): light page, hero + "open to everyone" column, three "more from" cards. */
+  body { background: #f3f2f8; color: #2b2740; font-family: "Barlow", var(--font-body); background-attachment: scroll; }
+  .home { max-width: 1152px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+  .home a { color: #4d33c9; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+  .panel { background: #fff; border: 1px solid #e6e3f0; border-radius: 16px; overflow: hidden; }
+  .hero {
+    padding: 2.5rem 2.5rem 2.2rem; color: #fff; background-color: #2a1a5e;
+    background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .live { display: inline-flex; align-items: center; gap: .5rem; background: #f5b82e; color: #1a1233; border-radius: 999px;
+    padding: .4rem .9rem; font: 700 .85rem/1 "Barlow Condensed", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+  .live::before { content: ""; width: .6rem; height: .6rem; border-radius: 50%; background: #1a1233; }
+  .hero h1 { font: 700 6.2rem/1 "Barlow Condensed", sans-serif; margin: 1rem 0 .5rem; letter-spacing: .01em; color: #fff; }
+  .hero p { font-size: 1.35rem; line-height: 1.5; color: #e6e0fa; margin: 0; max-width: 34rem; }
+  .body { padding: 2.2rem 2.5rem 2.5rem; }
+  .body h2 { font: 700 2.1rem/1.1 "Barlow Condensed", sans-serif; margin: 0 0 1rem; color: #17112e; }
+  .body p { font-size: 1.1rem; line-height: 1.6; color: #55516d; margin: 0 0 1.2rem; }
+  .note { background: #f3f2f8; border-radius: 10px; padding: .9rem 1.1rem; font-size: .95rem; color: #55516d; margin: 0 0 1.5rem; }
+  .btn { display: inline-flex; align-items: center; gap: .6rem; background: #4d33c9; color: #fff !important; border-radius: 8px;
+    padding: .95rem 1.5rem; font: 700 1.1rem/1 "Barlow", sans-serif; text-decoration: none !important; }
+  .btn:hover { background: #5f47d8; }
+  .open-h { display: flex; align-items: center; gap: .7rem; padding: 1.5rem 1.7rem; border-bottom: 1px solid #ece9f3;
+    font: 700 1.4rem/1 "Barlow Condensed", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #17112e; }
+  .open-h svg { width: 1.4rem; height: 1.4rem; color: #4d33c9; }
+  .open { padding: 1.5rem 1.7rem 1.7rem; }
+  .open + .open { border-top: 1px solid #ece9f3; }
+  .chip { display: inline-block; background: #e8e4fa; color: #4d33c9; border-radius: 6px; padding: .3rem .6rem;
+    font: 700 .75rem/1 "Barlow Condensed", sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+  .open h3 { font: 700 2rem/1.1 "Barlow Condensed", sans-serif; margin: .9rem 0 .5rem; color: #17112e; }
+  .open p { font-size: 1.05rem; line-height: 1.55; color: #55516d; margin: 0 0 1rem; }
+  .open a, .more a.go { font-weight: 600; font-size: 1rem; text-decoration: none; }
+  .open a::after, .more a.go::after { content: " \2192"; }
+  .sec-h { display: flex; align-items: center; gap: 1.2rem; margin: 3rem 0 1.2rem; }
+  .sec-h h2 { font: 700 2rem/1 "Barlow Condensed", sans-serif; letter-spacing: .1em; text-transform: uppercase; margin: 0; color: #17112e; white-space: nowrap; }
+  .sec-h::after { content: ""; flex: 1; height: 1px; background: #d9d5e8; }
+  .more-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+  .more { display: flex; flex-direction: column; background: #fff; border: 1px solid #e6e3f0; border-radius: 16px; overflow: hidden; }
+  .more header { padding: 1.5rem 1.7rem 1.4rem; }
+  .more header small { display: block; font: 700 .78rem/1 "Barlow Condensed", sans-serif; letter-spacing: .16em; text-transform: uppercase; margin-bottom: .7rem; }
+  .more header h3 { font: 700 2.3rem/1 "Barlow Condensed", sans-serif; margin: 0; }
+  .more.hs header { background: #f6e6b4; color: #3a2a06; }
+  .more.rg header { background: #1d6b4a; color: #fff; }
+  .more.store header { background: #2a1a5e; color: #fff; }
+  .more.store header h3 { color: #f5b82e; }
+  .more .more-b { padding: 1.5rem 1.7rem 1.7rem; display: flex; flex-direction: column; gap: 1.2rem; flex: 1; justify-content: space-between; }
+  .more p { margin: 0; font-size: 1.05rem; line-height: 1.55; color: #55516d; }
+  .notice { margin-top: 2.5rem; background: #fff5d6; border: 1px solid #f0dca0; border-radius: 12px; padding: 1.4rem 1.7rem; }
+  .notice h3 { font: 700 1.3rem/1.2 "Barlow", sans-serif; margin: 0 0 .5rem; color: #3a2a06; }
+  .notice p { margin: 0; color: #5a4a1c; }
+  .notice a { color: #5a3d00; text-decoration: underline; }
+  @media (max-width: 900px) {
+    .grid, .more-grid { grid-template-columns: 1fr; }
+    .hero { padding: 1.8rem 1.4rem; } .hero h1 { font-size: 4.5rem; }
+    .body { padding: 1.6rem 1.4rem 1.8rem; }
+  }
 </style>
 </head>
 <body>
 <header id="wotan-nav" data-skin="dw" data-section="home"></header>
-<div class="wrap">
-  <h1>WOTAN</h1>
-  <p class="tagline">The online social tournament site &mdash; decks, hats, player profiles, friends, and friendly-challenge duels.</p>
-  <div class="status-badge">Live</div>
-  <div class="card">
-    <p><a class="back" href="/profile.html"><b>Player Profiles</b></a> and
-    <a class="back" href="/friends.html"><b>Friends &amp; Duels</b></a> &mdash; public DEADWEIGHT player
-    records, friend requests, and friendly-challenge duels. Sign in with the same IDUNA account as
-    the Hat Store to manage friends and challenges — your DEADWEIGHT account needs an email linked
-    first (from inside the DEADWEIGHT client) for IDUNA to recognize it here. An accepted duel
-    mints a live match token either DEADWEIGHT client (native or browser) can queue with directly.</p>
+<main class="home">
+  <div class="grid">
+    <section class="panel">
+      <div class="hero">
+        <span class="live">Live</span>
+        <h1>WOTAN</h1>
+        <p>The online social tournament site &mdash; decks, hats, player profiles, friends, and friendly-challenge duels.</p>
+      </div>
+      <div class="body">
+        <h2>Player Profiles and Friends &amp; Duels</h2>
+        <p>Public DEADWEIGHT player records, friend requests, and friendly-challenge duels. Sign in with the same
+          IDUNA account as the Hat Store to manage friends and challenges.</p>
+        <p>An accepted duel mints a live match token either DEADWEIGHT client (native or browser) can queue with directly.</p>
+        <div class="note">Your DEADWEIGHT account needs an email linked first (from inside the DEADWEIGHT client) for IDUNA to recognize it here.</div>
+        <a class="btn" id="home-signin" href="/friends.html" data-signin>Sign in with IDUNA <span aria-hidden="true">&rarr;</span></a>
+      </div>
+    </section>
+    <aside class="panel">
+      <div class="open-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></svg>
+        Open to everyone
+      </div>
+      <div class="open">
+        <span class="chip">Deadweight</span>
+        <h3>Draft Decks</h3>
+        <p>Every deck drafted in DEADWEIGHT's draft queue, with win rates and per-card records. Hover any card to see it full size.</p>
+        <a href="/decks.html">No account needed</a>
+      </div>
+      <div class="open">
+        <span class="chip">Deadweight</span>
+        <h3>Matches</h3>
+        <p>The real leaderboard (rating/W-L-D) and recent match list, plus a step-through replay of any match: every card played,
+          every hull swing, replayed round by round through DEADWEIGHT's own match engine.</p>
+        <a href="/matches.html">No account needed</a>
+      </div>
+    </aside>
   </div>
-  <div class="card">
-    <p><a class="back" href="/decks.html"><b>Draft Decks</b></a> &mdash; every deck drafted in DEADWEIGHT's
-    draft queue, with win rates and per-card records. Hover any card to see it full size. Open to
-    everyone, no account needed.</p>
+
+  <div class="sec-h"><h2>More from WOTAN</h2></div>
+  <div class="more-grid">
+    <article class="more hs">
+      <header><small>Hearthstone</small><h3>Hearthstone Decks</h3></header>
+      <div class="more-b">
+        <p>The other half of the deck library: Hearthstone decks shared by players as readable lists and pasteable deck codes,
+          with likes, comments, player profiles and a wall. Switch between it and DEADWEIGHT from the game switch in the top bar.</p>
+        <a class="go" href="/hearthstone/">Browse decks &mdash; open to everyone</a>
+      </div>
+    </article>
+    <article class="more rg">
+      <header><small>REDGARDEN &middot; Knights of the Void</small><h3>Redgarden</h3></header>
+      <div class="more-b">
+        <p>The REDGARDEN leaderboard, hero win rates and per-player profiles: heroes played and recent results. Profiles are
+          separate from Hearthstone and DEADWEIGHT; switch from the game switch in the top bar.</p>
+        <a class="go" href="/redgarden/">View leaderboard &mdash; open to everyone</a>
+      </div>
+    </article>
+    <article class="more store">
+      <header><small>BRAWLPIT &middot; Phase 2</small><h3>Hat Store</h3></header>
+      <div class="more-b">
+        <p>The real Phase 2 store page: log in with your WOTAN/IDUNA account, spend Flow on a BRAWLPIT cosmetic hat.</p>
+        <a class="go" href="/store.html">Open the store</a>
+      </div>
+    </article>
   </div>
-  <div class="card">
-    <p><a class="back" href="/hearthstone/"><b>Hearthstone Decks</b></a> &mdash; the other half of the deck
-    library: Hearthstone decks shared by players as readable lists and pasteable deck codes, with likes,
-    comments, player profiles and a wall. A lighter, cream-and-gold section of its own; switch between it and
-    DEADWEIGHT from the game switch in the top bar. Browsing is open to everyone.</p>
+
+  <div class="notice">
+    <h3>This page is now WOTAN's own real home.</h3>
+    <p>The REDGARDEN bot leaderboard, hero-strength stats, and the in-browser GFD Battlegrounds demo haven't moved yet and are
+      still at <a href="https://okemily.com/tournaments.html">okemily.com/tournaments.html</a> &mdash; that page isn't going
+      away, it just isn't the front door anymore. Clubs live under your account menu once you sign in.</p>
   </div>
-  <div class="card">
-    <p><a class="back" href="/redgarden/"><b>Redgarden</b></a> &mdash; the REDGARDEN (Knights of the Void)
-    leaderboard, hero win rates and per-player profiles: heroes played and recent results. A third,
-    garden-green section of its own with profiles separate from Hearthstone and DEADWEIGHT; switch from the
-    game switch in the top bar. Browsing is open to everyone.</p>
-  </div>
-  <div class="card">
-    <p><a class="back" href="/matches.html"><b>Matches</b></a> &mdash; the real leaderboard (rating/W-L-D)
-    and recent match list, plus a step-through replay of any match: every card played, every hull swing,
-    replayed round by round through DEADWEIGHT's own match engine, cards shown as emoji by type. Open to
-    everyone, no account needed.</p>
-  </div>
-  <div class="card">
-    <p><a class="back" href="/store.html"><b>Hat Store</b></a> &mdash; the real Phase 2 store page
-    (WOTAN_HAT_STORE_NORTHSTAR.md): log in with your WOTAN/IDUNA account, spend Flow on a
-    BRAWLPIT cosmetic hat.</p>
-  </div>
-  <div class="card">
-    <p>This page is now WOTAN's own real home. The REDGARDEN bot leaderboard, hero-strength stats, and
-    the in-browser GFD Battlegrounds demo haven't moved yet and are still at
-    <a class="back" href="https://okemily.com/tournaments.html">okemily.com/tournaments.html</a> &mdash;
-    that page isn't going away, it just isn't the front door anymore.</p>
-  </div>
-</div>
+</main>
 <script src="/js/iduna-sso.js"></script>
 <script src="/js/wotan-nav.js"></script>
+<script>
+  // The page's own "Sign in with IDUNA" button uses the same SSO URL as the nav widget (data-signin
+  // makes wotan-nav remember this page for the return trip).
+  (function () {
+    var a = document.getElementById('home-signin');
+    if (a && window.WotanNav) { try { a.href = window.WotanNav.signInURL(); } catch (e) { /* keep fallback */ } }
+  })();
+</script>
 <script src="/js/cookie-consent.js"></script>
 </body>
 </html>

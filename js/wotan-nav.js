@@ -23,24 +23,19 @@
       ['submit', 'Submit', '/hearthstone/submit.html'],
       ['feed', 'Feed', '/hearthstone/feed.html'],
       ['players', 'Players', '/hearthstone/players.html'],
-      ['tracker', 'Tracker', '/hearthstone/tracker.html'],
-      ['clubs', 'Clubs', '/clubs/']
+      ['tracker', 'Tracker', '/hearthstone/tracker.html']
     ],
     rg: [
       ['board', 'Leaderboard', '/redgarden/'],
       ['heroes', 'Heroes', '/redgarden/heroes.html'],
-      ['play', 'Play', '/redgarden/play.html'],
-      ['clubs', 'Clubs', '/clubs/']
+      ['play', 'Play', '/redgarden/play.html']
     ],
     dw: [
       ['home', 'Home', '/'],
       ['play', 'Play', '/DEADWEIGHT/'],
       ['decks', 'Draft Decks', '/decks.html'],
       ['matches', 'Matches', '/matches.html'],
-      ['shankpit', 'SHANKPIT', '/shankpit.html'],
-      ['store', 'Hat Store', '/store.html'],
-      ['friends', 'Friends & Duels', '/friends.html'],
-      ['clubs', 'Clubs', '/clubs/']
+      ['shankpit', 'SHANKPIT', '/shankpit.html']
     ]
   };
 
@@ -115,17 +110,33 @@
 
   function build() {
     mount.textContent = '';
+    if (!document.getElementById('wn-fonts')) {
+      var lk = document.createElement('link');
+      lk.id = 'wn-fonts'; lk.rel = 'stylesheet';
+      lk.href = 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap';
+      document.head.appendChild(lk);
+    }
     var inner = el('div', { 'class': 'wn-in' });
 
+    // Row 1: GAMES bar -- the three games, each with a one-line subtitle, active one underlined.
+    var GAMES = [
+      ['dw', 'Deadweight', 'Drafts \u00b7 Matches \u00b7 Duels', '/decks.html'],
+      ['hs', 'Hearthstone', 'Shared deck library', '/hearthstone/'],
+      ['rg', 'Redgarden', 'Knights of the Void', '/redgarden/']
+    ];
+    var games = el('div', { 'class': 'wn-games' }, [
+      el('div', { 'class': 'wn-games-in' }, [el('span', { 'class': 'wn-games-label', text: 'Games' })].concat(GAMES.map(function (g) {
+        return el('a', { 'class': 'wn-game', href: g[3], 'aria-current': skin === g[0] ? 'true' : null }, [
+          el('b', { text: g[1] }), el('small', { text: g[2] })
+        ]);
+      })))
+    ]);
+    mount.appendChild(games);
+
+    // Row 2: brand bar -- wordmark, section tabs, the ONE account widget.
     var brand = el('a', { 'class': 'wn-brand', href: '/', 'aria-label': 'WOTAN home' }, [
       el('span', { text: 'Wotan' }),
       el('small', { text: 'EINHORN_INDUSTRIAL' })
-    ]);
-
-    var sw = el('div', { 'class': 'wn-switch', role: 'group', 'aria-label': 'Game' }, [
-      el('a', { href: '/decks.html', text: 'Deadweight', 'aria-current': skin === 'dw' ? 'true' : null }),
-      el('a', { href: '/hearthstone/', text: 'Hearthstone', 'aria-current': skin === 'hs' ? 'true' : null }),
-      el('a', { href: '/redgarden/', text: 'Redgarden', 'aria-current': skin === 'rg' ? 'true' : null })
     ]);
 
     var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : 'WOTAN sections') });
@@ -134,10 +145,9 @@
     });
 
     inner.appendChild(brand);
-    inner.appendChild(sw);
-    inner.appendChild(accountBox);
     inner.appendChild(tabs);
-    mount.appendChild(inner);
+    inner.appendChild(accountBox);
+    mount.appendChild(el('div', { 'class': 'wn-bar' }, [inner]));
   }
 
   var menuOpen = false;
