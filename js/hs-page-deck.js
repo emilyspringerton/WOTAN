@@ -20,9 +20,9 @@
     window.addEventListener('wotan:me', function () { /* topbar finished its own /me; our `who` already awaited the same promise */ });
   }
 
-  // Navy win-rate card (public record). Shown for others' decks with tracked games; the owner sees the fuller statsPanel.
+  // Navy win-rate card (public record); the owner additionally gets statsPanel in the sidebar.
   function winCard(d) {
-    if (!d.games || d.mine) return null;
+    if (!d.games) return null;
     var pct = Math.round((d.winrate || 0) * 100);
     var bar = h('i', { style: { width: Math.max(0, Math.min(100, pct)) + '%' } });
     function stat(n, l) { return h('div', null, h('b', { text: String(n) }), h('span', { text: l })); }
