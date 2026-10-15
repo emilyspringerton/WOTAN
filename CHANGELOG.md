@@ -255,4 +255,5 @@
   first.
 
 ## 2026-10-15
+- ops(identity): Twitch OAuth credentials set in live `iduna-env`, IDUNA restarted; `/auth/sso/twitch/start` verified 302 to Twitch with empty scope and `iam.okemily.com` callback (IDENT-04 Twitch half). Full browser round trip still unverified.
 - docs(identity): reconcile IDENTITY_NORTHSTAR §2 provider table and README with IQ-2 (Twitch is a login door, IDUNA 50c221d).
