@@ -19,7 +19,8 @@ export class DeadweightClient {
         this.round = 0;
         this.seat = 0;
     }
-    connect(name, token = '') {
+    /** mode 0 = random card queue, 2 = draft (HELLO mode byte; docs/WIRE_PROTOCOL.md). */
+    connect(name, token = '', mode = 0) {
         this.setState('connecting');
         this.ws = new WebSocket(this.bridgeUrl);
         this.ws.binaryType = 'arraybuffer';
@@ -36,7 +37,7 @@ export class DeadweightClient {
             // still sends no AUTH at all, matching the GUI/Android clients' own documented
             // "name-only play works with --no-auth servers" precedent — apps/gui/main.c's own
             // header comment.
-            this.send(proto.encodeHello(0, 0, name, ''));
+            this.send(proto.encodeHello(mode, 0, name, ''));
             if (token)
                 this.send(proto.encodeAuth(token));
         };
@@ -55,6 +56,26 @@ export class DeadweightClient {
     }
     queue(sameDeck, matchToken) {
         this.send(proto.encodeQueue(sameDeck, matchToken));
+    }
+    draftPick(index, mult) {
+        this.send(proto.encodeDraftPick(index, mult));
+    }
+    draftResume(cards) {
+        this.send(proto.encodeDraftResume(cards));
+    }
+    /** Drops the socket without firing any event (a replaced connection must not flip the new one's UI state). */
+    close() {
+        if (!this.ws)
+            return;
+        this.ws.onopen = null;
+        this.ws.onmessage = null;
+        this.ws.onclose = null;
+        this.ws.onerror = null;
+        try {
+            this.ws.close();
+        }
+        catch { /* already closed */ }
+        this.ws = null;
     }
     getState() {
         return this.state;
@@ -112,6 +133,12 @@ export class DeadweightClient {
             case 'ERROR':
                 this.setState('error');
                 this.ev.onError?.(f);
+                break;
+            case 'DRAFT_OFFER':
+                this.ev.onDraftOffer?.(f);
+                break;
+            case 'DRAFT_DONE':
+                this.ev.onDraftDone?.(f);
                 break;
             case 'PONG':
                 break;

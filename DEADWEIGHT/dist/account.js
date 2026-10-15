@@ -270,4 +270,33 @@ export async function setDisplayName(idunaBase, current, name) {
     persist(a);
     return a;
 }
+// ---- Draft run (S510 Draft Hub) -- same IDUNA routes apps/gui/main.c's dwi_draft_run_* call ----
+async function authed(idunaBase, token, path, method, body) {
+    return api(idunaBase, path, {
+        method,
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: body === undefined ? undefined : JSON.stringify(body),
+    });
+}
+export async function ticketBalance(idunaBase, playerID) {
+    const b = await api(idunaBase, '/players/' + encodeURIComponent(playerID) + '/tickets');
+    return b && typeof b.tickets === 'number' ? b.tickets : 0;
+}
+/** Spends one ticket and opens a run (ticketSpent=1), or reports the already-active run (ticketSpent=0).
+ * Throws ApiError(402) when the player has no tickets. */
+export async function draftRunStart(idunaBase, token) {
+    const b = await authed(idunaBase, token, '/draft-run/start', 'POST', {});
+    return { wins: b.wins | 0, losses: b.losses | 0, ticketSpent: !!b.ticket_spent };
+}
+export async function draftRunState(idunaBase, token) {
+    const b = await authed(idunaBase, token, '/draft-run', 'GET');
+    return { active: !!b.active, wins: b.wins | 0, losses: b.losses | 0, deck: Array.isArray(b.deck) ? b.deck.map((x) => Number(x)) : [] };
+}
+export async function draftRunSaveDeck(idunaBase, token, deck) {
+    await authed(idunaBase, token, '/draft-run/deck', 'POST', { deck });
+}
+export async function draftRunAbort(idunaBase, token) {
+    const b = await authed(idunaBase, token, '/draft-run/abort', 'POST', {});
+    return { wins: b.wins | 0, losses: b.losses | 0, granted: b.tickets_granted | 0, tickets: b.tickets | 0 };
+}
 //# sourceMappingURL=account.js.map

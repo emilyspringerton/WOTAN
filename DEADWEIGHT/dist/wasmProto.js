@@ -101,6 +101,20 @@ export function encodeLeave() {
     w.set_leave();
     return readEncoded(w, w.wasm_encode());
 }
+/** DRAFT_PICK (0x07): which offered card (0/1) and how many copies (1-3). Draft mode only. */
+export function encodeDraftPick(index, mult) {
+    const w = requireWasm();
+    w.set_draft_pick(index, mult);
+    return readEncoded(w, w.wasm_encode());
+}
+/** DRAFT_RESUME (0x08): resubmit a persisted 23-card deck (the Draft Hub's RESUME UPLINK after a reconnect). */
+export function encodeDraftResume(cards) {
+    const w = requireWasm();
+    w.set_draft_resume();
+    for (let i = 0; i < 23; i++)
+        w.set_draft_resume_card(i, i < cards.length ? cards[i] : -1);
+    return readEncoded(w, w.wasm_encode());
+}
 export function encodePing(nonce) {
     const w = requireWasm();
     w.set_ping(nonce);
