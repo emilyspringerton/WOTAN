@@ -508,3 +508,69 @@ html[data-theme="daylight"] #wotan-nav:not([data-skin="hs"]) {
   --wn-accent-fg: #ffffff; --wn-hover: #f0ece2; --wn-pop: #ffffff; --wn-focus: #6a2fc4;
   --wn-shadow: 0 10px 30px rgba(40, 30, 70, .16);
 }
+
+/* ---------------------------------------------------------------------------------------------
+   2026-10-15 Hearthstone pages in the new WOTAN look (founder screenshots + WOTAN_Home design mockup):
+   cool #f3f2f8 page, white cards, Barlow Condensed uppercase headings, indigo #4f33c4 actions, gold #f2b632
+   accent, gold-grid hero band, navy stat card, hexagonal cost gems. Re-tokenises body.hs so every .hs-*
+   component follows; the cream "IDUNA classic" values above are superseded. */
+body.hs {
+  --hs-bg: #f3f2f8; --hs-panel: #ffffff; --hs-panel-2: #f3f2f8; --hs-raise: #ffffff;
+  --hs-line: #e4e1ee; --hs-line-strong: #cfc9e3;
+  --hs-gold: #f2b632; --hs-gold-bright: #f5b82e; --hs-gold-deep: #4f33c4;
+  --hs-ink: #17122b; --hs-soft: #3b3555; --hs-faint: #5a5470;
+  --hs-rose: #d6456b; --hs-rose-deep: #b02a50; --hs-ok: #1d7a4a; --hs-err: #b3261e; --hs-warn: #8a5a00;
+  --hs-radius: 12px; --hs-radius-sm: 8px;
+  --hs-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --hs-read: "Barlow", system-ui, sans-serif; --hs-ui: "Barlow", system-ui, sans-serif;
+  --hs-shadow: 0 1px 2px rgba(23, 18, 43, .06);
+  font-size: 17px;
+}
+body.hs a { text-decoration-color: color-mix(in srgb, #4f33c4 40%, transparent); }
+body.hs a:hover { color: #2a1b5c; }
+body.hs .hs-h1, body.hs .hs-h2, body.hs .hs-h3 { font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+body.hs .hs-h1 { font-weight: 800; font-size: clamp(2.6rem, 8vw, 4.6rem); line-height: .95; color: #2a1d00; }
+body.hs .hs-eyebrow, body.hs .hs-label { font-family: var(--hs-display); font-weight: 700; letter-spacing: .16em; }
+body.hs .hs-deck-title, body.hs .hs-person a.handle { text-transform: none; font-weight: 700; letter-spacing: 0; }
+body.hs .hs-lede, body.hs .hs-desc { font-style: normal; }
+
+/* hero band: full-bleed gold grid */
+body.hs .hs-hero, body.hs .hs-deckhead {
+  position: relative; border-bottom: 0; padding: 2rem 0 2.2rem; margin-bottom: 1.5rem;
+  background-color: #f3e5ab;
+  background-image: linear-gradient(rgba(138, 100, 0, .10) 1px, transparent 1px), linear-gradient(90deg, rgba(138, 100, 0, .10) 1px, transparent 1px);
+  background-size: 32px 32px;
+  box-shadow: 0 0 0 100vmax #f3e5ab; clip-path: inset(0 -100vmax);
+}
+body.hs .hs-hero-stats {
+  background: #1e1445; border-top: 4px solid #b8860b; border-radius: 12px; padding: 1.1rem 1.4rem; color: #fff;
+  box-shadow: 0 14px 34px -14px rgba(30, 20, 69, .6);
+}
+body.hs .hs-hero-stats b { color: #fff; font-weight: 800; font-size: 2.4rem; }
+body.hs .hs-hero-stats span { color: #bdb4e6; font-family: var(--hs-display); font-weight: 700; }
+
+/* buttons: indigo primary, white outline secondary */
+body.hs .hs-btn { background: #4f33c4; border-color: #4f33c4; color: #fff !important; border-radius: 8px; font-weight: 700; letter-spacing: .01em; box-shadow: 0 6px 16px -8px rgba(79, 51, 196, .7); }
+body.hs .hs-btn:hover:not(:disabled) { background: #3f27a8; }
+body.hs .hs-btn.solid { background: #4f33c4; border-color: #4f33c4; }
+body.hs .hs-btn.ghost, body.hs .hs-btn.like { background: #fff; border-color: #cfc9e3; color: #17122b !important; box-shadow: none; }
+body.hs .hs-btn.ghost:hover:not(:disabled) { background: #f3f2f8; }
+body.hs .hs-btn.danger { background: #fff; box-shadow: none; }
+
+/* panels, tabs, chips */
+body.hs .hs-panel, body.hs .hs-filters, body.hs .hs-deck, body.hs .hs-post, body.hs .hs-person { border-color: #e4e1ee; }
+body.hs .hs-panel.gold { border-top: 4px solid #f2b632; }
+body.hs .hs-tab[aria-selected="true"] { border-bottom: 3px solid #f2b632; font-family: var(--hs-display); letter-spacing: .06em; text-transform: uppercase; }
+body.hs .hs-tab { font-family: var(--hs-display); font-weight: 600; font-size: 1rem; text-transform: uppercase; letter-spacing: .06em; }
+body.hs .hs-chip[aria-pressed="true"][data-class=""], body.hs .hs-chip.all[aria-pressed="true"] { background: #1e1445; border-color: #1e1445; color: #fff; box-shadow: none; }
+body.hs .hs-note { background: #fff5d6; border-color: #f0dca0; border-left-color: #f2b632; font-family: var(--hs-read); }
+
+/* hexagonal gold cost gems + gold mana-curve bars on the detail page */
+body.hs .hs-cardrow .gem {
+  border: 0; border-radius: 0; width: 1.8rem; height: 2rem; background: #b8860b; color: #2a1d00; font-weight: 800;
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+body.hs .hs-cardrow .nm { font-weight: 500; }
+body.hs .hs-cardrow .ct { background: #f3f2f8; border-radius: 8px; padding: .4rem .7rem; color: #17122b; }
+body.hs .hs-curve.lg i { background: #b8860b; opacity: 1; border-radius: 3px 3px 0 0; }
+body.hs .hs-code { background: #f3f2f8; }
