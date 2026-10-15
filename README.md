@@ -178,7 +178,8 @@ with a "Continue for now" path and banner during the 30-day grace window. Club r
 Twitch mark) only for players who opted in, and rank badges say "Leaderboard-matched" instead of "verified".
 - **Contract**: coded to `IDENTITY_NORTHSTAR.md` §4/§8; every endpoint path lives in `js/identity-api.js` only.
 - **Status, honestly**: the IDUNA backend (chunk ID-A) was being built in parallel and is **not deployed**; Battle.net
-  and Twitch OAuth apps are not registered (human step, chunk ID-D). This static front end has **never run in a
+  and Twitch OAuth apps are not registered (human step, IDENT-04). Twitch is both a link door and, since IDUNA `50c221d`,
+  a login door on the hosted SSO page (zero scopes; button hidden until `TWITCH_CLIENT_ID/SECRET` are set). This static front end has **never run in a
   browser or against the real API**. Verified only by `node scripts/identity-affordance-test.js` (plain node, DOM and
   fetch stub: rendering, gating, one-time reveal, API calls made, XSS-safe text, wiring) plus the unchanged clubs test.
 - **Assumption the backend must meet**: link starts are full-page navigations that cannot carry an Authorization header,

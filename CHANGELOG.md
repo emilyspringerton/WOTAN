@@ -253,3 +253,6 @@
   ("GITHUB REPO CREATED") — founder pre-created this repo empty; this is the first real commit.
   Not deployed yet — needs `WOTAN-DNS-001` (Cloudflare subdomain) + a real nginx server block
   first.
+
+## 2026-10-15
+- docs(identity): reconcile IDENTITY_NORTHSTAR §2 provider table and README with IQ-2 (Twitch is a login door, IDUNA 50c221d).

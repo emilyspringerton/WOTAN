@@ -39,7 +39,7 @@ a generic name; those are accepted as `unverified_tag` and routed `private` only
 | `battlenet` | Competitive identity, upload-key issuance, rank match | yes (primary) | yes (multiple) | `sub` |
 | `google` | Accessibility / social | yes (exists) | yes | `sub` (verified email only) |
 | `iduna_local` | Email/password | yes (exists) | n/a | player row |
-| `twitch` | Streamer layer: display name, live flag, later chat bot | **no** (settings only, per chat) | yes (one per player) | Twitch `sub`/user id |
+| `twitch` | Streamer layer: display name, live flag, later chat bot | yes (IQ-2, 2026-10-12; zero scopes) | yes (one per player) | Twitch `sub`/user id |
 
 Rules (non-negotiable):
 - **Link only from an authenticated session**; OAuth `state` is bound to that session's `player_id` + a nonce
