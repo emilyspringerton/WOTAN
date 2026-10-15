@@ -591,3 +591,12 @@ body.hs .hs-code { background: #f3f2f8; }
 .hs-wincard-stats { display: flex; gap: 1.6rem; margin-top: 1.2rem; padding-top: 1.1rem; border-top: 1px solid #3a2d6b; }
 .hs-wincard-stats b { display: block; font: 800 2rem/1 "Barlow Condensed", sans-serif; }
 .hs-wincard-stats span { font: 700 .68rem/1 "Barlow Condensed", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: #bdb4e6; }
+
+/* deck page: the "All decks" back link sits inside the gold hero band, like the design */
+body.hs .hs-back {
+  margin: -1.75rem 0 0; padding: 1.2rem 0 0; position: relative; background-color: #f3e5ab; box-shadow: 0 0 0 100vmax #f3e5ab; clip-path: inset(0 -100vmax);
+  background-image: linear-gradient(rgba(138, 100, 0, .10) 1px, transparent 1px), linear-gradient(90deg, rgba(138, 100, 0, .10) 1px, transparent 1px); background-size: 32px 32px;
+}
+body.hs .hs-back a { font-weight: 600; text-decoration: none; color: #2a1d00; }
+body.hs .hs-back + #root .hs-deckhead { margin-top: 0; padding-top: 1rem; }
+body.hs .hs-cardrow .ct { font-weight: 700; }
