@@ -271,3 +271,4 @@
 ## 2026-10-15
 - feat(themes): selectable themes Void/Ember/Terminal/Daylight via `html[data-theme]` token overrides + topbar Theme picker (localStorage `wotan_theme`); Hearthstone skin unchanged. Not browser-verified, not deployed.
 - feat(hs): Hearthstone pages restyled to the new design (screenshots + WOTAN_Home mockup): `body.hs` re-tokenised to #f3f2f8/white/indigo/gold, Barlow Condensed headings, gold-grid hero band, navy stat card, hex cost gems. Not browser-verified, not deployed.
+- feat(hs): deck detail navy win-rate card (win %, bar, wins/losses/tracked games) beside the title block. Not browser-verified.

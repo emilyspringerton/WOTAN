@@ -20,6 +20,19 @@
     window.addEventListener('wotan:me', function () { /* topbar finished its own /me; our `who` already awaited the same promise */ });
   }
 
+  // Navy win-rate card (public record). Shown for others' decks with tracked games; the owner sees the fuller statsPanel.
+  function winCard(d) {
+    if (!d.games || d.mine) return null;
+    var pct = Math.round((d.winrate || 0) * 100);
+    var bar = h('i', { style: { width: Math.max(0, Math.min(100, pct)) + '%' } });
+    function stat(n, l) { return h('div', null, h('b', { text: String(n) }), h('span', { text: l })); }
+    return h('div', { 'class': 'hs-wincard', role: 'group', 'aria-label': 'Win rate ' + pct + ' percent' },
+      h('span', { 'class': 'hs-wincard-k', text: 'Win rate' }),
+      h('div', { 'class': 'hs-wincard-pct' }, h('b', { text: String(pct) }), h('small', { text: '%' })),
+      h('div', { 'class': 'hs-wincard-bar' }, bar),
+      h('div', { 'class': 'hs-wincard-stats' }, stat(d.wins || 0, 'Wins'), stat(d.losses || 0, 'Losses'), stat(d.games, d.games === 1 ? 'Tracked game' : 'Tracked games')));
+  }
+
   function rec(r) { return r.wins + '–' + r.losses + (r.ties ? '–' + r.ties : '') + ' · ' + Math.round((r.winrate || 0) * 100) + '%'; }
 
   // Private page of my own deck: my record, the public win rate, and the projected global one. My games only
@@ -85,8 +98,7 @@
       titleEl,
       h('p', { 'class': 'hs-meta', style: { 'margin-top': '.5rem' } }, 'by ', UI.handleLink(author), ' · ', UI.ago(d.created_at)),
       d.private ? h('p', { 'class': 'hs-note', text: 'Private: only you can see this deck. It was synced from your tracker; publish it when you are ready to share it.' }) : null,
-      d.games && !d.mine ? h('p', { 'class': 'hs-meta', style: { 'margin-top': '.4rem' }, text: rec(d) + ' win rate over ' + d.games + (d.games === 1 ? ' tracked game' : ' tracked games') }) : null,
-      descEl, headActions));
+      descEl, headActions, winCard(d)));
 
     // left: card list
     var cards = d.cards || [];
