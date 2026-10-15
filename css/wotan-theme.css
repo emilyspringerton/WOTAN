@@ -155,3 +155,33 @@ button:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
 .msg.ok { color: var(--ok); }
 
 [hidden] { display: none !important; }
+
+
+/* ---- Selectable themes (2026-10-15). Default "void" is the :root palette above; the others only
+   override tokens, so every page that uses var(--*) re-skins with no per-page edits. Chosen via the
+   topbar theme picker (js/wotan-nav.js), stored in localStorage "wotan_theme", applied as
+   <html data-theme="...">. The Hearthstone pages keep their own cream skin (wotan-hs.css body.hs). */
+html[data-theme="ember"] {
+  --bg: #170806; --bg-raise: #240e09; --bg-card: #2c120b; --bg-card-hover: #3a1a0f;
+  --fg: #fbeee4; --fg-dim: #d1ad9a; --border: #5c2a18; --border-bright: #8a4224;
+  --violet: #e5532d; --violet-bright: #ff8a5c; --gold: #f0b24a; --gold-bright: #ffd27a;
+  --shadow: 0 18px 50px rgba(20, 4, 1, .7);
+}
+html[data-theme="terminal"] {
+  --bg: #020a05; --bg-raise: #05150a; --bg-card: #07200f; --bg-card-hover: #0b2d16;
+  --fg: #c9ffd9; --fg-dim: #6fb988; --border: #12502a; --border-bright: #1f8a48;
+  --violet: #1fd16a; --violet-bright: #5dff9a; --gold: #d6e84a; --gold-bright: #eaff7a;
+  --font-body: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --shadow: 0 18px 50px rgba(0, 8, 3, .75);
+}
+html[data-theme="daylight"] {
+  --bg: #f3f1ec; --bg-raise: #ffffff; --bg-card: #ffffff; --bg-card-hover: #f0ece2;
+  --fg: #1c1a24; --fg-dim: #5d5870; --border: #d5cfe0; --border-bright: #a99bcb;
+  --violet: #6a2fc4; --violet-bright: #8a52e6; --gold: #a6812c; --gold-bright: #8a6a1c;
+  --cyan: #0a8aa3; --orange: #c46a12; --red: #c7332c; --blue: #2c63c9; --ok: #17875a;
+  --shadow: 0 12px 34px rgba(40, 30, 70, .16);
+  color-scheme: light;
+}
+html[data-theme="daylight"] body {
+  background: radial-gradient(circle at 10% -10%, rgba(106, 47, 196, .08), transparent 42%), var(--bg);
+}

@@ -10,6 +10,18 @@
   'use strict';
 
   var RETURN_KEY = 'wotan_return_to';
+  var THEME_KEY = 'wotan_theme';
+  var THEMES = [['void', 'Void'], ['ember', 'Ember'], ['terminal', 'Terminal'], ['daylight', 'Daylight']];
+  function getTheme() {
+    var t = null;
+    try { t = localStorage.getItem(THEME_KEY); } catch (e) { /* storage blocked */ }
+    return THEMES.some(function (x) { return x[0] === t; }) ? t : 'void';
+  }
+  function applyTheme(t) {
+    if (t === 'void') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', t);
+  }
+  applyTheme(getTheme());
   var mount = document.getElementById('wotan-nav');
   if (!mount) return;
 
@@ -146,8 +158,34 @@
 
     inner.appendChild(brand);
     inner.appendChild(tabs);
+    if (skin !== 'hs') inner.appendChild(themePicker());
     inner.appendChild(accountBox);
     mount.appendChild(el('div', { 'class': 'wn-bar' }, [inner]));
+  }
+
+  function themePicker() {
+    var cur = getTheme();
+    var wrap = el('div', { 'class': 'wn-theme' });
+    var btn = el('button', { type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false', text: 'Theme' });
+    var menu = el('div', { 'class': 'wn-menu', role: 'menu', hidden: true });
+    THEMES.forEach(function (t) {
+      var b = el('button', { type: 'button', role: 'menuitemradio', 'aria-checked': t[0] === cur ? 'true' : 'false', text: t[1] });
+      b.addEventListener('click', function () {
+        try { localStorage.setItem(THEME_KEY, t[0]); } catch (e) { /* ignore */ }
+        applyTheme(t[0]);
+        [].forEach.call(menu.querySelectorAll('button'), function (x) { x.setAttribute('aria-checked', x === b ? 'true' : 'false'); });
+        menu.hidden = true; btn.setAttribute('aria-expanded', 'false');
+      });
+      menu.appendChild(b);
+    });
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = menu.hidden;
+      menu.hidden = !open; btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', function () { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); });
+    wrap.appendChild(btn); wrap.appendChild(menu);
+    return wrap;
   }
 
   var menuOpen = false;

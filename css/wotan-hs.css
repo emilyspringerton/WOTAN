@@ -483,3 +483,28 @@ body.hs ::selection { background: color-mix(in srgb, var(--hs-gold) 40%, transpa
   .wn-bar .wn-tabs { order: 3; flex: 1 1 100%; justify-content: flex-start; margin: 0; overflow-x: auto; }
   .wn-games-label { padding-left: 1rem; }
 }
+
+
+/* ---- themes: topbar picker + nav palettes for the dark (dw/rg) skins ---- */
+.wn-theme { position: relative; }
+.wn-theme > button {
+  font: inherit; font-size: .78rem; cursor: pointer; padding: .35rem .6rem;
+  background: transparent; color: var(--wn-fg); border: 1px solid var(--wn-line); border-radius: var(--wn-radius);
+}
+.wn-theme > button:hover { background: var(--wn-hover); }
+.wn-theme .wn-menu { right: 0; left: auto; min-width: 9rem; }
+.wn-theme .wn-menu button[aria-checked="true"]::before { content: "\2713  "; color: var(--wn-accent); }
+html[data-theme="ember"] #wotan-nav:not([data-skin="hs"]) {
+  --wn-bg: #240e09; --wn-fg: #fbeee4; --wn-dim: #d1ad9a; --wn-line: #5c2a18; --wn-accent: #f0b24a;
+  --wn-accent-fg: #170806; --wn-hover: #3a1a0f; --wn-pop: #2c120b; --wn-focus: #ff8a5c;
+}
+html[data-theme="terminal"] #wotan-nav:not([data-skin="hs"]) {
+  --wn-bg: #05150a; --wn-fg: #c9ffd9; --wn-dim: #6fb988; --wn-line: #12502a; --wn-accent: #1fd16a;
+  --wn-accent-fg: #020a05; --wn-hover: #0b2d16; --wn-pop: #07200f; --wn-focus: #5dff9a;
+  --wn-display: ui-monospace, Menlo, Consolas, monospace;
+}
+html[data-theme="daylight"] #wotan-nav:not([data-skin="hs"]) {
+  --wn-bg: #ffffff; --wn-fg: #1c1a24; --wn-dim: #5d5870; --wn-line: #d5cfe0; --wn-accent: #6a2fc4;
+  --wn-accent-fg: #ffffff; --wn-hover: #f0ece2; --wn-pop: #ffffff; --wn-focus: #6a2fc4;
+  --wn-shadow: 0 10px 30px rgba(40, 30, 70, .16);
+}
