@@ -51,6 +51,16 @@
     <div class="i-msg" id="catalog-msg" role="status" aria-live="polite"></div>
   </section>
 
+  <section class="i-section" id="market-card" hidden>
+    <div class="i-section-head">
+      <div><p class="i-label">Secondary market</p><h2 class="i-h2">Resale of limited editions</h2></div>
+      <span class="i-count" id="market-count"></span>
+    </div>
+    <p class="i-card-desc">Sold-out limited editions live here. Players set their own price; the seller keeps 88% and 12% is burned.</p>
+    <div class="i-grid" id="market-list"></div>
+    <div class="i-msg" id="market-msg" role="status" aria-live="polite"></div>
+  </section>
+
   <section class="i-section" id="owned-card" hidden>
     <div class="i-section-head">
       <div><p class="i-label">Locker</p><h2 class="i-h2">Your hats</h2></div>
@@ -111,7 +121,7 @@ function skeletons(el, n) { el.textContent = ''; for (let i = 0; i < n; i++) el.
 
 function showSignedOut() {
   characterID = ''; balance = null;
-  $('hero-stats').hidden = true; $('character-card').hidden = true; $('catalog-card').hidden = true; $('owned-card').hidden = true;
+  $('hero-stats').hidden = true; $('character-card').hidden = true; $('catalog-card').hidden = true; $('owned-card').hidden = true; $('market-card').hidden = true;
   $('auth-card').hidden = false;
 }
 
@@ -138,7 +148,7 @@ async function resolveCharacter() {
     // Not an error: the account simply has no GFD character yet. The web client creates one with
     // the MUD's own name-claim flow, bound to this same IDUNA account, so the store finds it after.
     characterID = ''; balance = null;
-    $('hero-stats').hidden = true; $('catalog-card').hidden = true; $('owned-card').hidden = true;
+    $('hero-stats').hidden = true; $('catalog-card').hidden = true; $('owned-card').hidden = true; $('market-card').hidden = true;
     plate.appendChild(h('div', { 'class': 'i-avatar', 'aria-hidden': 'true', text: '?' }));
     plate.appendChild(h('div', { 'class': 'i-plate-main' }, [
       h('p', { 'class': 'i-label', text: 'No character yet' }),
@@ -152,7 +162,8 @@ async function resolveCharacter() {
 
 async function refresh() {
   if (!(await resolveCharacter())) return;
-  $('catalog-card').hidden = false; $('owned-card').hidden = false;
+  $('catalog-card').hidden = false; $('owned-card').hidden = false; $('market-card').hidden = false;
+  await loadMarket();
   await Promise.all([loadCatalog(), loadOwned()]);
 }
 
@@ -197,11 +208,79 @@ async function buyHat(hat, btn) {
   } catch (e) { setMsg('catalog-msg', e.message, 'error'); toast(e.message, 'error'); btn.disabled = false; }
 }
 
+let myListings = {};  // hat_id -> listing_id for this character's active resale listings
+
+async function loadMarket() {
+  const list = $('market-list');
+  setMsg('market-msg', '');
+  try {
+    const [items, mineOwned] = await Promise.all([api('/hats/market'), api('/characters/' + encodeURIComponent(characterID) + '/hats')]);
+    ownedHatIDs = new Set(mineOwned.map((o) => o.hat_id));
+    myListings = {};
+    items.forEach((m) => { if (m.seller_character_id === characterID) myListings[m.hat_id] = m.listing_id; });
+    $('market-count').textContent = items.length + (items.length === 1 ? ' listing' : ' listings');
+    list.textContent = '';
+    if (!items.length) { list.appendChild(h('div', { 'class': 'i-empty i-panel', style: 'grid-column:1/-1' }, [h('p', { 'class': 'i-h2', text: 'Nothing for resale' }), h('p', { text: 'Own a limited edition? List it from your locker below.' })])); return; }
+    items.forEach((m) => {
+      const mine = m.seller_character_id === characterID;
+      const owned = ownedHatIDs.has(m.hat_id);
+      const short = balance !== null ? m.price - balance : 0;
+      const label = mine ? 'Cancel listing' : owned ? 'Owned' : short > 0 ? 'Need ' + fmt(short) + ' more' : 'Buy';
+      const btn = h('button', { type: 'button', 'class': 'i-btn' + (!mine && !owned && short <= 0 ? ' primary' : ''), text: label });
+      btn.disabled = !mine && (owned || short > 0);
+      btn.addEventListener('click', () => mine ? cancelListing(m, btn) : buyListing(m, btn));
+      list.appendChild(h('article', { 'class': 'i-card' }, [
+        h('div', { 'class': 'i-art', 'aria-hidden': 'true' }, [h('span', { 'class': 'i-badge', text: 'Limited \u00b7 ' + fmt(m.quantity_limit) }), art(m)]),
+        h('div', { 'class': 'i-card-body' }, [
+          h('h3', { 'class': 'i-card-name', text: m.name }),
+          h('p', { 'class': 'i-card-desc', text: 'sold by ' + (mine ? 'you' : m.seller_name || 'a player') + (m.creator ? ' \u00b7 drawn by ' + m.creator : '') }),
+          h('div', { 'class': 'i-card-foot' }, [h('span', { 'class': 'i-cost' }, [fmt(m.price), h('small', { text: 'Flow' })]), btn]),
+        ]),
+      ]));
+    });
+  } catch (e) { list.textContent = ''; setMsg('market-msg', e.message, 'error'); }
+}
+
+async function buyListing(m, btn) {
+  btn.disabled = true; setMsg('market-msg', '');
+  try {
+    await api('/characters/' + encodeURIComponent(characterID) + '/hats/market/buy', { method: 'POST', body: JSON.stringify({ listing_id: m.listing_id }) });
+    toast('Purchased ' + m.name + ' from the secondary market.');
+    await refresh();
+  } catch (e) { setMsg('market-msg', e.message, 'error'); toast(e.message, 'error'); btn.disabled = false; await loadMarket(); }
+}
+
+async function cancelListing(m, btn) {
+  btn.disabled = true; setMsg('market-msg', '');
+  try {
+    await api('/characters/' + encodeURIComponent(characterID) + '/hats/market/cancel', { method: 'POST', body: JSON.stringify({ listing_id: m.listing_id }) });
+    toast('Listing cancelled.');
+    await loadMarket();
+    await loadOwned();
+  } catch (e) { setMsg('market-msg', e.message, 'error'); btn.disabled = false; }
+}
+
+async function sellHat(o) {
+  const raw = prompt('Resale price for "' + o.name + '" in Flow (10 to 100,000). You keep 88%; 12% is burned.');
+  if (raw === null) return;
+  const price = Math.floor(Number(raw));
+  if (!(price >= 10 && price <= 100000)) { setMsg('owned-msg', 'Price must be 10 to 100,000 Flow.', 'error'); return; }
+  try {
+    await api('/characters/' + encodeURIComponent(characterID) + '/hats/market/list', { method: 'POST', body: JSON.stringify({ hat_id: o.hat_id, price }) });
+    toast(o.name + ' listed for ' + fmt(price) + ' Flow.');
+    await loadMarket();
+    await loadOwned();
+  } catch (e) { setMsg('owned-msg', e.message, 'error'); toast(e.message, 'error'); }
+}
+
+let ownedHatIDs = new Set();
+
 async function loadOwned() {
   const list = $('owned-list');
   setMsg('owned-msg', '');
   try {
     const owned = await api('/characters/' + encodeURIComponent(characterID) + '/hats');
+    ownedHatIDs = new Set(owned.map((o) => o.hat_id));
     $('stat-owned').textContent = fmt(owned.length);
     list.textContent = '';
     if (!owned.length) {
@@ -218,7 +297,14 @@ async function loadOwned() {
           h('h3', { 'class': 'i-card-name', text: o.name }),
           h('p', { 'class': 'i-card-desc', text: o.description || '' }),
           o.creator ? h('p', { 'class': 'i-card-desc', text: 'drawn by ' + o.creator }) : null,
-          h('div', { 'class': 'i-card-foot' }, [h('span'), btn]),
+          h('div', { 'class': 'i-card-foot' }, [h('span'), (function () {
+            if (!o.quantity_limit) return btn;
+            const sell = h('button', { type: 'button', 'class': 'i-btn', text: myListings[o.hat_id] ? 'Listed' : 'Sell' });
+            sell.disabled = !!myListings[o.hat_id];
+            sell.title = 'Limited edition: resell on the secondary market';
+            sell.addEventListener('click', () => sellHat(o));
+            return h('span', { style: 'display:inline-flex;gap:.4rem' }, [sell, btn]);
+          })()]),
         ]),
       ]));
     });
