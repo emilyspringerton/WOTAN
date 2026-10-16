@@ -26,7 +26,7 @@
   if (!mount) return;
 
   var skinAttr = mount.getAttribute('data-skin');
-  var skin = skinAttr === 'dw' ? 'dw' : (skinAttr === 'rg' ? 'rg' : (skinAttr === 'gfd' ? 'gfd' : 'hs'));
+  var skin = skinAttr === 'dw' ? 'dw' : (skinAttr === 'rg' ? 'rg' : (skinAttr === 'gfd' ? 'gfd' : (skinAttr === 'bp' ? 'bp' : 'hs')));
   var section = mount.getAttribute('data-section') || '';
 
   var TABS = {
@@ -48,6 +48,12 @@
       ['play', 'Play', '/GFD/'],
       ['store', 'Hat Store', '/store.html'],
       ['studio', 'Hat Studio', '/hat-studio.html']
+    ],
+    bp: [
+      ['play', 'Play', '/BRAWLPIT/'],
+      ['store', 'Hat Store', '/store.html'],
+      ['studio', 'Hat Studio', '/hat-studio.html'],
+      ['gfd', 'GFD', '/GFD/']
     ],
     dw: [
       ['home', 'Home', '/'],
@@ -143,7 +149,8 @@
       ['dw', 'Deadweight', 'Drafts \u00b7 Matches \u00b7 Duels', '/decks.html'],
       ['hs', 'Hearthstone', 'Shared deck library', '/hearthstone/'],
       ['rg', 'Redgarden', 'Knights of the Void', '/redgarden/'],
-      ['gfd', 'GoblinFoxDragon', 'MUD \u00b7 Hat Store', '/GFD/']
+      ['gfd', 'GoblinFoxDragon', 'MUD \u00b7 Hat Store', '/GFD/'],
+      ['bp', 'Brawlpit', 'Arena fighter \u00b7 Hat Store', '/BRAWLPIT/']
     ];
     var games = el('div', { 'class': 'wn-games' }, [
       el('div', { 'class': 'wn-games-in' }, [el('span', { 'class': 'wn-games-label', text: 'Games' })].concat(GAMES.map(function (g) {
@@ -160,7 +167,7 @@
       el('small', { text: 'EINHORN_INDUSTRIAL' })
     ]);
 
-    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : 'WOTAN sections')) });
+    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : (skin === 'bp' ? 'Brawlpit sections' : 'WOTAN sections'))) });
     TABS[skin].forEach(function (t) {
       tabs.appendChild(el('a', { href: t[2], text: t[1], 'aria-current': t[0] === section ? 'page' : null }));
     });

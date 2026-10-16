@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4f1ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Spectral:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-iduna.css">
+<link rel="stylesheet" href="/css/wotan-bp.css">
+<title>Play BRAWLPIT &mdash; WOTAN</title>
+<meta name="description" content="Play BRAWLPIT in your browser. Sign in with IDUNA to see your character and hats. Core engine port in progress -- not playable yet.">
+</head>
+<body class="iduna bp" data-page="play">
+<header id="wotan-nav" data-skin="bp" data-section="play"></header>
+
+<main class="bp-wrap" id="main">
+  <div class="bp-head">
+    <div>
+      <p class="bp-eyebrow">WOTAN &middot; Arena fighter</p>
+      <h1 class="bp-h1">BRAWLPIT</h1>
+    </div>
+    <div class="bp-hat" id="bp-hat" hidden>
+      <svg class="bp-bust" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">
+        <path fill="#000" d="M11 9h10v1h1v10h-1v1h-1v1h3v1h2v1h1v5h-1v1h-2v1h-1v-1h-1v1H11v-1h-1v1H9v-1H7v-1H6v-5h1v-1h2v-1h3v-1h-1v-1h-1V10h1z"/>
+        <path fill="#e8c4a0" d="M12 10h8v10h-1v1h-6v-1h-1z"/>
+        <path fill="#c9a07e" d="M16 12h4v1h-4zM16 13h1v4h-1z"/>
+        <path fill="#e0d9bf" d="M8 24h16v4H8z"/>
+        <path fill="#7e7466" d="M21 24h3v4h-3z"/>
+        <path fill="#cfc7a8" d="M12 29h8v1h-8z"/>
+      </svg>
+      <img class="bp-hat-img" id="bp-hat-img" alt="">
+    </div>
+    <p class="bp-sub" id="bp-sub">Your IDUNA account is your login; no install, no password. The core fighting engine is being ported from BRAWLPIT's native C runtime into PARENA -- this page is a real scaffold ahead of that landing, not a playable build yet.</p>
+  </div>
+
+  <div class="bp-bar" role="toolbar" aria-label="BRAWLPIT controls">
+    <span class="bp-pill" id="bp-pill">Core engine porting to PARENA</span>
+    <span class="sp"></span>
+    <button type="button" class="bp-btn" id="b-fullscreen" title="Fullscreen" disabled>Fullscreen</button>
+    <a class="bp-btn" href="/store.html" title="Spend your Flow on hats">Hat Store</a>
+  </div>
+
+  <div class="bp-stage" id="stage">
+    <div class="bp-placeholder">
+      <b>Not playable yet</b>
+      See <a href="https://github.com/emilyspringerton/MONOREPO/blob/master/BRAWLPIT/docs/BP_WASM_WOTAN_NORTHSTAR.md">BP_WASM_WOTAN_NORTHSTAR.md</a>
+      for the real, phased plan: BRAWLPIT's native C core engine is being ported to PARENA
+      (`PARENA/stdlib/brawlpit/`) and compiled to native wasm32, the same no-Emscripten pipeline
+      GoblinFoxDragon's own browser terminal already ships with. This page, the IDUNA sign-in,
+      the top nav tab, and the equipped-hat badge above are real and live now; the match itself
+      is not wired in yet.
+      <div class="bp-pad-status" id="bp-pad-status" aria-live="polite"></div>
+    </div>
+    <canvas class="bp-stage-canvas" id="bp-canvas" width="800" height="450" tabindex="0" role="application"
+            aria-label="BRAWLPIT stage. Not active yet." hidden></canvas>
+  </div>
+</main>
+
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="brawlpit.js"></script>
+<script src="hat.js"></script>
+</body>
+</html>

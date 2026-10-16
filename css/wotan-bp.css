@@ -1,0 +1,37 @@
+/* WOTAN /BRAWLPIT/ play page. Direct structural copy of wotan-gfd.css's layout (same IDUNA
+   front-page style guide: cream paper, gold-edged panels), since BRAWLPIT/ is scaffolded on the
+   exact same precedent -- see BRAWLPIT/docs/BP_WASM_WOTAN_NORTHSTAR.md. The stage itself is a
+   dark "console well" placeholder until the PARENA core-engine port (Phase 0) lands and there is
+   a real wasm module to render into. */
+
+.bp-wrap { max-width: 1180px; margin: 0 auto; padding: .6rem 1rem 4rem; }
+.bp-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .4rem 1.5rem; padding: 1.1rem 0 1rem; margin-bottom: .9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--i-gold) 55%, var(--i-line) 45%); position: relative; }
+.bp-head::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 5.5rem; height: 3px; background: var(--i-gold); }
+.bp-eyebrow { letter-spacing: .35em; text-transform: uppercase; font-size: .68rem; color: var(--i-muted); margin: 0 0 .3rem; }
+.bp-h1 { font: 500 clamp(1.9rem, 4.6vw, 2.9rem)/1.05 var(--i-display); letter-spacing: .02em; margin: 0; }
+.bp-sub { color: var(--i-muted); margin: 0; font-size: .95rem; max-width: 34rem; }
+
+/* Equipped hat, worn by the fighter bust in the header (BRAWLPIT/hat.js, a direct port of GFD/hat.js). */
+.bp-hat { position: relative; width: 64px; height: 64px; flex: 0 0 auto; margin: 0 auto; cursor: help; }
+.bp-hat[hidden] { display: none; }
+.bp-bust, .bp-hat-img { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+
+.bp-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin-bottom: .7rem; }
+.bp-bar .sp { flex: 1 1 1rem; }
+.bp-btn { appearance: none; font: 500 .9rem/1 var(--i-body); letter-spacing: .02em; color: var(--i-text); cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: .35rem; height: 2.4rem; padding: 0 .95rem; box-sizing: border-box; border-radius: 5px;
+  border: 1px solid color-mix(in srgb, var(--i-gold) 80%, #7b6640 20%); background: color-mix(in srgb, var(--i-paper) 88%, #e5dac7 12%);
+  transition: border-color 160ms ease, background-color 160ms ease, transform 120ms ease; }
+.bp-btn:hover:not(:disabled) { border-color: #c7ac72; background: color-mix(in srgb, var(--i-paper) 70%, #e5dac7 30%); }
+.bp-btn:active:not(:disabled) { transform: translateY(1px); }
+.bp-btn:focus-visible, .bp-stage:focus-visible { outline: 2px solid var(--i-gold-deep); outline-offset: 2px; }
+.bp-btn:disabled { opacity: .5; cursor: default; }
+
+.bp-stage { position: relative; border: 1px solid color-mix(in srgb, var(--i-gold) 55%, var(--i-line) 45%); border-radius: 8px;
+  background: #15131c; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.bp-placeholder { color: #cfc9d8; text-align: center; max-width: 30rem; padding: 2rem; font: 500 1rem/1.5 var(--i-body); }
+.bp-placeholder b { color: var(--i-gold); display: block; letter-spacing: .08em; text-transform: uppercase; font-size: .72rem; margin-bottom: .6rem; }
+.bp-pill { display: inline-flex; align-items: center; gap: .4rem; font: 600 .75rem/1 var(--i-body); letter-spacing: .04em; text-transform: uppercase;
+  padding: .3rem .7rem; border-radius: 999px; background: color-mix(in srgb, var(--i-gold) 18%, transparent); color: var(--i-gold-deep); }
+.bp-pad-status { margin-top: .6rem; font-size: .78rem; color: var(--i-muted); }

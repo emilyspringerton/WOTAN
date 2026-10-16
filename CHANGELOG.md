@@ -2,6 +2,8 @@
 
 ## 2026-10-16
 
+- feat(bp): **`/BRAWLPIT/` scaffold -- BRAWLPIT on WOTAN** (founder real-time: "port BRAWLPIT to WASM via PARENA and put on WOTAN, ALL THE WOTAN AFFORDANCES, IDUNA SSO LOGIN, A TOP TAB ON THE TOP... ensure hats show up in BRAWLPIT WEB, CONTROLLER SUPPORT IF YOU CAN DO IT IN THE BROWSER"). Follows `/GFD/`'s exact real pattern. `index.html` + `brawlpit.js` (shared IDUNA session, honest "core engine porting to PARENA -- not playable yet" placeholder stage, Gamepad connect/disconnect detection scaffold) + `hat.js` (direct structural port of `GFD/hat.js`'s two-call equipped-hat badge -- closes `WOTAN_HAT_STORE_NORTHSTAR.md` Phase 3's own open "BRAWLPIT-side rendering" question for the 2D web case). New `bp` nav skin + `BRAWLPIT` entry in the top `GAMES` bar (`js/wotan-nav.js`) + its own section tabs; new `css/wotan-bp.css`. Full plan and honest capability audit (no wasm toolchain in this sandbox, BRAWLPIT's real `core/*.c` not yet PARENA-ported) in `BRAWLPIT/docs/BP_WASM_WOTAN_NORTHSTAR.md`. Not browser-verified (no headless Chrome in this sandbox) -- Node syntax-checked only. No wasm module, no playable match yet.
+
 - GFD play page: the equipped hat is shown on a pixel bust in the header (`GFD/hat.js`), with a "Current Hat: <name>" tooltip. Hidden when signed out or no hat is equipped.
 
 - feat(store): **Secondary market** section (browse/buy/cancel resale listings) and a Sell button on limited editions in the locker that opens a dialog with a live price breakdown (88% seller / 8% designer royalty / 4% burn) and the fixed-rates / 25% ceiling notice. Needs IDUNA `202610160004_hat_market.sql`. Not browser-verified.

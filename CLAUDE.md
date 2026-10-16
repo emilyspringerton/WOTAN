@@ -102,6 +102,8 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
 
 ## Real, current status
 
+- `BRAWLPIT/` -- **BRAWLPIT web scaffold** (2026-10-16, founder real-time, see `BRAWLPIT/docs/BP_WASM_WOTAN_NORTHSTAR.md`): follows `GFD/`'s exact pattern (IDUNA SSO via the shared session, `wotan-nav.js` `bp` skin + top `GAMES`-bar entry, equipped-hat badge via `hat.js`, a direct structural port of `GFD/hat.js`). **Not a playable game yet** — BRAWLPIT's real core engine (`BRAWLPIT/core/*.c`) has not been ported to PARENA, and this sandbox has no wasm toolchain (`clang`/`llc`/`wasm-ld`) to build a `.wasm` even if it had been; the stage shows an honest placeholder instead of faking a build. `brawlpit.js` also carries a Gamepad-API connect/disconnect detection scaffold (Phase 4) ahead of there being an engine to feed input into. Closes `WOTAN_HAT_STORE_NORTHSTAR.md`'s own open Phase 3 question ("BRAWLPIT-side rendering") for the 2D web case. Not browser-verified — Node syntax-checked only.
+
 - `GFD/` -- **GoblinFoxDragon web client** (2026-10-16, founder real-time): `index.html` + `gfd.js` + `term.wasm`. The terminal is PARENA (`PARENA/stdlib/gfd/term.prn`, built by `PARENA/scripts/build_gfd_term_wasm.sh`, committed here as `GFD/term.wasm`; rebuild it when `term.prn` changes -- `PARENA/tests/gfd_term_test.mjs` tests the artifact). Talks to the MUD over `wss://wotan.okemily.com/GFD/ws` (Gateway route to `gfd-core:8480`, `EMILY/gitops/render.sh`); first frame is `{"token":<IDUNA SSO JWT>}`, close code 4401 = token refused. Uses the shared `js/iduna-sso.js` session, no sign-in button of its own. Character creation is the MUD's own name-claim flow (same code as SSH); the character is owned by the IDUNA account's `player_id`, which is what `store.html` looks up. One character per account for now (multibox licensing will raise it; no character select yet). Nav: `data-skin="gfd"` (`css/wotan-gfd.css`). Verified in headless Chromium against the real MUD; **not yet verified on a real phone keyboard or Safari**. Known limit: the terminal is a fixed 100x34 grid, so on a phone it is small (zoom/fullscreen help; reflow is future work).
 
 - `clubs/` — **Clubs (teams), Phase 2** (2026-10-12, see `CLUBS_NORTHSTAR.md`): directory, tier-shaped public page,
@@ -185,6 +187,8 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
 - `NORTHSTAR.md` — this repo's own S547 match stats+replay build (why DEADWEIGHT, architecture,
   verification, deferred work).
 - `BRAWLPIT/docs/WOTAN_HAT_STORE_NORTHSTAR.md` — the real, scoped hat-store feature plan.
+- `BRAWLPIT/docs/BP_WASM_WOTAN_NORTHSTAR.md` — the BRAWLPIT-on-WOTAN wasm port plan (this pass's
+  real scaffold + honest capability audit; the engine port itself is not started).
 - `OKEMILY/tournaments.html` — the original single-page version this repo is splitting WOTAN out
   of; not deleted, stays as the live page until this repo actually replaces it.
 - `EMILY/var/cloudflare.md` — real Cloudflare API token for the subdomain work (`WOTAN-DNS-001`).
