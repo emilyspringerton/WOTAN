@@ -205,3 +205,36 @@ Twitch mark) only for players who opted in, and rank badges say "Leaderboard-mat
   (DPAPI) key-exchange change is delivered as a patch in `HRIP/tracker/uplink/uplink-key.patch`, **not applied and not
   run** (no PowerShell here).
 - Files: `account/index.html`, `js/identity-{api,gate,page-account}.js`, `css/wotan-identity.css`, `scripts/identity-affordance-test.js`.
+  (2026-10-16: the page also opens with the account overview below -- `js/account-overview.js`.)
+
+## Redeem a code, and the account overview (2026-10-16)
+Founder real-time: "we need an affordance under the user profile for redeem a code ... it should enable founder mode in
+DEADWEIGHT web ... make it nice when a code is redeemed it should say what it did" -- after Battle.net's Redeem a Code
+page, its account overview and its account menu.
+- **Where**: the signed-in account menu has **Redeem a code**; **`/redeem/`** is the page (an `ENTER CODE` box, one button,
+  the answer under it, a help section); **`/account/`** now opens with an overview above the identity sections: a compact
+  Redeem card, **Games** (per-game status: Founder, ticket balance, "Playing as ...", a link into the game) and **Recent
+  redemptions** (date, what it gave, the code, Complete). Account pages share a small `acct` nav skin (tabs
+  Account | Redeem a code; no Hearthstone tabs, no theme picker). The DEADWEIGHT web client links here too.
+- **What it does**: calls IDUNA's `POST /api/v1/redeem` with your SSO session. The server works out which game the code is
+  for and which player you play it as (the rule `sso-exchange` uses), so a code lands on the account DEADWEIGHT signs in as.
+  A **Founder code** gives permanent Founder status and lifts Draft tickets to 9,999 (effectively unlimited); a ticket pack
+  adds tickets. **It says what it did**: "DEADWEIGHT Founder unlocked -- Founder status is now on your account, for good.
+  Draft tickets: 25 -> 9,999, effectively unlimited", with stat tiles and the account it was applied to; "+10 DEADWEIGHT
+  tickets -- Draft tickets: 9,999 -> 10,009 (+10)"; an account that already was a Founder is told "Nothing new this time ... it
+  has been used up". Failures say why: not valid or already used (those two read the same on purpose), wrong shape, the
+  account belongs to another game, sign-in expired, offline.
+- **Entry is forgiving**: upper-cases and groups five by five as you type (a dash only once a character follows it, so
+  Backspace works), accepts a paste with spaces, dashes, no dashes, or inside a sentence, and never truncates a paste (there is
+  deliberately no `maxlength`: browsers trim pasted text to it before any handler runs); Enter on an incomplete code says
+  what a code looks like. Guests are told (help text, and in the game) to Save progress with IDUNA first.
+- **Files**: `redeem/index.html`, `js/redeem-{api,widget,page}.js`, `js/account-overview.js`, `css/wotan-redeem.css`.
+  `js/redeem-api.js` holds every API path and every word of the answer; the widget is shared by the page and the overview card.
+  Also: the menu links' colour on `body.hs` pages (they were indigo on the dark menu) is fixed for every menu entry.
+- **Verified**: `node scripts/redeem-test.js` (21 plain-node checks) and `scripts/redeem-browser-test.mjs`: real headless
+  Chromium against the **real IDUNA binary** on a throwaway database seeded with synthetic codes -- the menu entry and its
+  contrast, typing and paste, every answer, every refusal, the account overview and its empty states, a 390 px phone width,
+  and (with `DEADWEIGHT_SITE` pointing at a `build-web.sh` output) the whole chain: sign in to the DEADWEIGHT client, click its
+  link, redeem in the new tab, come back to 9,999 and FOUNDER, still true after a reload. Run it with
+  `NODE_PATH=<dir with node_modules/playwright> PLAYWRIGHT_BROWSERS_PATH=... [IDUNA_BIN=...] [DEADWEIGHT_SITE=...] node scripts/redeem-browser-test.mjs`.
+  **Not verified**: Firefox, Safari, a real phone, a screen-reader pass.

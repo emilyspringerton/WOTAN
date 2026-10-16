@@ -1,0 +1,124 @@
+/* WOTAN "Redeem a code": the widget (js/redeem-widget.js), the /redeem/ page and the /account/ overview cards.
+   Everything is scoped under .rd (or .rd-page / .rd-grid) so it can sit on either skin: colours come from the IDUNA
+   style guide's --i-* tokens (wotan-iduna.css, body.iduna) when present, else the older --hs-* ones (body.hs), with
+   literals as a floor. Layout follows Battle.net's Redeem a Code page (founder real-time 2026-10-16): an ENTER CODE
+   label, one big box, one big button -- and a result panel that says what the code did. */
+
+.rd {
+  --rd-ink: var(--i-text, var(--hs-ink, #3a352e));
+  --rd-muted: var(--i-muted, var(--hs-faint, #7a7368));
+  --rd-line: var(--i-line, var(--hs-line, #d2c7b8));
+  --rd-gold: var(--i-gold, var(--hs-gold-bright, #c6a75e));
+  --rd-gold-soft: var(--i-gold-soft, var(--hs-gold, #bfa062));
+  --rd-gold-deep: var(--i-gold-deep, var(--hs-gold-deep, #8d7340));
+  --rd-gold-hi: var(--i-gold-hi, #d6bc7a);
+  --rd-paper: var(--i-paper, var(--hs-raise, #f8f3ea));
+  --rd-ok: var(--i-ok, var(--hs-ok, #4f7a4a));
+  --rd-bad: var(--i-bad, var(--hs-err, #a8452f));
+  --rd-display: var(--i-display, var(--hs-display, "Cormorant Garamond", Georgia, serif));
+  --rd-body: var(--i-body, var(--hs-read, "Spectral", Georgia, serif));
+  color: var(--rd-ink);
+}
+
+/* ---- the form ---- */
+.rd .rd-form { margin: 0; }
+.rd .rd-label { display: block; margin: 0 0 .5rem; font: 600 .68rem/1.2 var(--rd-body); letter-spacing: .3em; text-transform: uppercase; color: var(--rd-muted); }
+.rd .rd-row { display: flex; gap: .7rem; flex-wrap: wrap; }
+.rd .rd-input { flex: 1 1 15rem; min-width: 0; height: 3rem; padding: 0 .9rem; color: var(--rd-ink);
+  /* sized so the whole 29-character placeholder / a full code fits a phone-width box without clipping */
+  font: 500 clamp(.9rem, 3.7vw, 1.12rem)/1 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; letter-spacing: .05em; text-transform: uppercase;
+  background: color-mix(in srgb, var(--rd-paper) 55%, #fff 45%); border: 1px solid var(--rd-line); border-radius: 6px; }
+.rd .rd-input::placeholder { color: color-mix(in srgb, var(--rd-muted) 62%, transparent); letter-spacing: .06em; }
+.rd .rd-input:hover:not(:disabled) { border-color: var(--rd-gold); }
+.rd .rd-input:focus { outline: none; border-color: var(--rd-gold-deep); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rd-gold) 30%, transparent); }
+.rd .rd-input:disabled { opacity: .6; }
+.rd .rd-msg { min-height: 1.4rem; margin: .65rem 0 0; font-size: .92rem; color: var(--rd-muted); }
+.rd .rd-msg:empty { min-height: 0; margin: 0; } /* still in the DOM, so screen readers keep announcing it when text arrives */
+.rd .rd-msg.error { color: var(--rd-bad); }
+.rd .rd-msg a { color: var(--rd-gold-deep); }
+
+/* ---- buttons ---- */
+.rd .rd-btn { appearance: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: .4rem; white-space: nowrap;
+  min-height: 3rem; padding: 0 1.3rem; border-radius: 6px; font: 600 .98rem/1 var(--rd-body); letter-spacing: .02em; text-decoration: none; color: var(--rd-ink);
+  background: color-mix(in srgb, var(--rd-paper) 88%, #e5dac7 12%); border: 1px solid var(--rd-gold-soft);
+  transition: border-color 160ms ease, background-color 160ms ease, transform 120ms ease; }
+.rd .rd-btn:hover:not(:disabled) { border-color: var(--rd-gold); background: color-mix(in srgb, var(--rd-paper) 70%, #e5dac7 30%); }
+.rd .rd-btn:active:not(:disabled) { transform: translateY(1px); }
+.rd .rd-btn:focus-visible { outline: 2px solid var(--rd-gold-deep); outline-offset: 2px; }
+.rd .rd-btn:disabled { opacity: .55; cursor: default; }
+.rd .rd-btn.primary { background: var(--rd-gold); color: #2a2418; }
+.rd .rd-btn.primary:hover:not(:disabled) { background: var(--rd-gold-hi); }
+/* the narrow account-overview card: a full-width box over a full-width button, smaller type, smaller answer */
+.rd.compact .rd-input, .rd.compact .rd-btn { height: 2.7rem; min-height: 2.7rem; }
+.rd.compact .rd-row { flex-direction: column; }
+.rd.compact .rd-input { flex: 0 0 auto; font-size: .88rem; letter-spacing: .02em; }
+.rd.compact .rd-btn { width: 100%; }
+.rd.compact .rd-title { font-size: 1.35rem; }
+.rd.compact .rd-tile b { font-size: 1.6rem; }
+.rd.compact .rd-tile { min-width: 6.5rem; }
+
+/* ---- the answer: what the code did ---- */
+.rd .rd-result { margin-top: 1.2rem; padding: 1.1rem 1.2rem 1.15rem; border: 1px solid var(--rd-gold-soft); border-left: 4px solid var(--rd-ok);
+  border-radius: 6px; background: color-mix(in srgb, var(--rd-paper) 90%, var(--rd-gold) 10%); animation: rd-in 260ms ease-out; }
+.rd .rd-result.nothing { border-left-color: var(--rd-muted); }
+.rd .rd-badge { display: inline-block; margin: 0 0 .5rem; padding: .2rem .55rem; border: 1px solid var(--rd-ok); border-radius: 3px; color: var(--rd-ok);
+  font: 600 .62rem/1.2 var(--rd-body); letter-spacing: .2em; text-transform: uppercase; background: color-mix(in srgb, var(--rd-ok) 10%, transparent); }
+.rd .rd-badge.dim { border-color: var(--rd-line); color: var(--rd-muted); background: transparent; }
+.rd .rd-title { margin: 0; font: 600 clamp(1.5rem, 4vw, 1.9rem)/1.15 var(--rd-display); letter-spacing: .01em; color: var(--rd-ink); }
+.rd .rd-lines { margin: .6rem 0 0; padding-left: 1.2rem; }
+.rd .rd-lines li { margin: .2rem 0; }
+.rd .rd-tiles { display: flex; flex-wrap: wrap; gap: .9rem; margin: .9rem 0 0; }
+.rd .rd-tile { position: relative; min-width: 8rem; padding: .6rem .9rem .65rem; border: 1px solid color-mix(in srgb, var(--rd-gold) 50%, var(--rd-line) 50%);
+  border-radius: 6px; background: var(--rd-paper); }
+.rd .rd-tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 6px 0 0 6px; background: var(--rd-gold); }
+.rd .rd-tile b { display: block; font: 600 2rem/1 var(--rd-display); font-variant-numeric: tabular-nums; }
+.rd .rd-tile span { display: block; margin-top: .25rem; font-size: .62rem; letter-spacing: .24em; text-transform: uppercase; color: var(--rd-muted); }
+.rd .rd-fine { margin: .9rem 0 0; font-size: .82rem; color: var(--rd-muted); overflow-wrap: anywhere; }
+.rd .rd-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+@keyframes rd-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ---- account overview lists ---- */
+.rd .rd-empty { margin: 0 0 .8rem; color: var(--rd-muted); }
+.rd .rd-game { padding: .6rem 0; border-bottom: 1px solid var(--rd-line); }
+.rd .rd-game:last-child { border-bottom: 0; }
+.rd .rd-game-head { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; }
+.rd .rd-game-head b { font: 600 1.25rem/1.2 var(--rd-display); }
+.rd .rd-chip { padding: .22rem .5rem; border: 1px solid var(--rd-gold-deep); border-radius: 3px; color: var(--rd-gold-deep);
+  font: 600 .6rem/1 var(--rd-body); letter-spacing: .2em; text-transform: uppercase; background: color-mix(in srgb, var(--rd-gold) 14%, transparent); }
+.rd .rd-game-meta { margin: .15rem 0 .25rem; font-size: .88rem; color: var(--rd-muted); }
+.rd .rd-link { color: var(--rd-gold-deep); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--rd-gold) 65%, transparent); }
+.rd .rd-link:hover { color: var(--rd-ink); border-color: var(--rd-gold); }
+.rd .rd-history { list-style: none; margin: 0; padding: 0; }
+.rd .rd-history li { display: grid; grid-template-columns: 6.5rem 1fr auto auto; gap: .3rem 1rem; align-items: baseline; padding: .65rem 0; border-bottom: 1px solid var(--rd-line); }
+.rd .rd-history li:last-child { border-bottom: 0; }
+.rd .rd-h-date { color: var(--rd-muted); font-size: .88rem; }
+.rd .rd-h-code { font: 500 .78rem ui-monospace, Menlo, Consolas, monospace; letter-spacing: .04em; color: var(--rd-muted); }
+.rd .rd-h-state { font-size: .8rem; color: var(--rd-ok); }
+@media (max-width: 640px) {
+  .rd .rd-history li { grid-template-columns: 1fr auto; }
+  .rd .rd-h-code { grid-column: 1 / -1; }
+}
+@media (max-width: 480px) {
+  .rd .rd-row .rd-btn { width: 100%; }
+}
+
+/* ---- the /redeem/ page ---- */
+.rd-page .rd-panel { max-width: 40rem; }
+.rd-page .rd-foot { max-width: 40rem; margin: 1rem 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.4rem; }
+.rd-page .rd-cancel { appearance: none; cursor: pointer; background: none; border: 0; padding: 0; font: inherit; color: var(--i-muted); text-decoration: underline; text-underline-offset: 3px; }
+.rd-page .rd-cancel:hover { color: var(--i-text); }
+.rd-page .rd-help { max-width: 40rem; margin-top: 1.6rem; }
+.rd-page .rd-help summary { cursor: pointer; color: var(--i-gold-deep); font-weight: 600; }
+.rd-page .rd-help ul { margin: .7rem 0 0; padding-left: 1.2rem; color: var(--i-muted); }
+.rd-page .rd-help li { margin: .45rem 0; }
+.rd-page .rd-help li b { color: var(--i-text); }
+
+/* ---- the /account/ overview grid ---- */
+.rd-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); margin-bottom: 1rem; align-items: start; }
+.rd-grid > .hs-panel, .rd-overview > .hs-panel { margin-top: 0; }
+.rd-overview > .hs-panel { margin-bottom: 1rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rd .rd-result { animation: none; }
+  .rd .rd-btn { transition: none; }
+}

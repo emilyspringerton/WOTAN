@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4f1ea">
+<meta name="robots" content="noindex">
+<title>Redeem a Code &mdash; WOTAN</title>
+<meta name="description" content="Redeem a code for Founder status, Draft tickets or other game perks on your IDUNA account.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Spectral:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-iduna.css">
+<link rel="stylesheet" href="/css/wotan-redeem.css">
+</head>
+<body class="iduna rd-page">
+<header id="wotan-nav" data-skin="acct" data-section="redeem"></header>
+
+<main class="i-wrap" id="main">
+  <div class="i-hero">
+    <div>
+      <p class="i-label">Account</p>
+      <h1 class="i-h1">Redeem a Code</h1>
+      <p class="i-sub">Enter a code to unlock Founder status, Draft tickets or other game perks on your IDUNA account. When it works, this page tells you exactly what it did.</p>
+    </div>
+  </div>
+
+  <section class="i-panel rd-panel" aria-labelledby="rd-h">
+    <h2 class="i-h2" id="rd-h" hidden>Redeem a code</h2>
+    <div id="rd-mount"><noscript><p>Redeeming a code needs JavaScript.</p></noscript></div>
+  </section>
+
+  <p class="rd-foot">
+    <button type="button" class="rd-cancel" id="rd-cancel">Cancel</button>
+    <a class="i-link" href="/account/">Account overview</a>
+  </p>
+
+  <details class="rd-help" id="rd-help">
+    <summary>Need help redeeming a code?</summary>
+    <ul>
+      <li><b>What a code looks like.</b> Five groups of five letters and numbers. Capitals, dashes and spaces do not matter; paste it exactly as it came.</li>
+      <li><b>Each code works once.</b> If it says the code is not valid, check it for typos. A code somebody already used reads the same as a wrong one.</li>
+      <li><b>It goes to your IDUNA account.</b> If you have played DEADWEIGHT as a guest on this device, open the game and choose &ldquo;Save progress with IDUNA&rdquo; first, so the code lands on the account you actually play.</li>
+      <li><b>Founder codes</b> give permanent Founder status in DEADWEIGHT and lift your Draft tickets to 9,999, which is effectively unlimited. Reload DEADWEIGHT, or just switch back to its tab, and the new balance shows.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/redeem-api.js"></script>
+<script src="/js/redeem-widget.js"></script>
+<script src="/js/redeem-page.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

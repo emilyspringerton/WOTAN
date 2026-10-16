@@ -26,7 +26,7 @@
   if (!mount) return;
 
   var skinAttr = mount.getAttribute('data-skin');
-  var skin = skinAttr === 'dw' ? 'dw' : (skinAttr === 'rg' ? 'rg' : (skinAttr === 'gfd' ? 'gfd' : (skinAttr === 'bp' ? 'bp' : 'hs')));
+  var skin = skinAttr === 'dw' ? 'dw' : (skinAttr === 'rg' ? 'rg' : (skinAttr === 'gfd' ? 'gfd' : (skinAttr === 'bp' ? 'bp' : (skinAttr === 'acct' ? 'acct' : 'hs'))));
   var section = mount.getAttribute('data-section') || '';
 
   var TABS = {
@@ -55,6 +55,11 @@
       ['store', 'Hat Store', '/store.html'],
       ['studio', 'Hat Studio', '/hat-studio.html'],
       ['gfd', 'GFD', '/GFD/']
+    ],
+    // Account-level pages (not tied to one game): /account/ and /redeem/. Cream like the hs skin, no theme picker.
+    acct: [
+      ['account', 'Account', '/account/'],
+      ['redeem', 'Redeem a code', '/redeem/']
     ],
     dw: [
       ['home', 'Home', '/'],
@@ -169,14 +174,14 @@
       el('small', { text: 'EINHORN_INDUSTRIAL' })
     ]);
 
-    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : (skin === 'bp' ? 'Brawlpit sections' : 'WOTAN sections'))) });
+    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : (skin === 'bp' ? 'Brawlpit sections' : (skin === 'acct' ? 'Account sections' : 'WOTAN sections')))) });
     TABS[skin].forEach(function (t) {
       tabs.appendChild(el('a', { href: t[2], text: t[1], 'aria-current': t[0] === section ? 'page' : null }));
     });
 
     inner.appendChild(brand);
     inner.appendChild(tabs);
-    if (skin !== 'hs') inner.appendChild(themePicker());
+    if (skin !== 'hs' && skin !== 'acct') inner.appendChild(themePicker());
     inner.appendChild(accountBox);
     mount.appendChild(el('div', { 'class': 'wn-bar' }, [inner]));
   }
@@ -249,6 +254,8 @@
     if (skin !== 'rg') menu.appendChild(el('a', { role: 'menuitem', href: '/clubs/settings.html', text: 'My clubs & sync' }));
     // Identity federation: linked accounts (Battle.net/Google/Twitch), privacy, tracker upload keys. Site-wide.
     menu.appendChild(el('a', { role: 'menuitem', href: '/account/', text: 'Account & linked accounts' }));
+    // Redeem a code (founder real-time 2026-10-16, like Battle.net's account menu): Founder status, tickets and other perks.
+    menu.appendChild(el('a', { role: 'menuitem', href: '/redeem/', text: 'Redeem a code' }));
     menu.appendChild(el('hr'));
     var out = el('button', { type: 'button', role: 'menuitem', text: 'Sign out' });
     out.addEventListener('click', function () {

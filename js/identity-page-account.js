@@ -205,8 +205,13 @@
     UI.clear(root);
     root.setAttribute('aria-busy', 'false');
     root.appendChild(h('header', { 'class': 'hs-hero' }, h('div', null, h('p', { 'class': 'hs-eyebrow', text: 'Account' }),
-      h('h1', { 'class': 'hs-h1', text: 'Linked accounts and tracker keys' }),
-      h('p', { 'class': 'hs-lede', text: 'Link the accounts you play and stream with, choose what others see, and manage the keys your PC tracker uses to upload games.' }))));
+      h('h1', { 'class': 'hs-h1', text: 'Your account' }),
+      h('p', { 'class': 'hs-lede', text: 'Redeem codes, see your games, link the accounts you play and stream with, choose what others see, and manage the keys your PC tracker uses to upload games.' }))));
+    // Account overview (js/account-overview.js): redeem a code, per-game status, recent redemptions. Optional -- absent in the
+    // identity test harness -- and a failure in it must never block the identity sections below.
+    var overviewHost = h('div', { id: 'overview' });
+    root.appendChild(overviewHost);
+    if (window.AccountOverview) { try { window.AccountOverview.mount(overviewHost); } catch (e) { /* the identity sections still render */ } }
     var notice = h('div', { role: 'status' });
     if (ret.linked) notice.appendChild(h('p', { 'class': 'hs-msg ok', text: (API.PROVIDER_LABEL[ret.linked] || ret.linked) + ' account linked.' }));
     if (ret.error) { notice.appendChild(h('p', { 'class': 'hs-msg err', role: 'alert', text: API.friendly(ret.error, 'Linking did not finish (' + ret.error + '). Try again.') })); }
