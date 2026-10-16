@@ -10,6 +10,12 @@ PROJECT="${PROJECT:-project-d24a71e9-2daf-4b2d-917}"
 CTX="$(mktemp -d)"; trap 'rm -rf "$CTX"' EXIT
 mkdir -p "$CTX/site"
 git -C "$SRC" ls-files -z -- . ':(exclude)ops' ':(exclude)scripts' ':(exclude).github' ':(exclude)*.md' | (cd "$SRC" && xargs -0 -r tar cf - 2>/dev/null) | tar xf - -C "$CTX/site"
+# DEADWEIGHT_WEB_DIR (CI): a freshly built DEADWEIGHT web client (DEADWEIGHT/scripts/build-web.sh)
+# replaces the committed DEADWEIGHT/ copy, so the site never serves a stale hand-synced build.
+if [ -n "${DEADWEIGHT_WEB_DIR:-}" ]; then
+  rm -rf "$CTX/site/DEADWEIGHT" && mkdir -p "$CTX/site/DEADWEIGHT"
+  cp -r "$DEADWEIGHT_WEB_DIR"/. "$CTX/site/DEADWEIGHT/"
+fi
 cp "$SRC/ops/docker/wotan.Dockerfile" "$CTX/Dockerfile"
 
 # CI SA constraints (EMILY/gitops/CI_SETUP.md, found live 2026-10-05): pin the staging dir so gcloud

@@ -25,6 +25,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Always ship the DEADWEIGHT client built from DEADWEIGHT main (not the committed copy), so
+      # a WOTAN-only push never reverts a DEADWEIGHT deploy.
+      - uses: actions/checkout@v4
+        with:
+          repository: emilyspringerton/DEADWEIGHT
+          path: DEADWEIGHT-src
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build DEADWEIGHT web client
+        run: sudo apt-get update && sudo apt-get install -y clang lld && DEADWEIGHT-src/scripts/build-web.sh "$RUNNER_TEMP/dw-web"
+
       - name: Auth to GCP (Workload Identity, no stored key)
         uses: google-github-actions/auth@v2
         with:
@@ -34,4 +48,6 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v2
 
       - name: Build + push
+        env:
+          DEADWEIGHT_WEB_DIR: ${{ runner.temp }}/dw-web
         run: scripts/build-image.sh "$(git rev-parse --short HEAD)"
