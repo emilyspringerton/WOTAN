@@ -169,12 +169,14 @@ async function loadCatalog() {
     hats.forEach((hat) => {
       const have = ownedIDs.has(hat.hat_id);
       const short = balance !== null ? hat.flow_cost - balance : 0;
-      const btn = h('button', { type: 'button', 'class': 'i-btn' + (!have && short <= 0 ? ' primary' : ''), text: have ? 'Owned' : (short > 0 ? 'Need ' + fmt(short) + ' more' : 'Buy') });
-      btn.disabled = have || short > 0;
+      const soldOut = !!hat.sold_out && !have;
+      const btn = h('button', { type: 'button', 'class': 'i-btn' + (!have && !soldOut && short <= 0 ? ' primary' : ''), text: have ? 'Owned' : (soldOut ? 'Sold out' : (short > 0 ? 'Need ' + fmt(short) + ' more' : 'Buy')) });
+      btn.disabled = have || soldOut || short > 0;
+      if (soldOut) btn.title = 'Limited edition, sold out. Only available on the secondary market now.';
       if (short > 0) btn.title = 'You have ' + fmt(balance) + ' Flow; this hat costs ' + fmt(hat.flow_cost) + '.';
       btn.addEventListener('click', () => buyHat(hat, btn));
       list.appendChild(h('article', { 'class': 'i-card' + (have ? ' owned' : '') }, [
-        h('div', { 'class': 'i-art', 'aria-hidden': 'true' }, [have ? h('span', { 'class': 'i-badge ok', text: 'Owned' }) : null, art(hat)]),
+        h('div', { 'class': 'i-art', 'aria-hidden': 'true' }, [have ? h('span', { 'class': 'i-badge ok', text: 'Owned' }) : (soldOut ? h('span', { 'class': 'i-badge dim', text: 'Sold out' }) : (hat.quantity_limit ? h('span', { 'class': 'i-badge', text: 'Limited \u00b7 ' + fmt(hat.remaining) + ' of ' + fmt(hat.quantity_limit) + ' left' }) : null)), art(hat)]),
         h('div', { 'class': 'i-card-body' }, [
           h('h3', { 'class': 'i-card-name', text: hat.name }),
           h('p', { 'class': 'i-card-desc', text: hat.description || '' }),

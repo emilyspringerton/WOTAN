@@ -550,7 +550,7 @@ async function loadDesigns() {
       const state = d.status === 'listed' ? '<span class="badge accepted">Listed</span>' : d.status === 'unlisted' ? '<span class="badge pending">Unlisted</span>' : '<span class="badge declined">' + esc(d.status) + '</span>';
       el.innerHTML = `<img src="${esc(d.image_url)}" alt="">` +
         `<div><div><strong>${esc(d.name)}</strong> ${state}</div>` +
-        `<div class="small">${d.sales_count} sold · earned ${d.flow_earned} · burned ${d.flow_burned}${d.report_count ? ' · ' + d.report_count + ' reports' : ''}</div>` +
+        `<div class="small">${d.sales_count}${d.quantity_limit ? ' of ' + d.quantity_limit : ''} sold${d.sold_out ? ' · SOLD OUT (secondary market only)' : ''} · earned ${d.flow_earned} · burned ${d.flow_burned}${d.report_count ? ' · ' + d.report_count + ' reports' : ''}</div>` +
         `<div class="row tight" style="margin-top:.4rem"><input type="number" min="10" max="100000" value="${d.flow_cost}" aria-label="Price">` +
         `<button class="secondary chip" data-a="price">Set price</button>` +
         `<button class="secondary chip" data-a="toggle">${d.status === 'listed' ? 'Unlist' : 'Relist'}</button></div></div>`;
