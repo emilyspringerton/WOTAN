@@ -52,6 +52,19 @@ already signed in.
   (`players.kills`/`deaths`/`sessions`, gated by `shankpit.match.write`). "If you have an IDUNA
   account you have a SHANKPIT account" — no new account type needed, only this read. SHANKPIT and
   BIG_O premium keys are named as a real future phase, not built here.
+- **`/BRAWLPIT/` — BRAWLPIT, playable in the browser** (2026-10-16). The whole game -- simulation, CPU
+  fighters, menus, software renderer -- is one WebAssembly module compiled from PARENA
+  (`PARENA/stdlib/brawlpit/`): no malloc, no imports, and its physics is bit-identical to BRAWLPIT's C engine
+  (`PARENA/tests/brawlpit_parity_*`). Keyboard or gamepad, vs CPU / local 2P / free-for-all / practice; the hat
+  you equipped in the store (or drew in the Hat Studio) is worn in matches. The page's only JavaScript is
+  `BRAWLPIT/bp-host.js`, which is *generated* from PARENA (PARENA -> TypeScript -> JS) and does nothing but
+  instantiate the wasm, blit its framebuffer, forward input and decode images. `brawlpit.wasm`, `bp-host.js`
+  and `sprites.png` are committed (the deploy image is built from git-tracked files): regenerate with
+  `scripts/build-brawlpit.sh` (wasm + host, needs the sibling PARENA checkout, node and the LLVM toolchain) and
+  `python3 scripts/build-brawlpit-sprites.py` (the portrait atlas). `scripts/brawlpit-browser-test.mjs` drives
+  the real page in headless Chromium. **Honest limits:** verified in Node and headless Chromium only (not
+  Firefox/Safari/phones; no touch controls); the gamepad path was exercised through a Gamepad API shim, not a
+  physical controller; no audio; local play only (no online matches).
 - `/store.html` — the BRAWLPIT hat store. Login is a real redirect to IDUNA's own hosted SSO
   page (`iam.okemily.com`) — this page has no password field of its own.
 - **`/profile.html` — public DEADWEIGHT player profiles** (no login): look up any player by

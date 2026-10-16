@@ -36,6 +36,7 @@
       ['feed', 'Feed', '/hearthstone/feed.html'],
       ['players', 'Players', '/hearthstone/players.html'],
       ['tracker', 'Tracker', '/hearthstone/tracker.html'],
+      ['clubs', 'Clubs', '/clubs/'],
       ['gfd', 'GFD', '/GFD/']
     ],
     rg: [
@@ -61,6 +62,7 @@
       ['decks', 'Draft Decks', '/decks.html'],
       ['matches', 'Matches', '/matches.html'],
       ['shankpit', 'SHANKPIT', '/shankpit.html'],
+      ['friends', 'Friends', '/friends.html'],
       ['gfd', 'GFD', '/GFD/']
     ]
   };

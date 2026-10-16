@@ -35,3 +35,22 @@
 .bp-pill { display: inline-flex; align-items: center; gap: .4rem; font: 600 .75rem/1 var(--i-body); letter-spacing: .04em; text-transform: uppercase;
   padding: .3rem .7rem; border-radius: 999px; background: color-mix(in srgb, var(--i-gold) 18%, transparent); color: var(--i-gold-deep); }
 .bp-pad-status { margin-top: .6rem; font-size: .78rem; color: var(--i-muted); }
+
+/* ---- the live game (BRAWLPIT/bp-host.js drives these ids) ---- */
+.bp-stage { box-shadow: 0 0 0 4px color-mix(in srgb, var(--i-gold) 16%, transparent), 0 18px 44px rgba(60, 46, 18, .22); }
+.bp-stage-canvas { display: block; width: 100%; height: 100%; background: #06040f; outline: none; touch-action: none;
+  image-rendering: pixelated; image-rendering: crisp-edges; cursor: default; }
+.bp-stage-canvas[hidden] { display: none; }
+.bp-stage:fullscreen { aspect-ratio: auto; border: 0; border-radius: 0; box-shadow: none; background: #000; }
+.bp-stage:fullscreen .bp-stage-canvas { width: auto; height: 100%; max-width: 100%; aspect-ratio: 16/9; }
+.bp-load { color: #cfc9d8; text-align: center; max-width: 30rem; padding: 2rem; font: 500 1rem/1.5 var(--i-body); display: flex; flex-direction: column; gap: .4rem; }
+.bp-load[hidden] { display: none; }
+.bp-load b { color: var(--i-gold); letter-spacing: .08em; text-transform: uppercase; font-size: .72rem; }
+.bp-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .7rem; margin-top: 1rem; }
+.bp-tip { border: 1px solid color-mix(in srgb, var(--i-gold) 45%, var(--i-line) 55%); border-radius: 6px; padding: .75rem .9rem; background: var(--i-paper);
+  font-size: .86rem; line-height: 1.55; color: var(--i-muted); }
+.bp-tip b { display: block; letter-spacing: .24em; text-transform: uppercase; font-size: .66rem; color: var(--i-text); margin-bottom: .35rem; }
+.bp-tip kbd { font: 600 .74rem/1 var(--i-body); padding: .12rem .35rem; border: 1px solid var(--i-line); border-bottom-width: 2px; border-radius: 4px; background: #fffdf8; color: var(--i-text); }
+.bp-tip a { color: var(--i-gold-deep); }
+.bp-stat { margin: .9rem 0 0; font: 500 .72rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--i-faint, var(--i-muted)); letter-spacing: .02em; }
+.bp-pill { }

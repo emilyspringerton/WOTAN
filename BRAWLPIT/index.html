@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/css/wotan-iduna.css">
 <link rel="stylesheet" href="/css/wotan-bp.css">
 <title>Play BRAWLPIT &mdash; WOTAN</title>
-<meta name="description" content="Play BRAWLPIT in your browser. Sign in with IDUNA to see your character and hats. Core engine port in progress -- not playable yet.">
+<meta name="description" content="Play BRAWLPIT, the platform fighter, in your browser. The whole game runs as WebAssembly compiled from PARENA. Keyboard or gamepad; your equipped hat comes with you.">
 </head>
 <body class="iduna bp" data-page="play">
 <header id="wotan-nav" data-skin="bp" data-section="play"></header>
@@ -19,7 +19,7 @@
 <main class="bp-wrap" id="main">
   <div class="bp-head">
     <div>
-      <p class="bp-eyebrow">WOTAN &middot; Arena fighter</p>
+      <p class="bp-eyebrow">WOTAN &middot; Platform fighter</p>
       <h1 class="bp-h1">BRAWLPIT</h1>
     </div>
     <div class="bp-hat" id="bp-hat" hidden>
@@ -33,35 +33,43 @@
       </svg>
       <img class="bp-hat-img" id="bp-hat-img" alt="">
     </div>
-    <p class="bp-sub" id="bp-sub">Your IDUNA account is your login; no install, no password. The core fighting engine is being ported from BRAWLPIT's native C runtime into PARENA -- this page is a real scaffold ahead of that landing, not a playable build yet.</p>
+    <p class="bp-sub" id="bp-sub">Momentum, shields and blast zones. Keyboard or gamepad, one player or two. Sign in with IDUNA and the hat you equipped in the Hat Store goes into the ring with you.</p>
   </div>
 
   <div class="bp-bar" role="toolbar" aria-label="BRAWLPIT controls">
-    <span class="bp-pill" id="bp-pill">Core engine porting to PARENA</span>
+    <span class="bp-pill" id="bp-pill" role="status" aria-live="polite">Loading</span>
     <span class="sp"></span>
     <button type="button" class="bp-btn" id="b-fullscreen" title="Fullscreen" disabled>Fullscreen</button>
+    <a class="bp-btn" href="/hat-studio.html" title="Draw a hat">Hat Studio</a>
     <a class="bp-btn" href="/store.html" title="Spend your Flow on hats">Hat Store</a>
   </div>
 
-  <div class="bp-stage" id="stage">
-    <div class="bp-placeholder">
-      <b>Not playable yet</b>
-      See <a href="https://github.com/emilyspringerton/MONOREPO/blob/master/BRAWLPIT/docs/BP_WASM_WOTAN_NORTHSTAR.md">BP_WASM_WOTAN_NORTHSTAR.md</a>
-      for the real, phased plan: BRAWLPIT's native C core engine is being ported to PARENA
-      (`PARENA/stdlib/brawlpit/`) and compiled to native wasm32, the same no-Emscripten pipeline
-      GoblinFoxDragon's own browser terminal already ships with. This page, the IDUNA sign-in,
-      the top nav tab, and the equipped-hat badge above are real and live now; the match itself
-      is not wired in yet.
-      <div class="bp-pad-status" id="bp-pad-status" aria-live="polite"></div>
+  <div class="bp-stage" id="bp-stage">
+    <div class="bp-load" id="bp-load">
+      <b>Starting</b>
+      <span id="bp-load-msg">Fetching the game (a WebAssembly module, about 120 KB)&hellip;</span>
+      <noscript><span>BRAWLPIT is WebAssembly; it needs JavaScript enabled to load it.</span></noscript>
     </div>
-    <canvas class="bp-stage-canvas" id="bp-canvas" width="800" height="450" tabindex="0" role="application"
-            aria-label="BRAWLPIT stage. Not active yet." hidden></canvas>
+    <canvas class="bp-stage-canvas" id="bp-canvas" width="960" height="540" tabindex="0" role="application"
+            aria-label="BRAWLPIT. Arrow keys or WASD to navigate the menus and move; Enter to confirm." hidden></canvas>
   </div>
+  <p class="bp-pad-status" id="bp-pad-status" aria-live="polite"></p>
+
+  <div class="bp-tips">
+    <div class="bp-tip"><b>Player 1</b><kbd>A</kbd> <kbd>D</kbd> move &middot; <kbd>W</kbd> <kbd>S</kbd> up / drop through &middot; <kbd>Space</kbd> jump &middot; <kbd>J</kbd> attack &middot; <kbd>Shift</kbd> shield &middot; <kbd>K</kbd> special. A lone player can use either key set.</div>
+    <div class="bp-tip"><b>Player 2</b><kbd>&larr;</kbd> <kbd>&rarr;</kbd> <kbd>&uarr;</kbd> <kbd>&darr;</kbd> move &middot; <kbd>Right Ctrl</kbd> jump &middot; <kbd>/</kbd> attack &middot; <kbd>Right Shift</kbd> shield &middot; <kbd>'</kbd> special.</div>
+    <div class="bp-tip"><b>Gamepad</b>Stick or d-pad moves &middot; A jump &middot; X or RT attack &middot; LB or LT shield &middot; B or RB special &middot; Start pauses. One pad plays player 2 in a local match; two pads play one each. It drives the menus too.</div>
+    <div class="bp-tip"><b>Moves</b>Special alone dodges. Special + up or down is each fighter's own move. Hold special with a direction to charge a smash. Shield has a 16-frame windup (you can be hit) then 16 frames where attackers get punished.</div>
+    <div class="bp-tip"><b>Hats</b>The hat you equipped in the <a href="/store.html">Hat Store</a> (or drew in the <a href="/hat-studio.html">Hat Studio</a>) is worn in matches &mdash; pick it with up / down on the fighter-select screen.</div>
+    <div class="bp-tip"><b>What this is</b>The game is one WebAssembly module with no imports and no allocator, compiled from <a href="https://github.com/emilyspringerton/PARENA">PARENA</a>: simulation, bots, menus and renderer. Its physics is a port of BRAWLPIT's C engine and is bit-for-bit identical to it. The only JavaScript here is generated from PARENA too.</div>
+  </div>
+
+  <p class="bp-stat" id="bp-stat"></p>
 </main>
 
 <script src="/js/iduna-sso.js"></script>
 <script src="/js/wotan-nav.js"></script>
-<script src="brawlpit.js"></script>
-<script src="hat.js"></script>
+<script type="module" src="bp-host.js"></script>
+<script src="/js/cookie-consent.js"></script>
 </body>
 </html>
