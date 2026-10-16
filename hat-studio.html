@@ -54,6 +54,10 @@
   .full { width: 100%; }
   #preview { width: 96px; height: 96px; image-rendering: pixelated; border: 1px solid var(--border); border-radius: 6px; background: #2a1d44; }
   details > summary { cursor: pointer; font-weight: 700; }
+  dialog.limit-dialog { border: 2px solid var(--border-bright); border-radius: 8px; padding: 1.2rem; max-width: min(30rem, 94vw); width: 100%; background: var(--bg-raise); color: var(--fg); box-shadow: var(--glow); }
+  dialog.limit-dialog::backdrop { background: rgba(10, 6, 20, .7); }
+  dialog.limit-dialog h3 { margin: 0 0 .6rem; font-family: var(--font-display); font-size: 1rem; letter-spacing: .04em; text-transform: uppercase; color: var(--gold-bright); }
+  dialog.limit-dialog .row { margin-top: 1rem; justify-content: flex-end; }
 </style>
 </head>
 <body>
@@ -138,6 +142,9 @@
         <input type="number" id="hat-price" min="10" max="100000" step="1" value="150" class="full">
         <div class="row tight" id="price-chips" style="margin:.5rem 0"></div>
         <div class="breakdown" id="breakdown"></div>
+        <label for="hat-limit" style="margin-top:.6rem">Quantity limit <span class="hint small">(optional)</span></label>
+        <input type="number" id="hat-limit" min="1" max="1000000" step="1" class="full" placeholder="Unlimited">
+        <div class="small" style="margin-top:.3rem">Leave blank for unlimited. Set a number to make it a limited edition.</div>
       </div>
     </div>
     <div class="row" style="margin-top:1rem">
@@ -494,6 +501,17 @@ async function resolveCharacter() {
     characterID = c.character_id; $('designs-card').hidden = false; loadDesigns();
   } catch (e) { msg('No GFD character on this account yet -- create one in GFD Town, then come back to publish.', 'error'); }
 }
+// Limited editions: warn before publishing that selling out moves the hat to the secondary market.
+function confirmLimited(limit) {
+  const dlg = $('limit-dialog');
+  $('limit-text').textContent = 'Limiting the quantity of a hat means that after you sell out of all ' + limit.toLocaleString() +
+    ' on the WOTAN hat store, it will only be available on the secondary market.';
+  return new Promise(resolve => {
+    dlg.addEventListener('close', () => resolve(dlg.returnValue === 'confirm'), { once: true });
+    dlg.returnValue = 'cancel';
+    dlg.showModal();
+  });
+}
 $('publish-btn').onclick = async () => {
   if (!getIdunaSession()) { msg('Sign in with IDUNA (top right) to publish.', 'error'); return; }
   if (!characterID) { await resolveCharacter(); if (!characterID) return; }
@@ -501,14 +519,18 @@ $('publish-btn').onclick = async () => {
   if (name.length < 2) return msg('Give your hat a name (2-32 characters).', 'error');
   if (!hasInk()) return msg('Draw something first.', 'error');
   if (!(price >= 10 && price <= 100000)) return msg('Price must be 10-100,000 Flow.', 'error');
+  const limitRaw = $('hat-limit').value.trim();
+  const limit = limitRaw === '' ? null : Number(limitRaw);
+  if (limit !== null && !(Number.isInteger(limit) && limit >= 1 && limit <= 1000000)) return msg('Quantity limit must be a whole number from 1 to 1,000,000, or blank for unlimited.', 'error');
+  if (limit !== null && !(await confirmLimited(limit))) return;
   compose(main);
   const png = main.toDataURL('image/png');
   $('publish-btn').disabled = true;
   try {
-    const hat = await api('/characters/' + encodeURIComponent(characterID) + '/hats/design', {
-      method: 'POST', body: JSON.stringify({ name, description: $('hat-desc').value.trim(), flow_cost: price, png_base64: png.split(',')[1] }),
-    });
-    msg('Published "' + hat.name + '" for ' + hat.flow_cost + ' Flow. It is in the store now, and already in your hats.', 'ok');
+    const body = { name, description: $('hat-desc').value.trim(), flow_cost: price, png_base64: png.split(',')[1] };
+    if (limit !== null) body.quantity_limit = limit;
+    const hat = await api('/characters/' + encodeURIComponent(characterID) + '/hats/design', { method: 'POST', body: JSON.stringify(body) });
+    msg('Published "' + hat.name + '" for ' + hat.flow_cost + ' Flow' + (limit !== null ? ', limited to ' + limit : '') + '. It is in the store now, and already in your hats.', 'ok');
     loadDesigns(); loadEconomy();
   } catch (e) { msg(e.message, 'error'); }
   $('publish-btn').disabled = false;
@@ -549,6 +571,16 @@ async function loadDesigns() {
 layers = [newLayer('Hat')];
 setColor(color); refreshProjectList(); renderAll(); loadEconomy(); resolveCharacter();
 </script>
+<dialog class="limit-dialog" id="limit-dialog" aria-labelledby="limit-title">
+  <form method="dialog">
+    <h3 id="limit-title">Limited edition</h3>
+    <p id="limit-text" style="margin:0"></p>
+    <div class="row">
+      <button class="secondary" value="cancel" id="limit-cancel">Go back</button>
+      <button class="gold" value="confirm" id="limit-confirm">Publish limited edition</button>
+    </div>
+  </form>
+</dialog>
 <script src="/js/wotan-nav.js"></script>
 <script src="/js/cookie-consent.js"></script>
 </body>
