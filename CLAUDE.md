@@ -33,6 +33,13 @@ shared topbar markup rather than re-declaring `:root`/base styles. `button`/`.se
 rules also match a `.button` class, so a plain `<a>` can be styled like a button (2026-09-24,
 added for store.html's "Sign in with IDUNA" link).
 
+**IDUNA front page = the WOTAN style guide (2026-10-16, founder real-time: "look at the front page as the WOTAN style guide").**
+`css/wotan-iduna.css` distils IDUNA's own front page (`IDUNA/index.html` + `styles.css`): cream paper, thin gold-edged
+panels, Cormorant Garamond display over Spectral body, wide-tracked uppercase labels, restrained gold. New and reworked
+pages use its `.i-*` components (hero, panel, button, scoreboard stat tiles, cards, badges, toast) with `body.iduna`
+instead of inventing a palette; `store.html` and `GFD/` are the first two. The older dark `wotan-theme.css` pages
+(friends, matches, ...) are unchanged and migrate opportunistically.
+
 ## Auth — IDUNA as SSO (standing, 2026-09-24; live end to end since 2026-09-25)
 
 No page on this site renders its own email/password form. Every page links to IDUNA's own hosted
@@ -95,6 +102,8 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
 
 ## Real, current status
 
+- `GFD/` -- **GoblinFoxDragon web client** (2026-10-16, founder real-time): `index.html` + `gfd.js` + `term.wasm`. The terminal is PARENA (`PARENA/stdlib/gfd/term.prn`, built by `PARENA/scripts/build_gfd_term_wasm.sh`, committed here as `GFD/term.wasm`; rebuild it when `term.prn` changes -- `PARENA/tests/gfd_term_test.mjs` tests the artifact). Talks to the MUD over `wss://wotan.okemily.com/GFD/ws` (Gateway route to `gfd-core:8480`, `EMILY/gitops/render.sh`); first frame is `{"token":<IDUNA SSO JWT>}`, close code 4401 = token refused. Uses the shared `js/iduna-sso.js` session, no sign-in button of its own. Character creation is the MUD's own name-claim flow (same code as SSH); the character is owned by the IDUNA account's `player_id`, which is what `store.html` looks up. One character per account for now (multibox licensing will raise it; no character select yet). Nav: `data-skin="gfd"` (`css/wotan-gfd.css`). Verified in headless Chromium against the real MUD; **not yet verified on a real phone keyboard or Safari**. Known limit: the terminal is a fixed 100x34 grid, so on a phone it is small (zoom/fullscreen help; reflow is future work).
+
 - `clubs/` — **Clubs (teams), Phase 2** (2026-10-12, see `CLUBS_NORTHSTAR.md`): directory, tier-shaped public page,
   members workspace, manager console, invite join flow, settings/sync target. Backend is IDUNA
   `internal/http/handlers/clubs*.go` + `internal/clubs` (authz) + Back Office `/admin/clubs`; authorization is
@@ -133,7 +142,7 @@ scoped to a DIFFERENT game still gets a real, distinct refusal, not silently rea
   `data/cards.json`. See `NORTHSTAR.md` for the full account (why DEADWEIGHT, verification,
   deferred work). Live-verified via real headless-Chromium screenshots (desktop + phone) against
   the deployed page.
-- `store.html` — real, code-complete WOTAN_HAT_STORE_NORTHSTAR.md Phase 2 store page (2026-09-04):
+- `store.html` — (restyled 2026-10-16 on the IDUNA style guide: character plate with Flow balance + hats-owned tiles, hat cards, "need N more Flow" instead of a doomed Buy, locker with equipped state, toasts, no-character state linking to `/GFD/`) real, code-complete WOTAN_HAT_STORE_NORTHSTAR.md Phase 2 store page (2026-09-04):
   resolves the player's GFD character, real hat catalog/buy/equip against IDUNA's live Phase 1
   endpoints, all via this repo's own `/api/` nginx proxy. Login is IDUNA's own hosted SSO page
   (2026-09-24) — see "Auth — IDUNA as SSO" above and `IDUNA/internal/http/handlers/sso_login.go`

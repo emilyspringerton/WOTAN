@@ -26,7 +26,7 @@
   if (!mount) return;
 
   var skinAttr = mount.getAttribute('data-skin');
-  var skin = skinAttr === 'dw' ? 'dw' : (skinAttr === 'rg' ? 'rg' : 'hs');
+  var skin = skinAttr === 'dw' ? 'dw' : (skinAttr === 'rg' ? 'rg' : (skinAttr === 'gfd' ? 'gfd' : 'hs'));
   var section = mount.getAttribute('data-section') || '';
 
   var TABS = {
@@ -35,19 +35,27 @@
       ['submit', 'Submit', '/hearthstone/submit.html'],
       ['feed', 'Feed', '/hearthstone/feed.html'],
       ['players', 'Players', '/hearthstone/players.html'],
-      ['tracker', 'Tracker', '/hearthstone/tracker.html']
+      ['tracker', 'Tracker', '/hearthstone/tracker.html'],
+      ['gfd', 'GFD', '/GFD/']
     ],
     rg: [
       ['board', 'Leaderboard', '/redgarden/'],
       ['heroes', 'Heroes', '/redgarden/heroes.html'],
-      ['play', 'Play', '/redgarden/play.html']
+      ['play', 'Play', '/redgarden/play.html'],
+      ['gfd', 'GFD', '/GFD/']
+    ],
+    gfd: [
+      ['play', 'Play', '/GFD/'],
+      ['store', 'Hat Store', '/store.html'],
+      ['studio', 'Hat Studio', '/hat-studio.html']
     ],
     dw: [
       ['home', 'Home', '/'],
       ['play', 'Play', '/DEADWEIGHT/'],
       ['decks', 'Draft Decks', '/decks.html'],
       ['matches', 'Matches', '/matches.html'],
-      ['shankpit', 'SHANKPIT', '/shankpit.html']
+      ['shankpit', 'SHANKPIT', '/shankpit.html'],
+      ['gfd', 'GFD', '/GFD/']
     ]
   };
 
@@ -134,7 +142,8 @@
     var GAMES = [
       ['dw', 'Deadweight', 'Drafts \u00b7 Matches \u00b7 Duels', '/decks.html'],
       ['hs', 'Hearthstone', 'Shared deck library', '/hearthstone/'],
-      ['rg', 'Redgarden', 'Knights of the Void', '/redgarden/']
+      ['rg', 'Redgarden', 'Knights of the Void', '/redgarden/'],
+      ['gfd', 'GoblinFoxDragon', 'MUD \u00b7 Hat Store', '/GFD/']
     ];
     var games = el('div', { 'class': 'wn-games' }, [
       el('div', { 'class': 'wn-games-in' }, [el('span', { 'class': 'wn-games-label', text: 'Games' })].concat(GAMES.map(function (g) {
@@ -151,7 +160,7 @@
       el('small', { text: 'EINHORN_INDUSTRIAL' })
     ]);
 
-    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : 'WOTAN sections') });
+    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : 'WOTAN sections')) });
     TABS[skin].forEach(function (t) {
       tabs.appendChild(el('a', { href: t[2], text: t[1], 'aria-current': t[0] === section ? 'page' : null }));
     });

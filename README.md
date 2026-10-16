@@ -8,6 +8,8 @@
 distinct live content — REDGARDEN leaderboard, hero stats, GFD Battlegrounds demo, mailing list — and links forward to
 here). Plain static HTML/CSS/JS, no build step. See `CLAUDE.md` for status and related docs.
 
+**Play GoblinFoxDragon in the browser (2026-10-16):** `/GFD/` is a web terminal for the GFD MUD -- PARENA compiled to wasm for the terminal, IDUNA SSO for login, the MUD's own name-creation flow for new characters. It has its own tab in the top menu; the Hat Store links straight to it when an account has no character yet. See `CLAUDE.md`'s `GFD/` entry for architecture and honest limits.
+
 **Look**: BRAWLPIT "neon brutalist" art direction (2026-09-24) — near-black violet background,
 violet primary accent, a gold secondary accent, one shared stylesheet (`css/wotan-theme.css`)
 across every page. Dark-only by design.

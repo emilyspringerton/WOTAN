@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4f1ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Spectral:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-iduna.css">
+<link rel="stylesheet" href="/css/wotan-gfd.css">
+<title>Play GoblinFoxDragon &mdash; WOTAN</title>
+<meta name="description" content="Play the GoblinFoxDragon MUD in your browser. Sign in with IDUNA, pick a name, and go. No install, no password.">
+</head>
+<body class="iduna gfd" data-page="play">
+<header id="wotan-nav" data-skin="gfd" data-section="play"></header>
+
+<main class="gfd-wrap" id="main">
+  <div class="gfd-head">
+    <div>
+      <p class="gfd-eyebrow">WOTAN &middot; Persistent world</p>
+      <h1 class="gfd-h1">GoblinFoxDragon</h1>
+    </div>
+    <p class="gfd-sub" id="gfd-sub">A persistent-world MUD in your browser. Your IDUNA account is your login; no install, no password.</p>
+  </div>
+
+  <div class="gfd-bar" role="toolbar" aria-label="Terminal controls">
+    <span class="gfd-pill" id="gfd-pill" data-state="idle" role="status" aria-live="polite"><i></i><span id="gfd-pill-text">Starting</span></span>
+    <span class="sp"></span>
+    <button type="button" class="gfd-btn" id="b-copy" title="Copy the selected text (or Ctrl+Shift+C)">Copy</button>
+    <button type="button" class="gfd-btn" id="b-paste" title="Paste from the clipboard (or Ctrl+V)">Paste</button>
+    <button type="button" class="gfd-btn" id="b-smaller" aria-label="Smaller text" title="Smaller text">A&minus;</button>
+    <button type="button" class="gfd-btn" id="b-bigger" aria-label="Larger text" title="Larger text">A+</button>
+    <button type="button" class="gfd-btn" id="b-full" title="Fullscreen">Fullscreen</button>
+    <a class="gfd-btn" href="/store.html" title="Spend your Flow on hats">Hat Store</a>
+  </div>
+
+  <div class="gfd-stage" id="stage">
+    <canvas class="gfd-term" id="term" width="800" height="544" tabindex="0" role="application"
+            aria-label="GoblinFoxDragon terminal. Type to play; output is mirrored in the transcript below."></canvas>
+    <textarea class="gfd-input" id="gfd-input" aria-label="Terminal input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" rows="1"></textarea>
+
+    <button type="button" class="gfd-btn gfd-exit" id="b-exit">Exit fullscreen</button>
+    <div class="gfd-veil" id="veil" hidden>
+      <div class="gfd-card" id="veil-card"></div>
+    </div>
+  </div>
+
+  <div class="gfd-quick" id="quick" role="group" aria-label="Quick commands">
+    <span class="lbl">Quick</span>
+    <button type="button" class="gfd-btn" data-cmd="look">look</button>
+    <span class="gap"></span>
+    <button type="button" class="gfd-btn" data-cmd="n" aria-label="Go north">n</button>
+    <button type="button" class="gfd-btn" data-cmd="s" aria-label="Go south">s</button>
+    <button type="button" class="gfd-btn" data-cmd="e" aria-label="Go east">e</button>
+    <button type="button" class="gfd-btn" data-cmd="w" aria-label="Go west">w</button>
+    <span class="gap"></span>
+    <button type="button" class="gfd-btn" data-cmd="who">who</button>
+    <button type="button" class="gfd-btn" data-cmd="jobs">jobs</button>
+  </div>
+
+  <div class="gfd-tips">
+    <div class="gfd-tip"><b>First time?</b>The game asks you to pick a permanent character name (2&ndash;20 letters or digits). Your IDUNA account is bound to it, so next time you just walk in.</div>
+    <div class="gfd-tip"><b>Keys</b><kbd>&uarr;</kbd> <kbd>&darr;</kbd> command history &middot; <kbd>PgUp</kbd> <kbd>PgDn</kbd> or the mouse wheel for scrollback &middot; drag to select, double-click for a word, <kbd>Ctrl</kbd>+<kbd>C</kbd> copies a selection.</div>
+    <div class="gfd-tip"><b>Hats</b>Flow earned in game is spent in the <a href="/store.html">Hat Store</a>. It finds your character automatically.</div>
+  </div>
+
+  <div class="gfd-sr" id="gfd-sr" role="log" aria-live="polite" aria-relevant="additions" aria-label="Game transcript"></div>
+</main>
+
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/GFD/gfd.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

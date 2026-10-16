@@ -1,0 +1,75 @@
+/* WOTAN /GFD/ play page. Page chrome follows the IDUNA front-page style guide (css/wotan-iduna.css):
+   cream paper, gold-edged panels, serif display type. The terminal itself stays a dark "console well"
+   (the PARENA renderer's own palette), framed in gold, so it reads as an instrument set into the page.
+   The top bar uses wotan-hs.css's default (cream/gold) skin, with data-skin="gfd" for the GFD tab set. */
+
+.gfd-wrap { max-width: 1180px; margin: 0 auto; padding: .6rem 1rem 4rem; }
+.gfd-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .4rem 1.5rem; padding: 1.1rem 0 1rem; margin-bottom: .9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--i-gold) 55%, var(--i-line) 45%); position: relative; }
+.gfd-head::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 5.5rem; height: 3px; background: var(--i-gold); }
+.gfd-eyebrow { letter-spacing: .35em; text-transform: uppercase; font-size: .68rem; color: var(--i-muted); margin: 0 0 .3rem; }
+.gfd-h1 { font: 500 clamp(1.9rem, 4.6vw, 2.9rem)/1.05 var(--i-display); letter-spacing: .02em; margin: 0; }
+.gfd-sub { color: var(--i-muted); margin: 0; font-size: .95rem; max-width: 34rem; }
+
+/* Toolbar */
+.gfd-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin-bottom: .7rem; }
+.gfd-bar .sp { flex: 1 1 1rem; }
+.gfd-btn { appearance: none; font: 500 .9rem/1 var(--i-body); letter-spacing: .02em; color: var(--i-text); cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: .35rem; height: 2.4rem; padding: 0 .95rem; box-sizing: border-box; border-radius: 5px;
+  border: 1px solid color-mix(in srgb, var(--i-gold) 80%, #7b6640 20%); background: color-mix(in srgb, var(--i-paper) 88%, #e5dac7 12%);
+  transition: border-color 160ms ease, background-color 160ms ease, transform 120ms ease; }
+.gfd-btn:hover:not(:disabled) { border-color: #c7ac72; background: color-mix(in srgb, var(--i-paper) 70%, #e5dac7 30%); }
+.gfd-btn:active:not(:disabled) { transform: translateY(1px); }
+.gfd-btn:focus-visible, .gfd-term:focus-visible { outline: 2px solid var(--i-gold-deep); outline-offset: 2px; }
+.gfd-btn:disabled { opacity: .5; cursor: default; }
+.gfd-btn.primary { background: var(--i-gold); border-color: var(--i-gold-soft); color: #2a2418; font-weight: 600; }
+
+/* Connection pill */
+.gfd-pill { display: inline-flex; align-items: center; gap: .5rem; font-size: .66rem; letter-spacing: .24em; text-transform: uppercase; color: var(--i-muted);
+  border: 1px solid color-mix(in srgb, var(--i-gold) 50%, var(--i-line) 50%); border-radius: 999px; padding: 0 .9rem; background: var(--i-paper); height: 2.4rem; box-sizing: border-box; }
+.gfd-pill i { width: .6rem; height: .6rem; border-radius: 50%; background: var(--i-faint); display: inline-block; }
+.gfd-pill[data-state="live"] i { background: var(--i-ok); box-shadow: 0 0 8px var(--i-ok); }
+.gfd-pill[data-state="wait"] i { background: var(--i-gold); animation: gfd-pulse 1s infinite; }
+.gfd-pill[data-state="down"] i { background: var(--i-bad); }
+@keyframes gfd-pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .gfd-pill[data-state="wait"] i { animation: none; } }
+
+/* The console well: dark, gold-framed. The canvas is sized by JS to a multiple of 800x544 where it fits. */
+.gfd-stage { position: relative; background: #0d0b17; border: 1px solid var(--i-gold); border-radius: 6px; overflow: hidden;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--i-gold) 16%, transparent), 0 18px 44px rgba(60, 46, 18, .22); }
+.gfd-term { display: block; margin: 0 auto; max-width: 100%; height: auto; cursor: text; touch-action: pan-y; outline: none; }
+.gfd-stage.full { position: fixed; inset: 0; z-index: 50; border-radius: 0; border: 0; box-shadow: none; display: flex; align-items: center; justify-content: center; }
+.gfd-exit { display: none; }
+.gfd-stage.full .gfd-exit { display: inline-flex; position: absolute; top: .6rem; right: .6rem; z-index: 3; opacity: .9; }
+
+/* Overlay (sign-in, errors, reconnect): sits on the dark console, so light text */
+.gfd-veil { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 1.2rem; background: rgba(13, 11, 23, .9); text-align: center; color: #e6e3f2; }
+.gfd-veil[hidden] { display: none; }
+.gfd-card { max-width: 30rem; }
+.gfd-card h2 { font: 600 1.7rem/1.15 var(--i-display); letter-spacing: .02em; margin: 0 0 .5rem; color: #f4efe0; }
+.gfd-card p { color: #c9c3df; margin: .4rem 0 1rem; }
+.gfd-card a { color: var(--i-gold-hi); border-bottom: 1px solid var(--i-gold); text-decoration: none; }
+.gfd-card .acts { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
+
+/* Quick commands */
+.gfd-quick { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .75rem; align-items: center; }
+.gfd-quick .lbl { font-size: .66rem; letter-spacing: .3em; text-transform: uppercase; color: var(--i-muted); margin-right: .4rem; }
+.gfd-quick .gfd-btn { font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 600; min-width: 2.7rem; }
+.gfd-quick .gap { width: .6rem; }
+
+.gfd-tips { margin-top: 1.3rem; display: grid; gap: .9rem; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .gfd-tips { grid-template-columns: repeat(3, 1fr); } }
+.gfd-tip { border: 1px solid color-mix(in srgb, var(--i-gold) 55%, var(--i-line) 45%); border-radius: 6px; background: color-mix(in srgb, var(--i-panel) 92%, white 8%);
+  padding: .9rem 1.05rem; font-size: .92rem; color: var(--i-muted); }
+.gfd-tip b { display: block; color: var(--i-text); font: 500 .66rem var(--i-body); letter-spacing: .3em; text-transform: uppercase; margin-bottom: .4rem; }
+.gfd-tip a { color: var(--i-gold-deep); border-bottom: 1px solid color-mix(in srgb, var(--i-gold) 65%, transparent 35%); text-decoration: none; }
+.gfd-tip kbd { font: 600 .78rem ui-monospace, Menlo, Consolas, monospace; background: var(--i-paper); border: 1px solid var(--i-line); border-radius: 4px; padding: .05rem .35rem; color: var(--i-text); }
+
+/* Screen-reader transcript: present to assistive tech, invisible to sighted users. */
+.gfd-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: pre-wrap; }
+.gfd-input { position: absolute; left: 0; bottom: 0; width: 1px; height: 1px; opacity: 0; border: 0; padding: 0; resize: none; }
+
+@media (max-width: 640px) {
+  .gfd-wrap { padding: .4rem .6rem 3rem; }
+  .gfd-btn { height: 2.6rem; padding: 0 .8rem; }
+}

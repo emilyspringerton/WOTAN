@@ -3,84 +3,77 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WOTAN Hat Store &mdash; EINHORN_INDUSTRIAL</title>
-<meta name="description" content="Buy BRAWLPIT cosmetic hats with your GFD Flow balance.">
+<meta name="theme-color" content="#f4f1ea">
+<title>Hat Store &mdash; WOTAN</title>
+<meta name="description" content="Spend your GoblinFoxDragon Flow on BRAWLPIT cosmetic hats, then wear them in game.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/wotan-theme.css">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Spectral:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-iduna.css">
 <script src="/js/iduna-sso.js"></script>
-<style>
-  label .hint { font-weight: 400; opacity: 0.75; text-transform: none; letter-spacing: 0; }
-  .hat-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-    padding: 0.85rem 0; border-bottom: 1px solid var(--border);
-  }
-  .hat-row:last-child { border-bottom: none; }
-  .hat-name { font-weight: 700; }
-  .hat-desc { font-size: 0.85rem; color: var(--fg-dim); }
-  .hat-cost { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; color: var(--gold-bright); white-space: nowrap; }
-  .badge { color: var(--ok); border: 1px solid var(--ok); }
-  .hat-main { display: flex; align-items: center; gap: .75rem; min-width: 0; }
-  .thumb { width: 48px; height: 48px; flex: none; image-rendering: pixelated; border: 1px solid var(--border);
-           border-radius: 4px; background: #2a1d44; }
-  .thumb.empty { display: inline-block; }
-  .by { font-size: .78rem; color: var(--fg-dim); }
-  .split-note { font-size: .78rem; color: var(--fg-dim); }
-</style>
 </head>
-<body>
-<header id="wotan-nav" data-skin="dw" data-section="store"></header>
-<div class="wrap">
-  <h1>Hat Store</h1>
-  <p class="tagline">Spend your GFD Flow on a BRAWLPIT cosmetic hat.</p>
+<body class="iduna">
+<header id="wotan-nav" data-skin="gfd" data-section="store"></header>
 
-  <!-- Login (WOTAN_HAT_STORE_NORTHSTAR.md Phase 2, SSO'd 2026-09-24 -- founder real-time:
-       "instead of putting your password into page on wotan iduna needs to become the SSO"):
-       no email/password form here anymore. This links out to IDUNA's own dedicated login page
-       (iam.okemily.com -- a real cross-domain redirect, not a same-origin proxy trick), which
-       hands a token back via a URL fragment on return. See IDUNA/internal/http/handlers/
-       sso_login.go for the full rationale. -->
-  <div class="card" id="auth-card">
-    <p id="auth-status">Use <strong>Sign in</strong> (top right) with your IDUNA account to see the catalog and buy hats.</p>
+<main class="i-wrap" id="main">
+  <div class="i-hero">
     <div>
-      <a id="sso-login-link" href="#" hidden style="display:none" aria-hidden="true">Sign in with IDUNA</a>
-      <button class="secondary" id="logout-btn" hidden style="display:none">Log out</button>
+      <p class="i-label">GoblinFoxDragon &middot; BRAWLPIT</p>
+      <h1 class="i-h1">Hat Store</h1>
+      <p class="i-sub">Spend the Flow you earn in game on cosmetic hats. Your IDUNA account finds your character automatically.</p>
     </div>
-    <div class="msg" id="auth-msg"></div>
+    <div class="i-stats" id="hero-stats" hidden>
+      <div class="i-stat"><b id="stat-balance">&ndash;</b><span>Flow</span></div>
+      <div class="i-stat"><b id="stat-owned">&ndash;</b><span>Hats owned</span></div>
+    </div>
   </div>
 
-  <div class="card" id="character-card" hidden>
-    <p id="character-status">Resolving your GFD character&hellip;</p>
-  </div>
+  <!-- Signed-out / status. WOTAN rule: no sign-in button on a page -- the top bar owns it. The hidden
+       link below only exists so the shared signup=1 deep link keeps its target (see the script). -->
+  <section class="i-panel" id="auth-card">
+    <p class="i-label">Account</p>
+    <p id="auth-status" style="margin:.5rem 0 0">Use <strong>Sign in</strong> (top right) with your IDUNA account to see the catalog and buy hats.</p>
+    <a id="sso-login-link" href="#" hidden aria-hidden="true">Sign in with IDUNA</a>
+    <div class="i-msg" id="auth-msg" role="status" aria-live="polite"></div>
+  </section>
 
-  <div class="card" id="catalog-card" hidden>
-    <p><strong>Catalog</strong> &mdash; ordered by Flow cost. Hats drawn by players pay their designer 88% of the price; the other 12% is burned. <a href="/hat-studio.html">Draw your own hat &rarr;</a></p>
-    <div id="catalog-list"></div>
-    <div class="msg" id="catalog-msg"></div>
-  </div>
+  <section class="i-panel" id="character-card" hidden aria-live="polite">
+    <div class="i-plate" id="plate"></div>
+  </section>
 
-  <div class="card" id="owned-card" hidden>
-    <p><strong>Your hats</strong></p>
-    <div id="owned-list"></div>
-    <div class="msg" id="owned-msg"></div>
-  </div>
-</div>
+  <section class="i-section" id="catalog-card" hidden>
+    <div class="i-section-head">
+      <div><p class="i-label">Catalog</p><h2 class="i-h2">Available hats</h2></div>
+      <span class="i-badge dim" id="catalog-count"></span>
+    </div>
+    <div class="i-grid" id="catalog-list"></div>
+    <div class="i-msg" id="catalog-msg" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="i-section" id="owned-card" hidden>
+    <div class="i-section-head">
+      <div><p class="i-label">Locker</p><h2 class="i-h2">Your hats</h2></div>
+    </div>
+    <div class="i-grid" id="owned-list"></div>
+    <div class="i-msg" id="owned-msg" role="status" aria-live="polite"></div>
+  </section>
+</main>
+
+<div class="i-toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-// Real, honest, client-side only -- no framework, matching WOTAN's own index.html convention.
-// All calls go through this same origin's /api/ proxy (see ops/nginx-wotan.conf) straight to
-// IDUNA's real MMO/hats endpoints (BRAWLPIT/docs/WOTAN_HAT_STORE_NORTHSTAR.md Phase 2).
+// Client-side only, no framework (WOTAN convention). Every call goes through this origin's /api/
+// proxy to IDUNA's MMO/hats endpoints (BRAWLPIT/docs/WOTAN_HAT_STORE_NORTHSTAR.md Phase 2).
+// Restyled 2026-10-16 on the IDUNA front-page style guide (css/wotan-iduna.css); behaviour is unchanged
+// apart from affordances: Flow balance, "need N more" instead of a doomed Buy click, toasts, and a
+// locker that shows what is equipped.
 
-// getToken()/getPlayerID() read the SHARED cross-page IDUNA session (js/iduna-sso.js, 2026-09-25
-// -- "the SSO should be sticky when i click around it forgets im logged in"). Signing in here or
-// on friends.html now makes both pages see the same session, since they read/write the same
-// localStorage keys instead of each page keeping its own separate copy.
 function getToken() { const s = getIdunaSession(); return s ? s.token : ''; }
 function getPlayerID() { const s = getIdunaSession(); return s ? s.playerID : ''; }
 
 let characterID = '';
+let balance = null;         // Flow; null until the character resolves
 
 async function api(path, opts) {
   opts = opts || {};
@@ -90,198 +83,166 @@ async function api(path, opts) {
   const res = await fetch('/api/v1' + path, opts);
   let body = null;
   try { body = await res.json(); } catch (e) { /* no body, e.g. 204 */ }
-  if (!res.ok) {
-    const msg = (body && (body.error || body.message)) || res.statusText || ('HTTP ' + res.status);
-    throw new Error(msg);
-  }
+  if (!res.ok) throw new Error((body && (body.error || body.message)) || res.statusText || ('HTTP ' + res.status));
   return body;
 }
 
-function setAuthMsg(text, kind) {
-  const el = document.getElementById('auth-msg');
-  el.textContent = text || '';
-  el.className = 'msg' + (kind ? ' ' + kind : '');
+const $ = (id) => document.getElementById(id);
+function h(tag, attrs, kids) {
+  const n = document.createElement(tag);
+  for (const k in (attrs || {})) {
+    if (k === 'text') n.textContent = attrs[k];
+    else if (attrs[k] !== null && attrs[k] !== false && attrs[k] !== undefined) n.setAttribute(k, attrs[k] === true ? '' : attrs[k]);
+  }
+  (kids || []).forEach((c) => c && n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
+  return n;
 }
-
-// buildSsoURL()/handleIdunaSsoReturn() come from the shared js/iduna-sso.js (2026-09-25) --
-// signup=1 (from GFD's own deep link, see the bootstrap block below) is forwarded through so the
-// SSO page can default to its register mode.
-//
-// Real "sticky" bootstrap (2026-09-25, founder real-time: "the SSO should be sticky when i click
-// around it forgets im logged in"): a fresh SSO redirect return wins if present, but a shared
-// session from an EARLIER page visit (e.g. signed in on friends.html, then navigated here) is now
-// also recognized, not just this page's own prior visits.
-async function handleSsoReturn() {
-  const fresh = handleIdunaSsoReturn();
-  const session = fresh || getIdunaSession();
-  if (!session) return false;
-  if (fresh) setAuthMsg('Signed in as ' + (fresh.displayName || 'IDUNA account') + '.', 'ok');
-  await afterLogin();
-  return true;
+function setMsg(id, text, kind) { const el = $(id); el.textContent = text || ''; el.className = 'i-msg' + (kind ? ' ' + kind : ''); }
+let toastTimer = 0;
+function toast(text, kind) {
+  const t = $('toast'); t.textContent = text; t.className = 'i-toast show' + (kind ? ' ' + kind : '');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.className = 'i-toast'; }, 3200);
 }
+const art = (x) => x.image_url ? h('img', { src: x.image_url, alt: '', loading: 'lazy', style: 'width:96px;height:96px;image-rendering:pixelated;position:relative;z-index:1' }) : h('i', { text: monogram(x.name) });
+const monogram = (name) => (String(name || '?').trim()[0] || '?').toUpperCase();
+const fmt = (n) => Number(n).toLocaleString();
 
-function logout() {
-  clearIdunaSession();
-  characterID = '';
-  document.getElementById('character-card').hidden = true;
-  document.getElementById('catalog-card').hidden = true;
-  document.getElementById('owned-card').hidden = true;
-  document.getElementById('logout-btn').hidden = true;
-  setAuthMsg('Logged out.');
+function skeletons(el, n) { el.textContent = ''; for (let i = 0; i < n; i++) el.appendChild(h('div', { 'class': 'i-skel', 'aria-hidden': 'true' })); }
+
+function showSignedOut() {
+  characterID = ''; balance = null;
+  $('hero-stats').hidden = true; $('character-card').hidden = true; $('catalog-card').hidden = true; $('owned-card').hidden = true;
+  $('auth-card').hidden = false;
 }
 
 async function resolveCharacter() {
-  const el = document.getElementById('character-card');
-  const status = document.getElementById('character-status');
-  el.hidden = false;
+  const card = $('character-card'), plate = $('plate');
+  card.hidden = false; $('auth-card').hidden = true;
+  plate.textContent = '';
   try {
     const c = await api('/characters/by-player/' + encodeURIComponent(getPlayerID()));
     characterID = c.character_id;
-    status.textContent = 'Playing as ' + (c.name || characterID) + ' — ' + c.gold_balance + ' Flow.';
-    document.getElementById('catalog-card').hidden = false;
-    document.getElementById('owned-card').hidden = false;
-    await Promise.all([loadCatalog(), loadOwned()]);
+    balance = Number(c.gold_balance) || 0;
+    const meta = [c.level ? 'Level ' + c.level : null, c.job_main || null].filter(Boolean).join(' · ');
+    plate.appendChild(h('div', { 'class': 'i-avatar', 'aria-hidden': 'true', text: monogram(c.name) }));
+    plate.appendChild(h('div', { 'class': 'i-plate-main' }, [
+      h('p', { 'class': 'i-label', text: 'Playing as' }),
+      h('p', { 'class': 'i-plate-name', text: c.name || characterID }),
+      meta ? h('p', { 'class': 'i-plate-meta', text: meta }) : null,
+    ]));
+    plate.appendChild(h('a', { 'class': 'i-btn primary', href: '/GFD/', text: 'Play as ' + (c.name || 'your character') }));
+    $('stat-balance').textContent = fmt(balance);
+    $('hero-stats').hidden = false;
+    return true;
   } catch (e) {
-    // Real, honest: a WOTAN account with no GFD character yet has nothing to spend and nothing
-    // to wear a hat -- not an error, just the real current state, matching OKEMILY/hats.html's
-    // own "not live yet" honesty convention rather than a scary/red error message.
-    status.textContent = 'No GFD character found for this account yet -- create one in GFD Town first, then come back here.';
+    // Not an error: the account simply has no GFD character yet. The web client creates one with
+    // the MUD's own name-claim flow, bound to this same IDUNA account, so the store finds it after.
+    characterID = ''; balance = null;
+    $('hero-stats').hidden = true; $('catalog-card').hidden = true; $('owned-card').hidden = true;
+    plate.appendChild(h('div', { 'class': 'i-avatar', 'aria-hidden': 'true', text: '?' }));
+    plate.appendChild(h('div', { 'class': 'i-plate-main' }, [
+      h('p', { 'class': 'i-label', text: 'No character yet' }),
+      h('p', { 'class': 'i-plate-name', text: 'Create your hero first' }),
+      h('p', { 'class': 'i-plate-meta', text: 'Hats are worn by your GoblinFoxDragon character. Pick a name in the game, then come back to shop.' }),
+    ]));
+    plate.appendChild(h('a', { 'class': 'i-btn primary', href: '/GFD/', text: 'Create your character in GFD' }));
+    return false;
   }
 }
 
-async function afterLogin() {
-  document.getElementById('logout-btn').hidden = false;
-  await resolveCharacter();
+async function refresh() {
+  if (!(await resolveCharacter())) return;
+  $('catalog-card').hidden = false; $('owned-card').hidden = false;
+  await Promise.all([loadCatalog(), loadOwned()]);
 }
 
 async function loadCatalog() {
-  const list = document.getElementById('catalog-list');
-  const msg = document.getElementById('catalog-msg');
-  list.innerHTML = '';
-  msg.textContent = '';
+  const list = $('catalog-list');
+  setMsg('catalog-msg', '');
+  if (!list.children.length) skeletons(list, 4);
   try {
-    const [hats, owned] = await Promise.all([
-      api('/hats'),
-      api('/characters/' + encodeURIComponent(characterID) + '/hats'),
-    ]);
-    const ownedIDs = new Set(owned.map(o => o.hat_id));
-    hats.forEach(h => {
-      const row = document.createElement('div');
-      row.className = 'hat-row';
-      const already = ownedIDs.has(h.hat_id);
-      row.innerHTML =
-        '<div class="hat-main">' + thumb(h) + '<div><div class="hat-name">' + escapeHtml(h.name) + (already ? '<span class="badge">Owned</span>' : '') + '</div>' +
-        '<div class="hat-desc">' + escapeHtml(h.description || '') + '</div>' +
-        (h.creator ? '<div class="by">drawn by ' + escapeHtml(h.creator) + (h.sales_count ? ' &middot; ' + h.sales_count + ' sold' : '') + '</div>' : '') +
-        '</div></div>' +
-        '<div class="hat-cost">' + h.flow_cost + ' Flow' + (h.creator ? '<div class="split-note">' + Math.floor(h.flow_cost * 88 / 100) + ' to designer</div>' : '') + '</div>';
-      const btn = document.createElement('button');
-      btn.textContent = already ? 'Owned' : 'Buy';
-      btn.disabled = already;
-      btn.onclick = () => buyHat(h.hat_id, btn);
-      row.appendChild(btn);
-      list.appendChild(row);
+    const [hats, owned] = await Promise.all([api('/hats'), api('/characters/' + encodeURIComponent(characterID) + '/hats')]);
+    const ownedIDs = new Set(owned.map((o) => o.hat_id));
+    $('catalog-count').textContent = hats.length + (hats.length === 1 ? ' hat' : ' hats');
+    list.textContent = '';
+    if (!hats.length) { list.appendChild(h('div', { 'class': 'i-empty i-panel' }, [h('p', { 'class': 'i-h2', text: 'Nothing on the shelf yet' }), h('p', { text: 'New hats land here as they are released.' })])); return; }
+    hats.forEach((hat) => {
+      const have = ownedIDs.has(hat.hat_id);
+      const short = balance !== null ? hat.flow_cost - balance : 0;
+      const btn = h('button', { type: 'button', 'class': 'i-btn' + (!have && short <= 0 ? ' primary' : ''), text: have ? 'Owned' : (short > 0 ? 'Need ' + fmt(short) + ' more' : 'Buy') });
+      btn.disabled = have || short > 0;
+      if (short > 0) btn.title = 'You have ' + fmt(balance) + ' Flow; this hat costs ' + fmt(hat.flow_cost) + '.';
+      btn.addEventListener('click', () => buyHat(hat, btn));
+      list.appendChild(h('article', { 'class': 'i-card' + (have ? ' owned' : '') }, [
+        h('div', { 'class': 'i-art', 'aria-hidden': 'true' }, [have ? h('span', { 'class': 'i-badge ok', text: 'Owned' }) : null, art(hat)]),
+        h('div', { 'class': 'i-card-body' }, [
+          h('h3', { 'class': 'i-card-name', text: hat.name }),
+          h('p', { 'class': 'i-card-desc', text: hat.description || '' }),
+          hat.creator ? h('p', { 'class': 'i-card-desc', text: 'drawn by ' + hat.creator + (hat.sales_count ? ' \u00b7 ' + hat.sales_count + ' sold' : '') + ' \u00b7 ' + Math.floor(hat.flow_cost * 88 / 100) + ' Flow to designer' }) : null,
+          h('div', { 'class': 'i-card-foot' }, [h('span', { 'class': 'i-cost' }, [fmt(hat.flow_cost), h('small', { text: 'Flow' })]), btn]),
+        ]),
+      ]));
     });
-  } catch (e) {
-    msg.textContent = e.message;
-    msg.className = 'msg error';
-  }
+  } catch (e) { list.textContent = ''; setMsg('catalog-msg', e.message, 'error'); }
 }
 
-async function buyHat(hatID, btn) {
-  btn.disabled = true;
-  const msg = document.getElementById('catalog-msg');
-  msg.textContent = '';
+async function buyHat(hat, btn) {
+  btn.disabled = true; setMsg('catalog-msg', '');
   try {
-    await api('/characters/' + encodeURIComponent(characterID) + '/hats/buy', {
-      method: 'POST', body: JSON.stringify({ hat_id: hatID }),
-    });
-    msg.textContent = 'Purchased.';
-    msg.className = 'msg ok';
-    await Promise.all([loadCatalog(), loadOwned(), resolveCharacter()]);
-  } catch (e) {
-    msg.textContent = e.message;
-    msg.className = 'msg error';
-    btn.disabled = false;
-  }
+    await api('/characters/' + encodeURIComponent(characterID) + '/hats/buy', { method: 'POST', body: JSON.stringify({ hat_id: hat.hat_id }) });
+    toast('Purchased ' + hat.name + '.');
+    await refresh();
+  } catch (e) { setMsg('catalog-msg', e.message, 'error'); toast(e.message, 'error'); btn.disabled = false; }
 }
 
 async function loadOwned() {
-  const list = document.getElementById('owned-list');
-  const msg = document.getElementById('owned-msg');
-  list.innerHTML = '';
-  msg.textContent = '';
+  const list = $('owned-list');
+  setMsg('owned-msg', '');
   try {
     const owned = await api('/characters/' + encodeURIComponent(characterID) + '/hats');
-    if (owned.length === 0) {
-      list.innerHTML = '<p class="hat-desc">No hats yet.</p>';
+    $('stat-owned').textContent = fmt(owned.length);
+    list.textContent = '';
+    if (!owned.length) {
+      list.appendChild(h('div', { 'class': 'i-empty i-panel', style: 'grid-column:1/-1' }, [h('p', { 'class': 'i-h2', text: 'Your locker is empty' }), h('p', { text: 'Buy a hat above and equip it here.' })]));
       return;
     }
-    owned.forEach(o => {
-      const row = document.createElement('div');
-      row.className = 'hat-row';
-      row.innerHTML =
-        '<div class="hat-main">' + thumb(o) + '<div><div class="hat-name">' + escapeHtml(o.name) + (o.equipped ? '<span class="badge">Equipped</span>' : '') + '</div>' +
-        '<div class="hat-desc">' + escapeHtml(o.description || '') + '</div>' +
-        (o.creator ? '<div class="by">drawn by ' + escapeHtml(o.creator) + '</div>' : '') + '</div></div>';
-      const btn = document.createElement('button');
-      btn.textContent = o.equipped ? 'Equipped' : 'Equip';
-      btn.disabled = o.equipped;
-      btn.className = 'secondary';
-      btn.onclick = () => equipHat(o.hat_id, btn);
-      row.appendChild(btn);
-      list.appendChild(row);
+    owned.forEach((o) => {
+      const btn = h('button', { type: 'button', 'class': 'i-btn' + (o.equipped ? '' : ' primary'), text: o.equipped ? 'Equipped' : 'Equip' });
+      btn.disabled = !!o.equipped;
+      btn.addEventListener('click', () => equipHat(o, btn));
+      list.appendChild(h('article', { 'class': 'i-card owned' + (o.equipped ? ' equipped' : '') }, [
+        h('div', { 'class': 'i-art', 'aria-hidden': 'true' }, [o.equipped ? h('span', { 'class': 'i-badge', text: 'Equipped' }) : null, art(o)]),
+        h('div', { 'class': 'i-card-body' }, [
+          h('h3', { 'class': 'i-card-name', text: o.name }),
+          h('p', { 'class': 'i-card-desc', text: o.description || '' }),
+          o.creator ? h('p', { 'class': 'i-card-desc', text: 'drawn by ' + o.creator }) : null,
+          h('div', { 'class': 'i-card-foot' }, [h('span'), btn]),
+        ]),
+      ]));
     });
-  } catch (e) {
-    msg.textContent = e.message;
-    msg.className = 'msg error';
-  }
+  } catch (e) { list.textContent = ''; setMsg('owned-msg', e.message, 'error'); }
 }
 
-async function equipHat(hatID, btn) {
-  btn.disabled = true;
-  const msg = document.getElementById('owned-msg');
-  msg.textContent = '';
+async function equipHat(o, btn) {
+  btn.disabled = true; setMsg('owned-msg', '');
   try {
-    await api('/characters/' + encodeURIComponent(characterID) + '/hats/equip', {
-      method: 'PATCH', body: JSON.stringify({ hat_id: hatID }),
-    });
-    msg.textContent = 'Equipped.';
-    msg.className = 'msg ok';
-    await Promise.all([loadCatalog(), loadOwned()]);
-  } catch (e) {
-    msg.textContent = e.message;
-    msg.className = 'msg error';
-    btn.disabled = false;
-  }
+    await api('/characters/' + encodeURIComponent(characterID) + '/hats/equip', { method: 'PATCH', body: JSON.stringify({ hat_id: o.hat_id }) });
+    toast(o.name + ' equipped. It shows next time you enter the game.');
+    await loadOwned();
+  } catch (e) { setMsg('owned-msg', e.message, 'error'); toast(e.message, 'error'); btn.disabled = false; }
 }
 
-// Player-drawn hats carry a PNG served by IDUNA through this origin's /api/ proxy; curated hats
-// have no pixel art yet, so they get an empty frame rather than a broken image.
-function thumb(h) {
-  return h.image_url ? '<img class="thumb" alt="" loading="lazy" src="' + escapeHtml(h.image_url) + '">' : '<span class="thumb empty"></span>';
-}
+// signup=1 (from GFD's own sign-up shortcut) is forwarded to the hosted IDUNA page by buildSsoURL().
+$('sso-login-link').href = buildSsoURL(new URLSearchParams(location.search).get('signup') === '1' ? { signup: '1' } : null);
 
-function escapeHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s == null ? '' : String(s);
-  return d.innerHTML;
-}
-
-document.getElementById('sso-login-link').href = buildSsoURL(
-  new URLSearchParams(location.search).get('signup') === '1' ? { signup: '1' } : null
-);
-document.getElementById('logout-btn').addEventListener('click', logout);
-
-// Real page-load bootstrap: handleSsoReturn() now covers both a token just handed back from
-// IDUNA's SSO page AND a sticky session carried over from another WOTAN page (see its own doc
-// comment above) -- either way it calls afterLogin() itself, so there's no separate fallback
-// branch needed here anymore.
-handleSsoReturn();
-</script>
-<script>
-// One sign-in control site-wide (the topbar widget): once signed in, the card says so instead of telling the user to sign in.
-(function () { try { var s = getIdunaSession(); if (s) { var el = document.getElementById('auth-status'); if (el) el.textContent = 'Signed in' + (s.displayName ? ' as ' + s.displayName : '') + '.'; } } catch (e) {} })();
+// Sticky session bootstrap: a fresh SSO return wins; otherwise the shared session from an earlier
+// WOTAN page. wotan-nav.js (loaded below) consumes the fragment first on pages that include it.
+(async function boot() {
+  const fresh = handleIdunaSsoReturn();
+  const session = fresh || getIdunaSession();
+  if (!session) { showSignedOut(); return; }
+  await refresh();
+})();
 </script>
 <script src="/js/wotan-nav.js"></script>
 <script src="/js/cookie-consent.js"></script>
