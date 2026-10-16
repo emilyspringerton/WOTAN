@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4f1ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Spectral:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-iduna.css">
+<link rel="stylesheet" href="/css/wotan-sp.css">
+<title>Play shankpit-460 &mdash; WOTAN</title>
+<meta name="description" content="shankpit-460, a small, quick arena shooter, in your browser. Press play for a bot match straight away; if another human is searching you are moved into a free-for-all, first to 16 or six minutes. The whole game runs as WebAssembly compiled from PARENA.">
+</head>
+<body class="iduna sp" data-page="play">
+<header id="wotan-nav" data-skin="sp" data-section="play"></header>
+
+<main class="sp-wrap" id="main">
+  <div class="sp-head">
+    <div>
+      <p class="sp-eyebrow">WOTAN &middot; Arena shooter</p>
+      <h1 class="sp-h1">shankpit-460</h1>
+    </div>
+    <p class="sp-sub" id="sp-sub">A small, quick arena shooter. Press play and you are in a bot match straight away; if another human is searching you are both moved into a free-for-all &mdash; first to 16 kills, or six minutes.</p>
+  </div>
+
+  <div class="sp-bar" role="toolbar" aria-label="shankpit-460 controls">
+    <span class="sp-pill" id="sp-pill" role="status" aria-live="polite">Loading</span>
+    <span class="sp-online" id="sp-online" aria-live="off"></span>
+    <span class="sp"></span>
+    <button type="button" class="sp-btn" id="sp-mute" title="Mute / unmute (M)">Sound on</button>
+    <button type="button" class="sp-btn" id="sp-fullscreen" title="Fullscreen" disabled>Fullscreen</button>
+  </div>
+
+  <div class="sp-stage" id="sp-stage">
+    <div class="sp-load" id="sp-load">
+      <b>Starting</b>
+      <span id="sp-load-msg">Fetching the game (a WebAssembly module, about 180 KB)&hellip;</span>
+      <noscript><span>shankpit-460 is WebAssembly; it needs JavaScript enabled to load it.</span></noscript>
+    </div>
+    <canvas class="sp-canvas" id="sp-canvas" width="640" height="360" tabindex="0" role="application"
+            aria-label="shankpit-460. Click to play. W A S D to move, mouse to aim, left mouse to fire, 1 to 6 to pick a weapon." hidden></canvas>
+  </div>
+  <p class="sp-who" id="sp-who" aria-live="polite"><span id="sp-who-msg"></span> <a id="sp-who-link" hidden></a></p>
+
+  <div class="sp-tips">
+    <div class="sp-tip"><b>Move &amp; aim</b><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> move &middot; mouse aims &middot; <kbd>Space</kbd> jump (hold it to float higher) &middot; <kbd>Ctrl</kbd> or <kbd>C</kbd> or <kbd>Shift</kbd> crouch and slide.</div>
+    <div class="sp-tip"><b>Weapons</b><kbd>1</kbd> knife &middot; <kbd>2</kbd> magnum &middot; <kbd>3</kbd> AR &middot; <kbd>4</kbd> shotgun &middot; <kbd>5</kbd> sniper &middot; <kbd>6</kbd> katana. Left mouse fires, <kbd>R</kbd> reloads, the mouse wheel cycles. Right mouse zooms the sniper. <kbd>E</kbd> is the ability: storm charges for the sniper, a dash for the katana.</div>
+    <div class="sp-tip"><b>Matches</b>Against bots it is first to 13 or five minutes. Against people it is first to 16 or six minutes, free for all, up to ten players. A shield soaks damage first; a head shot with no shield left counts triple. <kbd>Tab</kbd> shows the scores.</div>
+    <div class="sp-tip"><b>Finding a match</b>The moment you press play you are in a bot match and the page says <i>searching for match</i>. If someone else is searching you are both moved into a lobby together; more can arrive while it counts down, and a match still in its first four and a half minutes takes late arrivals. When it ends you see the score and can requeue.</div>
+    <div class="sp-tip"><b>Gamepad</b>Left stick moves, right stick looks, right trigger fires, A jumps, B crouches, X reloads, bumpers change weapon, left trigger or right bumper is the ability.</div>
+    <div class="sp-tip"><b>What this is</b>The game is one WebAssembly module with no imports and no allocator, compiled from <a href="https://github.com/emilyspringerton/PARENA">PARENA</a>: its physics and weapons are a port of <a href="https://github.com/emilyspringerton/shankpit-460">shankpit-460</a>'s C engine (checked against it tick for tick), the renderer is a software rasteriser, and the bots are written from scratch. The only JavaScript here is generated from PARENA too.</div>
+  </div>
+
+  <p class="sp-stat" id="sp-stat"></p>
+</main>
+
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script type="module" src="sp-host.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

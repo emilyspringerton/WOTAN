@@ -18,7 +18,7 @@
   // IDUNA game_online.go founderDailyCap: the balance a Founder is lifted to. "Effectively unlimited".
   var UNLIMITED_AT = 9999;
   // Where "Play" goes after a redemption. Only games that have a page on this site.
-  var PLAY = { deadweight: '/DEADWEIGHT/', brawlpit: '/BRAWLPIT/' };
+  var PLAY = { deadweight: '/DEADWEIGHT/', brawlpit: '/BRAWLPIT/', shankpit460: '/shankpit-460/' };
 
   var MESSAGES = {
     invalid_code_format: 'That does not look like a code. Codes are five groups of five letters and numbers, like XXXXX-XXXXX-XXXXX-XXXXX-XXXXX.',

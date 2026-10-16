@@ -171,7 +171,7 @@
     catch (e) { return new Date(t).toISOString().slice(0, 10); }
   }
 
-  var PLAY = { deadweight: '/DEADWEIGHT/', brawlpit: '/BRAWLPIT/' };
+  var PLAY = { deadweight: '/DEADWEIGHT/', brawlpit: '/BRAWLPIT/', shankpit460: '/shankpit-460/' };
 
   function renderGames(host, games) {
     clear(host);

@@ -26,7 +26,7 @@
   if (!mount) return;
 
   var skinAttr = mount.getAttribute('data-skin');
-  var skin = skinAttr === 'dw' ? 'dw' : (skinAttr === 'rg' ? 'rg' : (skinAttr === 'gfd' ? 'gfd' : (skinAttr === 'bp' ? 'bp' : (skinAttr === 'acct' ? 'acct' : 'hs'))));
+  var skin = skinAttr === 'dw' ? 'dw' : (skinAttr === 'rg' ? 'rg' : (skinAttr === 'gfd' ? 'gfd' : (skinAttr === 'bp' ? 'bp' : (skinAttr === 'sp' ? 'sp' : (skinAttr === 'acct' ? 'acct' : 'hs')))));
   var section = mount.getAttribute('data-section') || '';
 
   var TABS = {
@@ -55,6 +55,10 @@
       ['store', 'Hat Store', '/store.html'],
       ['studio', 'Hat Studio', '/hat-studio.html'],
       ['gfd', 'GFD', '/GFD/']
+    ],
+    sp: [
+      ['play', 'Play', '/shankpit-460/'],
+      ['account', 'Account', '/account/']
     ],
     // Account-level pages (not tied to one game): /account/ and /redeem/. Cream like the hs skin, no theme picker.
     acct: [
@@ -157,7 +161,8 @@
       ['hs', 'Hearthstone', 'Shared deck library', '/hearthstone/'],
       ['rg', 'Redgarden', 'Knights of the Void', '/redgarden/'],
       ['gfd', 'GoblinFoxDragon', 'MUD \u00b7 Hat Store', '/GFD/'],
-      ['bp', 'Brawlpit', 'Arena fighter \u00b7 Hat Store', '/BRAWLPIT/']
+      ['bp', 'Brawlpit', 'Arena fighter \u00b7 Hat Store', '/BRAWLPIT/'],
+      ['sp', 'shankpit-460', 'Arena shooter \u00b7 Free-for-all', '/shankpit-460/']
     ];
     var games = el('div', { 'class': 'wn-games' }, [
       el('div', { 'class': 'wn-games-in' }, [el('span', { 'class': 'wn-games-label', text: 'Games' })].concat(GAMES.map(function (g) {
@@ -174,7 +179,7 @@
       el('small', { text: 'EINHORN_INDUSTRIAL' })
     ]);
 
-    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : (skin === 'bp' ? 'Brawlpit sections' : (skin === 'acct' ? 'Account sections' : 'WOTAN sections')))) });
+    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : (skin === 'bp' ? 'Brawlpit sections' : (skin === 'sp' ? 'shankpit-460 sections' : (skin === 'acct' ? 'Account sections' : 'WOTAN sections'))))) });
     TABS[skin].forEach(function (t) {
       tabs.appendChild(el('a', { href: t[2], text: t[1], 'aria-current': t[0] === section ? 'page' : null }));
     });

@@ -450,14 +450,14 @@ body.hs ::selection { background: color-mix(in srgb, var(--hs-gold) 40%, transpa
 .wn-games-in::-webkit-scrollbar { display: none; }
 .wn-games-label {
   font: 600 .72rem/1 var(--wn-display); letter-spacing: .2em; text-transform: uppercase; color: #5b5876;
-  display: inline-flex; align-items: center; padding: 0 1.4rem 0 2.5rem; font-family: "Barlow Condensed", var(--wn-display);
+  display: inline-flex; align-items: center; padding: 0 1.1rem 0 1.5rem; font-family: "Barlow Condensed", var(--wn-display);
 }
 .wn-game {
-  display: inline-flex; flex-direction: column; justify-content: center; gap: .15rem; padding: .7rem 1.5rem;
+  display: inline-flex; flex-direction: column; justify-content: center; gap: .15rem; padding: .7rem 1.05rem;
   border-left: 1px solid #ece9f3; border-bottom: 3px solid transparent; color: #1a1333; white-space: nowrap;
 }
 .wn-game:last-child { border-right: 1px solid #ece9f3; }
-.wn-game b { font: 700 1.05rem/1.1 "Barlow Condensed", var(--wn-display); letter-spacing: .1em; text-transform: uppercase; }
+.wn-game b { font: 700 1.02rem/1.1 "Barlow Condensed", var(--wn-display); letter-spacing: .07em; text-transform: uppercase; }
 .wn-game small { font: 400 .78rem/1.2 "Barlow", var(--wn-body); color: #6b6885; }
 .wn-game:hover { background: #f6f4fb; text-decoration: none; }
 .wn-game[aria-current="true"] { border-bottom-color: #f5b82e; }

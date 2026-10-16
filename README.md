@@ -66,6 +66,22 @@ already signed in.
   the real page in headless Chromium. **Honest limits:** verified in Node and headless Chromium only (not
   Firefox/Safari/phones; no touch controls); the gamepad path was exercised through a Gamepad API shim, not a
   physical controller; no audio; local play only (no online matches).
+- **`/shankpit-460/` — shankpit-460, playable in the browser, with human matchmaking** (2026-10-16). SHANKPIT's competitive
+  fork (the brand name is lower case and hyphenated) as a small, quick arena FFA shooter. The whole game -- the physics and weapons
+  (ported from shankpit-460's C engine, checked against it tick for tick), a software 3D renderer, the bots, the HUD and
+  screens, the matchmaking protocol client -- is one WebAssembly module compiled from PARENA (`PARENA/stdlib/shankpit460/`):
+  no malloc, no imports. The page's only JavaScript is `shankpit-460/sp-host.js`, *generated* from PARENA like BRAWLPIT's.
+  **The flow:** press PLAY and you are in a bot match straight away with SEARCHING FOR MATCH on screen; if another human is
+  searching you are both moved into a free-for-all lobby (human matches are first to 16 kills or six minutes; more can join
+  the countdown and a match still in its first 4:30 takes late arrivals); the match ends with the standings and a REQUEUE
+  button. Human matches run through IDUNA's `/api/v1/shankpit460/play` WebSocket (a referee that owns the clock, health,
+  score and respawns and checks every claimed hit); a signed-in player's name is their IDUNA game-player name, anyone else is
+  a guest. Rebuild with `scripts/build-shankpit460.sh` (needs the sibling PARENA checkout, node and the LLVM toolchain) and
+  commit the outputs. Tests: `scripts/shankpit460-net-test.mjs` (two real engines against the real IDUNA binary) and
+  `scripts/shankpit460-browser-test.mjs` (real headless Chromium, with screenshots). **Honest limits:** Node and headless
+  Chromium only (not Firefox/Safari/phones; no touch controls); the gamepad and the sound were not exercised by a person;
+  the referee stops impossible hits, walls and speed hacks but not aimbots or wallhacks. **Stats and the bot league are the
+  next pass** -- nothing is persisted yet.
 - `/store.html` — the BRAWLPIT hat store. Login is a real redirect to IDUNA's own hosted SSO
   page (`iam.okemily.com`) — this page has no password field of its own.
 - **`/profile.html` — public DEADWEIGHT player profiles** (no login): look up any player by
