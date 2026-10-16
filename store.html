@@ -56,7 +56,7 @@
       <div><p class="i-label">Secondary market</p><h2 class="i-h2">Resale of limited editions</h2></div>
       <span class="i-count" id="market-count"></span>
     </div>
-    <p class="i-card-desc">Sold-out limited editions live here. Players set their own price; the seller keeps 88% and 12% is burned.</p>
+    <p class="i-card-desc">Sold-out limited editions live here. Players set their own price. Of each resale, 8% goes to the hat's designer as a royalty, 4% is burned, and the seller keeps 88%.</p>
     <div class="i-grid" id="market-list"></div>
     <div class="i-msg" id="market-msg" role="status" aria-live="polite"></div>
   </section>
@@ -260,17 +260,44 @@ async function cancelListing(m, btn) {
   } catch (e) { setMsg('market-msg', e.message, 'error'); btn.disabled = false; }
 }
 
-async function sellHat(o) {
-  const raw = prompt('Resale price for "' + o.name + '" in Flow (10 to 100,000). You keep 88%; 12% is burned.');
-  if (raw === null) return;
-  const price = Math.floor(Number(raw));
-  if (!(price >= 10 && price <= 100000)) { setMsg('owned-msg', 'Price must be 10 to 100,000 Flow.', 'error'); return; }
-  try {
-    await api('/characters/' + encodeURIComponent(characterID) + '/hats/market/list', { method: 'POST', body: JSON.stringify({ hat_id: o.hat_id, price }) });
-    toast(o.name + ' listed for ' + fmt(price) + ' Flow.');
-    await loadMarket();
-    await loadOwned();
-  } catch (e) { setMsg('owned-msg', e.message, 'error'); toast(e.message, 'error'); }
+// Resale split: 8% royalty to the designer, 4% burn, the rest to the seller (matches IDUNA splitMarketPrice).
+const RESALE = { royalty: 8, burn: 4 };
+const RESALE_NOTE = 'Current rates are fixed. Future listing burns are subject to regulatory adjustments for market stabilization, never to exceed a 25% ceiling.';
+function resaleSplit(price) {
+  const seller = Math.floor(price * (100 - RESALE.royalty - RESALE.burn) / 100), royalty = Math.floor(price * RESALE.royalty / 100);
+  return { seller, royalty, burn: price - seller - royalty };
+}
+function sellHat(o) {
+  const dlg = $('sell-dialog'), input = $('sell-price'), box = $('sell-breakdown'), err = $('sell-err');
+  $('sell-title').textContent = 'List "' + o.name + '"';
+  input.value = ''; err.textContent = '';
+  const render = () => {
+    const price = Math.floor(Number(input.value));
+    box.textContent = '';
+    if (!(price >= 10 && price <= 100000)) { box.appendChild(h('p', { 'class': 'i-card-desc', text: 'Enter a price from 10 to 100,000 Flow.' })); } else {
+      const b = resaleSplit(price);
+      box.appendChild(h('p', { 'class': 'i-card-desc', text: 'Buyer pays ' + fmt(price) + ' Flow' }));
+      box.appendChild(h('p', { 'class': 'i-card-desc', text: 'You receive ' + fmt(b.seller) + ' Flow (' + (100 - RESALE.royalty - RESALE.burn) + '%)' }));
+      box.appendChild(h('p', { 'class': 'i-card-desc', text: 'Designer royalty ' + fmt(b.royalty) + ' Flow (' + RESALE.royalty + '%)' }));
+      box.appendChild(h('p', { 'class': 'i-card-desc', text: 'Burned ' + fmt(b.burn) + ' Flow (' + RESALE.burn + '%)' }));
+    }
+    box.appendChild(h('p', { 'class': 'i-card-desc', style: 'margin-top:.6rem;font-style:italic', text: RESALE_NOTE }));
+  };
+  input.oninput = render; render();
+  $('sell-form').onsubmit = async (ev) => {
+    ev.preventDefault();
+    const price = Math.floor(Number(input.value));
+    if (!(price >= 10 && price <= 100000)) { err.textContent = 'Price must be 10 to 100,000 Flow.'; return; }
+    try {
+      await api('/characters/' + encodeURIComponent(characterID) + '/hats/market/list', { method: 'POST', body: JSON.stringify({ hat_id: o.hat_id, price }) });
+      dlg.close();
+      toast(o.name + ' listed for ' + fmt(price) + ' Flow.');
+      await loadMarket();
+      await loadOwned();
+    } catch (e) { err.textContent = e.message; }
+  };
+  $('sell-cancel').onclick = () => dlg.close();
+  dlg.showModal(); input.focus();
 }
 
 let ownedHatIDs = new Set();
@@ -332,6 +359,19 @@ $('sso-login-link').href = buildSsoURL(new URLSearchParams(location.search).get(
   await refresh();
 })();
 </script>
+<dialog id="sell-dialog" class="i-panel" style="max-width:min(28rem,94vw);width:100%" aria-labelledby="sell-title">
+  <form id="sell-form" method="dialog">
+    <h2 class="i-h2" id="sell-title">List hat</h2>
+    <label class="i-label" for="sell-price">Asking price (Flow)</label>
+    <input type="number" id="sell-price" min="10" max="100000" step="1" style="width:100%" inputmode="numeric">
+    <div id="sell-breakdown" style="margin-top:.8rem"></div>
+    <div class="i-msg error" id="sell-err" role="alert"></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem">
+      <button type="button" class="i-btn" id="sell-cancel">Cancel</button>
+      <button type="submit" class="i-btn primary">List for sale</button>
+    </div>
+  </form>
+</dialog>
 <script src="/js/wotan-nav.js"></script>
 <script src="/js/cookie-consent.js"></script>
 </body>
