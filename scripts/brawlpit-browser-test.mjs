@@ -1,5 +1,6 @@
 // Real-browser test of the BRAWLPIT page (headless Chromium via Playwright).
 //   NODE_PATH=<dir with node_modules/playwright> PLAYWRIGHT_BROWSERS_PATH=... node scripts/brawlpit-browser-test.mjs [outdir]
+//   (BRAWLPIT_BASE_URL=https://wotan.okemily.com ... runs it against the deployed site instead of a local server)
 // Serves this repo's static files, opens /BRAWLPIT/, and checks that the WebAssembly game really
 // boots in a browser, paints, takes keyboard and gamepad input, runs a match, and that the page's
 // only JavaScript is the generated bp-host.js (plus the site-wide nav/SSO scripts).
@@ -15,18 +16,25 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outdir = process.argv[2] || path.join(root, '..', 'brawlpit-shots');
 fs.mkdirSync(outdir, { recursive: true });
 
+// BRAWLPIT_BASE_URL=https://wotan.okemily.com runs the same checks against the DEPLOYED site (the IDUNA
+// endpoints stay stubbed either way, so no real account or token is involved); unset, this repo is served locally.
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.wasm': 'application/wasm', '.json': 'application/json', '.png': 'image/png' };
-const server = http.createServer((req, res) => {
-  let p = decodeURIComponent(req.url.split('?')[0]);
-  if (p.startsWith('/api/')) { res.writeHead(404); res.end('{}'); return; }
-  if (p.endsWith('/')) p += 'index.html';
-  const f = path.join(root, p);
-  if (!f.startsWith(root) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); res.end('nf'); return; }
-  res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream' });
-  fs.createReadStream(f).pipe(res);
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const base = `http://127.0.0.1:${server.address().port}`;
+let server = null, base;
+if (process.env.BRAWLPIT_BASE_URL) {
+  base = process.env.BRAWLPIT_BASE_URL.replace(/\/$/, '');
+} else {
+  server = http.createServer((req, res) => {
+    let p = decodeURIComponent(req.url.split('?')[0]);
+    if (p.startsWith('/api/')) { res.writeHead(404); res.end('{}'); return; }
+    if (p.endsWith('/')) p += 'index.html';
+    const f = path.join(root, p);
+    if (!f.startsWith(root) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); res.end('nf'); return; }
+    res.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream' });
+    fs.createReadStream(f).pipe(res);
+  });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  base = `http://127.0.0.1:${server.address().port}`;
+}
 
 let pass = 0, fail = 0;
 const ok = (c, m) => { c ? pass++ : fail++; console.log((c ? 'PASS: ' : 'FAIL: ') + m); };
@@ -242,6 +250,6 @@ const toFight = async (pg) => { await tapKey(pg, 'Enter'); await tapKey(pg, 'Ent
 await page.waitForTimeout(10000);
 ok(errors.length === 0, 'no page or console errors during the whole session' + (errors.length ? ': ' + errors.join(' | ') : ''));
 await browser.close();
-server.close();
+if (server) server.close();
 console.log(`\n${pass} passed, ${fail} failed (screenshots in ${outdir})`);
 process.exit(fail ? 1 : 0);
