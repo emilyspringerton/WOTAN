@@ -54,13 +54,14 @@
             aria-label="BRAWLPIT. Arrow keys or WASD to navigate the menus and move; Enter to confirm." hidden></canvas>
   </div>
   <p class="bp-pad-status" id="bp-pad-status" aria-live="polite"></p>
+  <p class="bp-pad-status" id="bp-hat-status" aria-live="polite"><span id="bp-hat-msg"></span> <a id="bp-hat-link" hidden></a></p>
 
   <div class="bp-tips">
     <div class="bp-tip"><b>Player 1</b><kbd>A</kbd> <kbd>D</kbd> move &middot; <kbd>W</kbd> <kbd>S</kbd> up / drop through &middot; <kbd>Space</kbd> jump &middot; <kbd>J</kbd> attack &middot; <kbd>Shift</kbd> shield &middot; <kbd>K</kbd> special. A lone player can use either key set.</div>
     <div class="bp-tip"><b>Player 2</b><kbd>&larr;</kbd> <kbd>&rarr;</kbd> <kbd>&uarr;</kbd> <kbd>&darr;</kbd> move &middot; <kbd>Right Ctrl</kbd> jump &middot; <kbd>/</kbd> attack &middot; <kbd>Right Shift</kbd> shield &middot; <kbd>'</kbd> special.</div>
     <div class="bp-tip"><b>Gamepad</b>Stick or d-pad moves &middot; A jump &middot; X or RT attack &middot; LB or LT shield &middot; B or RB special &middot; Start pauses. One pad plays player 2 in a local match; two pads play one each. It drives the menus too.</div>
     <div class="bp-tip"><b>Moves</b>Special alone dodges. Special + up or down is each fighter's own move. Hold special with a direction to charge a smash. Shield has a 16-frame windup (you can be hit) then 16 frames where attackers get punished.</div>
-    <div class="bp-tip"><b>Hats</b>The hat you equipped in the <a href="/store.html">Hat Store</a> (or drew in the <a href="/hat-studio.html">Hat Studio</a>) is worn in matches &mdash; pick it with up / down on the fighter-select screen.</div>
+    <div class="bp-tip"><b>Hats</b>Sign in and the hat you equipped in the <a href="/store.html">Hat Store</a> (or drew in the <a href="/hat-studio.html">Hat Studio</a>) is on your fighter in every match, with nothing to pick. Up / down on the fighter-select screen swaps it for no hat or a plain colour hat. Change which hat is equipped in the store, then reload.</div>
     <div class="bp-tip"><b>What this is</b>The game is one WebAssembly module with no imports and no allocator, compiled from <a href="https://github.com/emilyspringerton/PARENA">PARENA</a>: simulation, bots, menus and renderer. Its physics is a port of BRAWLPIT's C engine and is bit-for-bit identical to it. The only JavaScript here is generated from PARENA too.</div>
   </div>
 

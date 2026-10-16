@@ -71,7 +71,8 @@ const stat = await page.textContent('#bp-stat');
 ok(/0 imports/.test(stat) && /no allocator/.test(stat), 'footer reports 0 imports and no allocator: ' + stat.trim());
 
 await page.waitForFunction(() => !document.getElementById('bp-hat').hidden, null, { timeout: 8000 });
-ok(await page.evaluate(() => document.getElementById('bp-hat-img').getAttribute('src') === '/api/v1/hats/h1/image'), 'signed-in player: header badge shows the equipped hat');
+ok(await page.evaluate(() => document.getElementById('bp-hat-img').getAttribute('src').startsWith('data:image/png')), 'signed-in player: header badge shows the equipped hat (the 32x32 surface the wasm wears)');
+ok(/Wearing your Hat Store hat: Gold Crown\./.test(await page.textContent('#bp-hat-msg')), 'signed-in player: the status line under the canvas names the hat being worn');
 ok(apiHits.filter((h) => h.u.startsWith('/api/v1/characters/')).every((h) => h.auth === 'Bearer tok-e2e'), 'IDUNA calls carried the shared session token');
 
 // the page's scripts: generated host + site-wide nav/SSO + consent; nothing hand-written for BRAWLPIT
@@ -93,13 +94,25 @@ await page.focus('#bp-canvas');
 await press('Enter');                 // VS CPU
 await page.waitForTimeout(150);
 await (await page.$('#bp-canvas')).screenshot({ path: path.join(outdir, 'canvas-select.png') });
-await press('ArrowRight', 2);
-await press('ArrowUp');                       // hat: none -> your WOTAN hat
+// the equipped store hat is on the fighter already: nothing was picked. Gold (255,215,0) is the stub crown's colour.
+const gold = (pg) => pg.evaluate(() => { const c = document.getElementById('bp-canvas'); const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] === 255 && d[i + 1] === 215 && d[i + 2] === 0) n++; return n; });
+const goldSelect = await gold(page);
+ok(goldSelect > 400, `fighter select: the equipped hat is already on player 1's fighter without touching anything (${goldSelect} px of the crown's gold)`);
+await press('ArrowRight', 2);                 // another fighter: the hat stays
 await page.waitForTimeout(100);
 await (await page.$('#bp-canvas')).screenshot({ path: path.join(outdir, 'canvas-select-hat.png') });
+await press('ArrowDown');                     // store hat -> NO HAT
+await page.waitForTimeout(100);
+const goldBare = await gold(page);
+ok(goldBare < goldSelect - 400, `down takes the hat off (${goldBare} px of gold left)`);
+await (await page.$('#bp-canvas')).screenshot({ path: path.join(outdir, 'canvas-select-nohat.png') });
+await press('ArrowUp');                       // and back on
+await page.waitForTimeout(100);
+ok(Math.abs((await gold(page)) - goldSelect) < 60, 'up puts it back on');
 await press('Enter'); await press('Enter');   // lock in, stage -> fight
 await page.waitForTimeout(3300);              // READY / 3 / 2 / 1 / GO
 await (await page.$('#bp-canvas')).screenshot({ path: path.join(outdir, 'canvas-fight-0.png') });
+const goldFight = await gold(page);
 const sample = async () => (await page.evaluate(() => { const c = document.getElementById('bp-canvas'); return Array.from(c.getContext('2d').getImageData(0, 0, c.width, c.height).data.slice(0, 4 * 960 * 540)); })).reduce((a, b, i) => (a * 31 + b + i) | 0, 7);
 const h1 = await sample();
 await page.keyboard.down('d'); await page.waitForTimeout(700); await page.keyboard.up('d');
@@ -155,6 +168,75 @@ await page.waitForTimeout(600);
 await page.evaluate(() => { window.__pad.axes[0] = 0; window.__pad.buttons[0] = { pressed: false, value: 0 }; });
 const q2 = await sample();
 ok(q1 !== q2, 'a gamepad stick + button moves a fighter in the free-for-all');
+
+// ---- other visitors: each in its own browser context (own localStorage) ----------------------------------------------
+async function openPersona({ session, routes }) {
+  const pg = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  pg.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
+  pg.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource|fonts\.g/.test(m.text())) errors.push('console: ' + m.text()); });
+  await pg.route('**/fonts.googleapis.com/**', (r) => r.abort());
+  await pg.route('**/fonts.gstatic.com/**', (r) => r.abort());
+  await pg.route('**/iam.okemily.com/**', (r) => r.abort());
+  if (session) await pg.addInitScript(() => { localStorage.setItem('wotan_iduna_token', 'tok-p'); localStorage.setItem('wotan_iduna_player_id', 'p-p'); localStorage.setItem('wotan_iduna_display_name', 'P'); });
+  await pg.route('**/api/v1/**', (r) => { const u = new URL(r.request().url()).pathname; const f = routes[u]; return f ? r.fulfill(f) : r.fulfill({ status: 404, json: {} }); });
+  await pg.goto(base + '/BRAWLPIT/', { waitUntil: 'load' });
+  await pg.waitForFunction(() => document.getElementById('bp-pill')?.textContent === 'Running in WebAssembly', null, { timeout: 15000 });
+  return pg;
+}
+const msgOf = (pg) => pg.evaluate(() => document.getElementById('bp-hat-msg').textContent);
+const tapKey = async (pg, k) => { await pg.keyboard.down(k); await pg.waitForTimeout(70); await pg.keyboard.up(k); await pg.waitForTimeout(90); };   // the game polls key state each frame: hold across one
+const toFight = async (pg) => { await tapKey(pg, 'Enter'); await tapKey(pg, 'Enter'); await pg.waitForTimeout(3300); };                          // lock in the fighter, then the stage, then READY / 3 / 2 / 1 / GO
+
+{ // signed out: no hat, an honest status line, and the same fight has none of the crown's gold -- the baseline for the signed-in fight above
+  const pg = await openPersona({ session: false, routes: {} });
+  await pg.waitForFunction(() => document.getElementById('bp-hat-msg').textContent.length > 0, null, { timeout: 5000 });
+  ok(/not signed in/.test(await msgOf(pg)) && (await pg.evaluate(() => { const a = document.getElementById('bp-hat-link'); return !a.hidden && a.textContent === 'Sign in with IDUNA' && a.href.startsWith('https://iam.okemily.com/'); })),
+     'signed out: the status line says so and offers the IDUNA sign-in');
+  ok(await pg.evaluate(() => document.getElementById('bp-hat').hidden), 'signed out: the header badge stays hidden');
+  await pg.focus('#bp-canvas'); await tapKey(pg, 'Enter');            // title -> fighter select (VS CPU)
+  const bare = await gold(pg);
+  ok(bare < 60, `signed out: nothing gold on the fighter-select screen (${bare} px)`);
+  await toFight(pg);
+  const goldBareFight = await gold(pg);
+  ok(goldFight >= 40 && goldBareFight === 0, `in a fight the signed-in player's crown shows (${goldFight} px of gold -- the camera is zoomed out) and the signed-out one has none (${goldBareFight} px)`);
+  await (await pg.$('#bp-canvas')).screenshot({ path: path.join(outdir, 'canvas-fight-signed-out.png') });
+  await pg.close();
+}
+{ // the curated catalogue: IDUNA stores the art as an HTML-entity string ("&#9733;" stands in for the emoji here -- this machine has no emoji font)
+  const pg = await openPersona({ session: true, routes: {
+    '/api/v1/characters/by-player/p-p': { json: { character_id: 'c-p' } },
+    '/api/v1/characters/c-p/hats': { json: [{ hat_id: 'x1', name: 'Star Cap', equipped: true, image_asset: '&#9733;' }] } } });
+  await pg.waitForFunction(() => /Wearing/.test(document.getElementById('bp-hat-msg').textContent), null, { timeout: 8000 });
+  ok(/Wearing your Hat Store hat: Star Cap\./.test(await msgOf(pg)), 'curated hat: worn, and the status line names it');
+  // read the badge back: the data URL of the surface the wasm wears. Its ink must sit inside the 22x22 box standing on the head.
+  const box = await pg.evaluate(async () => {
+    const img = document.getElementById('bp-hat-img'); const im = new Image(); im.src = img.src; await im.decode();
+    const c = document.createElement('canvas'); c.width = 32; c.height = 32; const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+    const d = g.getImageData(0, 0, 32, 32).data; let x0 = 99, y0 = 99, x1 = -1, y1 = -1, n = 0;
+    for (let y = 0; y < 32; y++) for (let x = 0; x < 32; x++) if (d[(y * 32 + x) * 4 + 3] > 40) { n++; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+    return { n, x0, y0, x1, y1 };
+  });
+  ok(box.n > 40, `curated hat: the entity was decoded and a glyph was really drawn (${box.n} inked pixels, not a blank surface)`);
+  ok(box.x0 >= 4 && box.x1 <= 28 && box.y1 <= 31 && box.y1 >= 27 && Math.abs((box.x0 + box.x1) / 2 - 15.5) <= 2.5,
+     `curated hat: the glyph is fitted to the head -- centred (x ${box.x0}..${box.x1}) and standing on row ~30 (bottom ${box.y1}), top ${box.y0}`);
+  await pg.focus('#bp-canvas'); await tapKey(pg, 'Enter');            // title -> fighter select (VS CPU)
+  await (await pg.$('#bp-canvas')).screenshot({ path: path.join(outdir, 'canvas-select-curated-hat.png') });
+  await toFight(pg);
+  await (await pg.$('#bp-canvas')).screenshot({ path: path.join(outdir, 'canvas-fight-curated-hat.png') });
+  await pg.close();
+}
+{ // nothing equipped / expired sign-in
+  const pg = await openPersona({ session: true, routes: {
+    '/api/v1/characters/by-player/p-p': { json: { character_id: 'c-p' } },
+    '/api/v1/characters/c-p/hats': { json: [{ hat_id: 'x1', name: 'Spare', equipped: false, image_asset: '&#9733;' }] } } });
+  await pg.waitForFunction(() => /no hat equipped/.test(document.getElementById('bp-hat-msg').textContent), null, { timeout: 8000 });
+  ok(await pg.evaluate(() => document.getElementById('bp-hat-link').getAttribute('href') === '/store.html' && document.getElementById('bp-hat').hidden), 'nothing equipped: the status line points at the Hat Store and no badge is shown');
+  await pg.close();
+  const ex = await openPersona({ session: true, routes: { '/api/v1/characters/by-player/p-p': { status: 401, json: {} } } });
+  await ex.waitForFunction(() => /expired/.test(document.getElementById('bp-hat-msg').textContent), null, { timeout: 8000 });
+  ok(true, 'expired sign-in (HTTP 401): the status line says so instead of silently showing no hat');
+  await ex.close();
+}
 
 // sustained: 10 s of play, no errors, still animating
 await page.waitForTimeout(10000);

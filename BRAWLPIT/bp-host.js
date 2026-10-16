@@ -344,11 +344,135 @@ export function apiGet(path        )      {
 export function ignoreBang(e     )       {
 }
 
+export function signInUrl()      {
+    return ((typeof buildSsoURL !== "undefined") ? buildSsoURL() : "/store.html");
+}
+
+export function hatStatusBang(msg     , linkText     , linkHref     )       {
+    setTextBang("bp-hat-msg", msg);
+    {
+        let a      = el("bp-hat-link");
+        if ((!((a == null)))) {
+            a.textContent = linkText;
+            a.href = linkHref;
+            a.hidden = (linkText === "");
+        }
+    }
+}
+
+export function digitValue(c        )         {
+    return (((c >= 48) && (c <= 57)) ? (c - 48) : (((c >= 97) && (c <= 102)) ? (c - 87) : (((c >= 65) && (c <= 70)) ? (c - 55) : -1)));
+}
+
+export function entityEnd(s     , from        )         {
+    {
+        let n      = s.length;
+        {
+            let j         = (from + 2);
+            while (true) {
+                if ((j >= n)) {
+                    return -1;
+                } else {
+                    if (((j - from) > 10)) {
+                        return -1;
+                    } else {
+                        if ((s.charCodeAt(j) === 59)) {
+                            return j;
+                        } else {
+                            j = (j + 1);
+                            continue;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+}
+
+export function entityCode(s     , from        , end        )         {
+    {
+        let x      = s.charCodeAt((from + 2));
+        let hex          = ((x === 120) || (x === 88));
+        let radix         = (hex ? 16 : 10);
+        let start         = (hex ? (from + 3) : (from + 2));
+        if ((start >= end)) {
+            return -1;
+        } else {
+            {
+                let j         = start;
+                let v         = 0;
+                while (true) {
+                    if ((j < end)) {
+                        {
+                            let d         = digitValue(s.charCodeAt(j));
+                            if (((d < 0) || (d >= radix))) {
+                                return -1;
+                            } else {
+                                const _t0 = (j + 1);
+                                const _t1 = ((v * radix) + d);
+                                j = _t0;
+                                v = _t1;
+                                continue;
+                            }
+                        }
+                    } else {
+                        if ((v > 1114111)) {
+                            return -1;
+                        } else {
+                            return v;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+export function decodeEntities(s     )      {
+    {
+        let n      = s.length;
+        {
+            let i         = 0;
+            let out         = "";
+            while (true) {
+                if ((i >= n)) {
+                    return out;
+                } else {
+                    {
+                        let amp          = ((s.charCodeAt(i) === 38) && (((i + 2) < n) && (s.charCodeAt((i + 1)) === 35)));
+                        let end         = (amp ? entityEnd(s, i) : -1);
+                        let cp         = ((end >= 0) ? entityCode(s, i, end) : -1);
+                        if ((cp >= 0)) {
+                            const _t0 = (end + 1);
+                            const _t1 = ("" + out + String.fromCodePoint(cp));
+                            i = _t0;
+                            out = _t1;
+                            continue;
+                        } else {
+                            const _t2 = (i + 1);
+                            const _t3 = ("" + out + s.charAt(i));
+                            i = _t2;
+                            out = _t3;
+                            continue;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+}
+
 export function loadHat()       {
     if ((typeof getIdunaSession !== "undefined")) {
         session = getIdunaSession();
-        if ((!((session == null)))) {
-            apiGet(("" + "/characters/by-player/" + encode(session.playerID))).then(onCharacter).then(onHats).catch(ignoreBang);
+        if ((session == null)) {
+            hatStatusBang("You are not signed in, so there is no hat to wear.", "Sign in with IDUNA", signInUrl());
+        } else {
+            hatStatusBang("Looking up your equipped hat...", "", "");
+            apiGet(("" + "/characters/by-player/" + encode(session.playerID))).then(onCharacter).then(onHats).catch(onHatError);
         }
     }
 }
@@ -361,26 +485,43 @@ export function hatList(owned     )      {
     return (Array.isArray(owned) ? owned : (owned.hats ? owned.hats : owned.items));
 }
 
-export function onHats(owned     )       {
-    {
-        let list      = hatList(owned);
+export function equippedHat(list     )      {
+    if ((list == null)) {
+        return null;
+    } else {
         {
             let i         = 0;
             while (true) {
-                if (((!((list == null))) && (i < list.length))) {
+                if ((i < list.length)) {
                     {
                         let h      = list[i];
                         if (h.equipped) {
-                            useHat(h);
+                            return h;
                         } else {
                             i = (i + 1);
                             continue;
                         }
                     }
+                } else {
+                    return null;
                 }
                 break;
             }
         }
+    }
+}
+
+export function onHats(owned     )       {
+    {
+        let h      = equippedHat(hatList(owned));
+        ((h == null) ? hatStatusBang("You have no hat equipped yet.", "Pick one in the Hat Store", "/store.html") : useHat(h));
+    }
+}
+
+export function onHatError(e     )       {
+    {
+        let why         = ("" + e);
+        ((why === "HTTP 404") ? hatStatusBang("This account has no BRAWLPIT character yet, so there is no hat to wear.", "Open the Hat Store", "/store.html") : (((why === "HTTP 401") || (why === "HTTP 403")) ? hatStatusBang("Your sign-in has expired, so your hat could not be loaded.", "Sign in with IDUNA", signInUrl()) : hatStatusBang(("" + "Could not load your equipped hat (" + why + ")."), "", "")));
     }
 }
 
@@ -406,22 +547,15 @@ export function putHatNameBang(name     )       {
 export function useHat(h     )       {
     hatName = h.name;
     putHatNameBang(hatName);
-    if (h.image_url) {
-        {
-            let img      = el("bp-hat-img");
-            if ((!((img == null)))) {
-                img.src = h.image_url;
-            }
-        }
-        setHiddenBang("bp-hat", false);
-        fetch(h.image_url).then(blobOf).then(decodeBitmap).then(onBitmap).catch(ignoreBang);
-    } else {
-        (h.image_asset ? rasterizeEmoji(h.image_asset) : undefined);
-    }
+    (h.image_url ? fetch(h.image_url).then(blobOf).then(decodeBitmap).then(onBitmap).catch(onHatImageError) : rasterizeArtBang(h));
+}
+
+export function onHatImageError(e     )       {
+    hatStatusBang(("" + "Could not load the image for " + hatName + " (" + e + ")."), "", "");
 }
 
 export function blobOf(r     )      {
-    return r.blob();
+    return (r.ok ? r.blob() : Promise.reject(("" + "HTTP " + r.status)));
 }
 
 export function decodeBitmap(blob     )      {
@@ -437,12 +571,28 @@ export function smallCanvas()      {
     }
 }
 
+export function showBadgeBang(c2     )       {
+    {
+        let img      = el("bp-hat-img");
+        let box      = el("bp-hat");
+        if ((!((img == null)))) {
+            img.src = c2.toDataURL();
+        }
+        if ((!((box == null)))) {
+            box.title = ("" + "Wearing: " + hatName);
+        }
+        setHiddenBang("bp-hat", false);
+    }
+}
+
 export function publishHatBang(c2     )       {
     {
         let data      = c2.getContext("2d").getImageData(0, 0, 32, 32).data;
         let dst      = new Uint8Array(memory.buffer, wasm.bp_hat_addr(0), 4096);
         dst.set(data);
         wasm.bp_hat_set(0, 1);
+        showBadgeBang(c2);
+        hatStatusBang(("" + "Wearing your Hat Store hat: " + hatName + "."), "Change hat", "/store.html");
     }
 }
 
@@ -456,15 +606,49 @@ export function onBitmap(bmp     )       {
     }
 }
 
-export function rasterizeEmoji(emoji     )       {
+export function monogram(name     )      {
+    return (((!((name == null))) && (name.length > 0)) ? name.charAt(0).toUpperCase() : "?");
+}
+
+export function artGlyph(h     )      {
+    {
+        let raw      = h.image_asset;
+        return (((typeof raw) === "string") ? decodeEntities(raw) : "");
+    }
+}
+
+export function glyphP(s     )          {
+    return ((s.length > 0) && (s.codePointAt(0) > 127));
+}
+
+export function rasterizeTextBang(text     , font        , fill        )       {
     {
         let c2      = smallCanvas();
         let g      = c2.getContext("2d");
-        g.font = "26px serif";
-        g.textAlign = "center";
-        g.textBaseline = "middle";
-        g.fillText(emoji, 16, 18);
+        g.font = font;
+        g.textAlign = "left";
+        g.textBaseline = "alphabetic";
+        g.fillStyle = fill;
+        {
+            let m      = g.measureText(text);
+            let l      = m.actualBoundingBoxLeft;
+            let r      = m.actualBoundingBoxRight;
+            let a      = m.actualBoundingBoxAscent;
+            let d      = m.actualBoundingBoxDescent;
+            let span         = Math.max((l + r), (a + d));
+            let k         = ((span > 0.0) ? (22.0 / span) : 0.2);
+            g.translate((16.0 - ((k * (r - l)) / 2.0)), (30.0 - (k * d)));
+            g.scale(k, k);
+            g.fillText(text, 0, 0);
+        }
         publishHatBang(c2);
+    }
+}
+
+export function rasterizeArtBang(h     )       {
+    {
+        let glyph      = artGlyph(h);
+        (glyphP(glyph) ? rasterizeTextBang(glyph, "100px serif", "#d8b463") : rasterizeTextBang(monogram(h.name), "bold 100px sans-serif", "#d8b463"));
     }
 }
 

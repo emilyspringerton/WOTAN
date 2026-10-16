@@ -56,7 +56,8 @@ already signed in.
   fighters, menus, software renderer -- is one WebAssembly module compiled from PARENA
   (`PARENA/stdlib/brawlpit/`): no malloc, no imports, and its physics is bit-identical to BRAWLPIT's C engine
   (`PARENA/tests/brawlpit_parity_*`). Keyboard or gamepad, vs CPU / local 2P / free-for-all / practice; the hat
-  you equipped in the store (or drew in the Hat Studio) is worn in matches. The page's only JavaScript is
+  you equipped in the store (or drew in the Hat Studio) is on your fighter in every match by default, and a status line says
+  what it found (signed out, nothing equipped, expired sign-in). The page's only JavaScript is
   `BRAWLPIT/bp-host.js`, which is *generated* from PARENA (PARENA -> TypeScript -> JS) and does nothing but
   instantiate the wasm, blit its framebuffer, forward input and decode images. `brawlpit.wasm`, `bp-host.js`
   and `sprites.png` are committed (the deploy image is built from git-tracked files): regenerate with
