@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-16
+
+- feat(hat-studio): `hat-studio.html` -- layered 32x32 pixel editor (pencil, line, paint bucket,
+  eraser, eyedropper, mirror, undo/redo, local projects), price guide with the 88% designer /
+  12% burned breakdown, publish + "My hats" dashboard (re-price, unlist). Store shows player art,
+  designer credit and the split. Exports PNG and a `.hat` file for BRAWLPIT.
+
 ## 2026-10-15
 - Chrome + home redesign to match the new design reference (kanban #641): every page now gets a two-row
   topbar -- a white GAMES bar (Deadweight "Drafts · Matches · Duels", Hearthstone "Shared deck library",

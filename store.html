@@ -22,6 +22,12 @@
   .hat-desc { font-size: 0.85rem; color: var(--fg-dim); }
   .hat-cost { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; color: var(--gold-bright); white-space: nowrap; }
   .badge { color: var(--ok); border: 1px solid var(--ok); }
+  .hat-main { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+  .thumb { width: 48px; height: 48px; flex: none; image-rendering: pixelated; border: 1px solid var(--border);
+           border-radius: 4px; background: #2a1d44; }
+  .thumb.empty { display: inline-block; }
+  .by { font-size: .78rem; color: var(--fg-dim); }
+  .split-note { font-size: .78rem; color: var(--fg-dim); }
 </style>
 </head>
 <body>
@@ -50,7 +56,7 @@
   </div>
 
   <div class="card" id="catalog-card" hidden>
-    <p><strong>Catalog</strong> &mdash; ordered by Flow cost.</p>
+    <p><strong>Catalog</strong> &mdash; ordered by Flow cost. Hats drawn by players pay their designer 88% of the price; the other 12% is burned. <a href="/hat-studio.html">Draw your own hat &rarr;</a></p>
     <div id="catalog-list"></div>
     <div class="msg" id="catalog-msg"></div>
   </div>
@@ -164,9 +170,11 @@ async function loadCatalog() {
       row.className = 'hat-row';
       const already = ownedIDs.has(h.hat_id);
       row.innerHTML =
-        '<div><div class="hat-name">' + escapeHtml(h.name) + (already ? '<span class="badge">Owned</span>' : '') + '</div>' +
-        '<div class="hat-desc">' + escapeHtml(h.description || '') + '</div></div>' +
-        '<div class="hat-cost">' + h.flow_cost + ' Flow</div>';
+        '<div class="hat-main">' + thumb(h) + '<div><div class="hat-name">' + escapeHtml(h.name) + (already ? '<span class="badge">Owned</span>' : '') + '</div>' +
+        '<div class="hat-desc">' + escapeHtml(h.description || '') + '</div>' +
+        (h.creator ? '<div class="by">drawn by ' + escapeHtml(h.creator) + (h.sales_count ? ' &middot; ' + h.sales_count + ' sold' : '') + '</div>' : '') +
+        '</div></div>' +
+        '<div class="hat-cost">' + h.flow_cost + ' Flow' + (h.creator ? '<div class="split-note">' + Math.floor(h.flow_cost * 88 / 100) + ' to designer</div>' : '') + '</div>';
       const btn = document.createElement('button');
       btn.textContent = already ? 'Owned' : 'Buy';
       btn.disabled = already;
@@ -213,8 +221,9 @@ async function loadOwned() {
       const row = document.createElement('div');
       row.className = 'hat-row';
       row.innerHTML =
-        '<div><div class="hat-name">' + escapeHtml(o.name) + (o.equipped ? '<span class="badge">Equipped</span>' : '') + '</div>' +
-        '<div class="hat-desc">' + escapeHtml(o.description || '') + '</div></div>';
+        '<div class="hat-main">' + thumb(o) + '<div><div class="hat-name">' + escapeHtml(o.name) + (o.equipped ? '<span class="badge">Equipped</span>' : '') + '</div>' +
+        '<div class="hat-desc">' + escapeHtml(o.description || '') + '</div>' +
+        (o.creator ? '<div class="by">drawn by ' + escapeHtml(o.creator) + '</div>' : '') + '</div></div>';
       const btn = document.createElement('button');
       btn.textContent = o.equipped ? 'Equipped' : 'Equip';
       btn.disabled = o.equipped;
@@ -245,6 +254,12 @@ async function equipHat(hatID, btn) {
     msg.className = 'msg error';
     btn.disabled = false;
   }
+}
+
+// Player-drawn hats carry a PNG served by IDUNA through this origin's /api/ proxy; curated hats
+// have no pixel art yet, so they get an empty frame rather than a broken image.
+function thumb(h) {
+  return h.image_url ? '<img class="thumb" alt="" loading="lazy" src="' + escapeHtml(h.image_url) + '">' : '<span class="thumb empty"></span>';
 }
 
 function escapeHtml(s) {

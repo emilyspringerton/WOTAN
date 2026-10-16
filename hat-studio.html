@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hat Studio &mdash; WOTAN</title>
+<meta name="description" content="Draw a BRAWLPIT hat, set your price, and earn 88% of every sale in Flow.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-theme.css">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<script src="/js/iduna-sso.js"></script>
+<style>
+  .wrap.studio { max-width: 1180px; }
+  .studio-grid { display: grid; grid-template-columns: 76px minmax(0, 1fr) 320px; gap: 1rem; align-items: start; }
+  @media (max-width: 900px) { .studio-grid { grid-template-columns: 1fr; } }
+  .tools { display: flex; flex-direction: column; gap: .4rem; }
+  @media (max-width: 900px) { .tools { flex-direction: row; flex-wrap: wrap; } }
+  .tool { padding: .5rem .25rem; text-align: center; font-size: .78rem; line-height: 1.15; }
+  .tool[aria-pressed="true"] { background: var(--violet); border-color: var(--violet-bright); box-shadow: var(--glow); }
+  .tool kbd { display: block; opacity: .65; font-size: .68rem; }
+  .stage { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
+  .canvas-box {
+    position: relative; width: min(100%, 512px); aspect-ratio: 1; touch-action: none;
+    border: 2px solid var(--border-bright); border-radius: 8px; overflow: hidden;
+    background-color: #2a1d44;
+    background-image: linear-gradient(45deg, #34255a 25%, transparent 25%, transparent 75%, #34255a 75%),
+                      linear-gradient(45deg, #34255a 25%, transparent 25%, transparent 75%, #34255a 75%);
+    background-size: 32px 32px; background-position: 0 0, 16px 16px;
+  }
+  .canvas-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+  #cv-over { cursor: crosshair; }
+  .row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+  .row.tight { gap: .3rem; }
+  .small { font-size: .82rem; color: var(--fg-dim); }
+  .swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  .sw { aspect-ratio: 1; border: 2px solid var(--border); border-radius: 4px; padding: 0; cursor: pointer; }
+  .sw[aria-pressed="true"] { border-color: var(--gold-bright); box-shadow: 0 0 0 2px var(--gold); }
+  .layer { display: grid; grid-template-columns: auto 1fr auto; gap: .4rem; align-items: center; padding: .35rem .4rem;
+           border: 1px solid var(--border); border-radius: 6px; margin-bottom: .35rem; background: var(--bg-raise); }
+  .layer.active { border-color: var(--violet-bright); box-shadow: var(--glow); }
+  .layer input[type=text] { padding: .15rem .35rem; font-size: .85rem; }
+  .layer input[type=range] { grid-column: 1 / -1; padding: 0; }
+  .panel h3 { margin: 0 0 .6rem; font-family: var(--font-display); font-size: .95rem; letter-spacing: .04em; text-transform: uppercase; color: var(--gold-bright); }
+  .panel + .panel { margin-top: 1rem; }
+  .breakdown { font-family: var(--font-display); font-size: .9rem; border: 1px dashed var(--border-bright); border-radius: 6px; padding: .55rem .7rem; }
+  .breakdown b.earn { color: var(--ok); } .breakdown b.burn { color: var(--orange); }
+  .chip { padding: .25rem .6rem; font-size: .8rem; }
+  .design { display: grid; grid-template-columns: 56px 1fr; gap: .6rem; padding: .6rem 0; border-bottom: 1px solid var(--border); }
+  .design:last-child { border-bottom: none; }
+  .design img, .thumb { width: 56px; height: 56px; image-rendering: pixelated; border: 1px solid var(--border); border-radius: 4px; background: #2a1d44; }
+  .design input[type=number] { width: 6.5rem; }
+  .full { width: 100%; }
+  #preview { width: 96px; height: 96px; image-rendering: pixelated; border: 1px solid var(--border); border-radius: 6px; background: #2a1d44; }
+  details > summary { cursor: pointer; font-weight: 700; }
+</style>
+</head>
+<body>
+<header id="wotan-nav" data-skin="dw" data-section="store"></header>
+<div class="wrap studio">
+  <h1>Hat Studio</h1>
+  <p class="tagline">Draw a BRAWLPIT hat, name your price, and earn <strong>88%</strong> of every sale in Flow. The other <strong>12%</strong> is burned, so Flow stays worth something.</p>
+
+  <div class="studio-grid">
+    <!-- tools -->
+    <div class="tools" role="toolbar" aria-label="Drawing tools">
+      <button class="tool secondary" data-tool="pencil" aria-pressed="true" title="Pencil (P)">Pencil<kbd>P</kbd></button>
+      <button class="tool secondary" data-tool="line" aria-pressed="false" title="Line (L) &mdash; hold Shift for 45&deg;">Line<kbd>L</kbd></button>
+      <button class="tool secondary" data-tool="bucket" aria-pressed="false" title="Paint bucket (G)">Bucket<kbd>G</kbd></button>
+      <button class="tool secondary" data-tool="eraser" aria-pressed="false" title="Eraser (E)">Eraser<kbd>E</kbd></button>
+      <button class="tool secondary" data-tool="pick" aria-pressed="false" title="Eyedropper (I)">Pick<kbd>I</kbd></button>
+      <button class="tool secondary" id="mirror" aria-pressed="false" title="Mirror left/right (M) &mdash; hats are usually symmetric">Mirror<kbd>M</kbd></button>
+      <button class="tool secondary" id="guide" aria-pressed="true" title="Show the head guide (H)">Head<kbd>H</kbd></button>
+      <button class="tool secondary" id="gridtoggle" aria-pressed="true" title="Pixel grid">Grid<kbd>#</kbd></button>
+    </div>
+
+    <!-- canvas -->
+    <div class="stage">
+      <div class="canvas-box" id="canvas-box">
+        <canvas id="cv-main" width="32" height="32"></canvas>
+        <canvas id="cv-over" width="512" height="512"></canvas>
+      </div>
+      <div class="row">
+        <button class="secondary" id="undo" title="Undo (Ctrl+Z)">Undo</button>
+        <button class="secondary" id="redo" title="Redo (Ctrl+Shift+Z)">Redo</button>
+        <button class="secondary danger" id="clear">Clear layer</button>
+        <span class="small" id="status">32&times;32 &middot; pencil</span>
+      </div>
+    </div>
+
+    <!-- side panels -->
+    <div>
+      <div class="card panel">
+        <h3>Colour</h3>
+        <div class="row" style="margin-bottom:.6rem">
+          <input type="color" id="color" value="#c07dff" aria-label="Current colour" style="width:3rem;height:2.2rem;padding:0">
+          <span class="small" id="hex">#c07dff</span>
+        </div>
+        <div class="swatches" id="swatches"></div>
+      </div>
+
+      <div class="card panel">
+        <h3>Layers</h3>
+        <div id="layers"></div>
+        <div class="row tight"><button class="secondary chip" id="layer-add">+ Layer</button></div>
+      </div>
+
+      <div class="card panel">
+        <h3>Projects</h3>
+        <div class="row" style="margin-bottom:.5rem">
+          <select id="proj-select" aria-label="Saved projects" style="flex:1"></select>
+          <button class="secondary chip" id="proj-load">Open</button>
+        </div>
+        <div class="row tight">
+          <input type="text" id="proj-name" maxlength="32" placeholder="project name" style="flex:1" aria-label="Project name">
+          <button class="secondary chip" id="proj-save">Save</button>
+          <button class="secondary chip" id="proj-new">New</button>
+        </div>
+        <p class="small" style="margin-top:.5rem">Drafts are kept in this browser. Publish to share.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- publish -->
+  <div class="card panel" style="margin-top:1rem">
+    <h3>Publish &amp; price</h3>
+    <div style="display:grid; grid-template-columns: 112px minmax(0,1fr) minmax(0,1fr); gap: 1rem; align-items:start" id="publish-grid">
+      <div><canvas id="preview" width="32" height="32"></canvas><div class="small" style="margin-top:.3rem">preview</div></div>
+      <div>
+        <label for="hat-name">Name</label>
+        <input type="text" id="hat-name" maxlength="32" class="full" placeholder="Cone of Silence">
+        <label for="hat-desc" style="margin-top:.6rem">One line about it <span class="hint small">(optional)</span></label>
+        <input type="text" id="hat-desc" maxlength="120" class="full" placeholder="Pointy. Judgemental. Warm.">
+      </div>
+      <div>
+        <label for="hat-price">Price in Flow</label>
+        <input type="number" id="hat-price" min="10" max="100000" step="1" value="150" class="full">
+        <div class="row tight" id="price-chips" style="margin:.5rem 0"></div>
+        <div class="breakdown" id="breakdown"></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:1rem">
+      <button class="gold" id="publish-btn">Publish hat</button>
+      <button class="secondary" id="dl-png">Download PNG</button>
+      <button class="secondary" id="dl-hat" title="A .hat file the BRAWLPIT game client can load">Download .hat for BRAWLPIT</button>
+      <a class="small" id="signin-link" href="#" hidden>Sign in with IDUNA to publish</a>
+    </div>
+    <div class="msg" id="publish-msg"></div>
+    <p class="small" style="margin-top:.8rem">Prices are yours to set and change later (10&ndash;100,000 Flow). When someone buys, you get 88% rounded down and the remainder is burned. You keep your own copy. Other players can report a hat; three reports hold it for review.</p>
+  </div>
+
+  <!-- my designs -->
+  <div class="card panel" id="designs-card" style="margin-top:1rem" hidden>
+    <h3>My hats</h3>
+    <div class="small" id="designs-summary"></div>
+    <div id="designs-list"></div>
+    <div class="msg" id="designs-msg"></div>
+  </div>
+
+  <!-- how flow works -->
+  <details class="card" style="margin-top:1rem">
+    <summary>How Flow works across worlds</summary>
+    <p class="small" style="margin-top:.6rem">Flow is one balance for your IDUNA character. Grind in GFD &mdash; sell worm crystals in Town &mdash; and the Flow lands here within seconds, ready to spend in the <a href="/store.html">Hat Store</a>. When a hat you drew sells, your 88% goes into that same balance and shows up in GFD without you reconnecting.</p>
+    <p class="small" id="econ-line"></p>
+  </details>
+</div>
+
+<script>
+'use strict';
+const N = 32, ZOOM = 16;
+const PALETTE = ['#000000','#3b2a5c','#7c4dff','#c07dff','#52e9ff','#5b9dff','#2c7a4b','#57e6a0',
+                 '#f4f0ea','#b6a7d1','#d8b463','#eecb84','#ff9d4d','#ff5b53','#a8323a','#6b4423'];
+const $ = (id) => document.getElementById(id);
+
+// ---------------------------------------------------------------- state
+let layers = [];            // {name, visible, opacity, px: Uint8ClampedArray(N*N*4)}
+let active = 0;
+let tool = 'pencil';
+let color = [192, 125, 255, 255];
+let mirror = false, showGuide = true, showGrid = true;
+let undoStack = [], redoStack = [];
+let drag = null;            // {x0,y0,x,y,button}
+let currentName = '';
+
+const newLayer = (name) => ({ name, visible: true, opacity: 100, px: new Uint8ClampedArray(N * N * 4) });
+const clone = () => JSON.stringify(layers.map(l => ({ n: l.name, v: l.visible, o: l.opacity, p: Array.from(l.px) })));
+function restore(s) {
+  layers = JSON.parse(s).map(l => ({ name: l.n, visible: l.v, opacity: l.o, px: Uint8ClampedArray.from(l.p) }));
+  if (active >= layers.length) active = layers.length - 1;
+}
+function snapshot() { undoStack.push(clone()); if (undoStack.length > 60) undoStack.shift(); redoStack = []; }
+function undo() { if (!undoStack.length) return; redoStack.push(clone()); restore(undoStack.pop()); renderAll(); }
+function redo() { if (!redoStack.length) return; undoStack.push(clone()); restore(redoStack.pop()); renderAll(); }
+
+// ---------------------------------------------------------------- drawing primitives
+const idx = (x, y) => (y * N + x) * 4;
+const inb = (x, y) => x >= 0 && y >= 0 && x < N && y < N;
+function put(px, x, y, c) {
+  if (!inb(x, y)) return;
+  const i = idx(x, y); px[i] = c[0]; px[i+1] = c[1]; px[i+2] = c[2]; px[i+3] = c[3];
+}
+function putM(px, x, y, c) { put(px, x, y, c); if (mirror) put(px, N - 1 - x, y, c); }
+function line(px, x0, y0, x1, y1, c) {                       // Bresenham
+  const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+  let err = dx + dy;
+  for (;;) {
+    putM(px, x0, y0, c);
+    if (x0 === x1 && y0 === y1) break;
+    const e2 = 2 * err;
+    if (e2 >= dy) { err += dy; x0 += sx; }
+    if (e2 <= dx) { err += dx; y0 += sy; }
+  }
+}
+function same(px, i, c) { return px[i] === c[0] && px[i+1] === c[1] && px[i+2] === c[2] && px[i+3] === c[3]; }
+function bucket(px, x, y, c) {                                // 4-connected flood fill, exact match
+  if (!inb(x, y)) return;
+  const t = [px[idx(x,y)], px[idx(x,y)+1], px[idx(x,y)+2], px[idx(x,y)+3]];
+  if (same(px, idx(x, y), c)) return;
+  const stack = [[x, y]];
+  while (stack.length) {
+    const [cx, cy] = stack.pop();
+    if (!inb(cx, cy) || !same(px, idx(cx, cy), t)) continue;
+    put(px, cx, cy, c);
+    stack.push([cx+1, cy], [cx-1, cy], [cx, cy+1], [cx, cy-1]);
+  }
+}
+const ERASE = [0, 0, 0, 0];
+const cur = () => layers[active];
+function snap45(x0, y0, x, y) {
+  const dx = x - x0, dy = y - y0, ax = Math.abs(dx), ay = Math.abs(dy);
+  if (ax > 2 * ay) return [x, y0];
+  if (ay > 2 * ax) return [x0, y];
+  const m = Math.max(ax, ay);
+  return [x0 + Math.sign(dx) * m, y0 + Math.sign(dy) * m];
+}
+
+// ---------------------------------------------------------------- rendering
+const main = $('cv-main'), mctx = main.getContext('2d');
+const over = $('cv-over'), octx = over.getContext('2d');
+function compose(target) {
+  const t = target.getContext('2d');
+  t.clearRect(0, 0, N, N);
+  const tmp = document.createElement('canvas'); tmp.width = tmp.height = N;
+  const tc = tmp.getContext('2d');
+  for (const l of layers) {
+    if (!l.visible) continue;
+    tc.clearRect(0, 0, N, N);
+    tc.putImageData(new ImageData(l.px, N, N), 0, 0);
+    t.globalAlpha = l.opacity / 100;
+    t.drawImage(tmp, 0, 0);
+  }
+  t.globalAlpha = 1;
+}
+function drawGuide() {
+  // Faint head + shoulders silhouette: hats sit on the head, so the bottom third is the "head".
+  octx.save();
+  octx.fillStyle = 'rgba(244,240,234,.13)';
+  octx.strokeStyle = 'rgba(244,240,234,.35)';
+  octx.lineWidth = 2;
+  const z = ZOOM;
+  octx.beginPath(); octx.ellipse(16 * z, 27 * z, 8 * z, 8 * z, 0, 0, Math.PI * 2); octx.fill(); octx.stroke();
+  octx.setLineDash([6, 6]);
+  octx.beginPath(); octx.moveTo(0, 20 * z); octx.lineTo(N * z, 20 * z); octx.stroke();   // brim line
+  octx.restore();
+}
+function drawOverlay() {
+  octx.clearRect(0, 0, over.width, over.height);
+  if (showGuide) drawGuide();
+  if (showGrid) {
+    octx.strokeStyle = 'rgba(255,255,255,.07)'; octx.lineWidth = 1; octx.beginPath();
+    for (let i = 1; i < N; i++) { octx.moveTo(i * ZOOM + .5, 0); octx.lineTo(i * ZOOM + .5, N * ZOOM); octx.moveTo(0, i * ZOOM + .5); octx.lineTo(N * ZOOM, i * ZOOM + .5); }
+    octx.stroke();
+  }
+  if (mirror) { octx.strokeStyle = 'rgba(82,233,255,.5)'; octx.beginPath(); octx.moveTo(N * ZOOM / 2, 0); octx.lineTo(N * ZOOM / 2, N * ZOOM); octx.stroke(); }
+  if (drag && tool === 'line') {                              // line preview
+    const tmp = new Uint8ClampedArray(N * N * 4);
+    line(tmp, drag.x0, drag.y0, drag.x, drag.y, color);
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const i = idx(x, y); if (tmp[i+3]) { octx.fillStyle = `rgba(${tmp[i]},${tmp[i+1]},${tmp[i+2]},.8)`; octx.fillRect(x * ZOOM, y * ZOOM, ZOOM, ZOOM); }
+    }
+  }
+  if (hover) { octx.strokeStyle = 'rgba(255,255,255,.8)'; octx.strokeRect(hover.x * ZOOM + .5, hover.y * ZOOM + .5, ZOOM - 1, ZOOM - 1); }
+}
+let hover = null;
+function renderLayers() {
+  const box = $('layers'); box.innerHTML = '';
+  [...layers.keys()].reverse().forEach(i => {
+    const l = layers[i];
+    const el = document.createElement('div'); el.className = 'layer' + (i === active ? ' active' : '');
+    el.innerHTML = '<input type="checkbox" title="Visible"><input type="text" maxlength="20" aria-label="Layer name">' +
+      '<span class="row tight"><button class="secondary chip" title="Move up">&uarr;</button><button class="secondary chip" title="Move down">&darr;</button><button class="danger chip" title="Delete layer">&times;</button></span>' +
+      '<input type="range" min="0" max="100" aria-label="Opacity">';
+    const [vis, name] = el.querySelectorAll('input[type=checkbox],input[type=text]');
+    const [up, down, del] = el.querySelectorAll('button');
+    const op = el.querySelector('input[type=range]');
+    vis.checked = l.visible; name.value = l.name; op.value = l.opacity;
+    el.addEventListener('pointerdown', (e) => { if (active !== i && !e.target.closest('button')) { active = i; renderLayers(); } });
+    vis.onchange = () => { snapshot(); l.visible = vis.checked; renderCanvas(); };
+    name.onchange = () => { l.name = name.value || 'Layer'; };
+    op.oninput = () => { l.opacity = +op.value; renderCanvas(); };
+    op.onchange = () => { };
+    up.onclick = () => { if (i < layers.length - 1) { snapshot(); [layers[i], layers[i+1]] = [layers[i+1], layers[i]]; if (active === i) active = i + 1; renderAll(); } };
+    down.onclick = () => { if (i > 0) { snapshot(); [layers[i], layers[i-1]] = [layers[i-1], layers[i]]; if (active === i) active = i - 1; renderAll(); } };
+    del.onclick = () => { if (layers.length > 1) { snapshot(); layers.splice(i, 1); active = Math.min(active, layers.length - 1); renderAll(); } };
+    box.appendChild(el);
+  });
+}
+function renderCanvas() { compose(main); compose($('preview')); drawOverlay(); updateStatus(); }
+function renderAll() { renderLayers(); renderCanvas(); }
+function updateStatus() {
+  $('status').textContent = `${N}×${N} · ${tool}${mirror ? ' · mirror' : ''}` + (hover ? ` · ${hover.x},${hover.y}` : '');
+}
+
+// ---------------------------------------------------------------- input
+function cellFrom(e) {
+  const r = over.getBoundingClientRect();
+  return { x: Math.max(0, Math.min(N - 1, Math.floor((e.clientX - r.left) / r.width * N))),
+           y: Math.max(0, Math.min(N - 1, Math.floor((e.clientY - r.top) / r.height * N))) };
+}
+over.addEventListener('pointerdown', (e) => {
+  e.preventDefault(); over.setPointerCapture(e.pointerId);
+  const { x, y } = cellFrom(e);
+  const erase = e.button === 2 || tool === 'eraser';
+  if (tool === 'pick' || e.altKey) {
+    // Eyedropper reads the visible composite so you can sample from any layer.
+    const d = main.getContext('2d').getImageData(x, y, 1, 1).data;
+    if (d[3]) setColor([d[0], d[1], d[2], 255]);
+    return;
+  }
+  if (!cur().visible) { msg('That layer is hidden.', 'error'); return; }
+  snapshot();
+  if (tool === 'bucket') { bucket(cur().px, x, y, erase ? ERASE : color); if (mirror) bucket(cur().px, N-1-x, y, erase ? ERASE : color); renderCanvas(); return; }
+  drag = { x0: x, y0: y, x, y, erase };
+  if (tool === 'pencil' || tool === 'eraser') { putM(cur().px, x, y, erase ? ERASE : color); }
+  renderCanvas();
+});
+over.addEventListener('pointermove', (e) => {
+  const { x, y } = cellFrom(e);
+  hover = { x, y };
+  if (drag) {
+    if (tool === 'line') { [drag.x, drag.y] = e.shiftKey ? snap45(drag.x0, drag.y0, x, y) : [x, y]; }
+    else { line(cur().px, drag.x, drag.y, x, y, drag.erase ? ERASE : color); drag.x = x; drag.y = y; }
+  }
+  renderCanvas();
+});
+over.addEventListener('pointerup', (e) => {
+  if (drag && tool === 'line') line(cur().px, drag.x0, drag.y0, drag.x, drag.y, drag.erase ? ERASE : color);
+  drag = null; renderCanvas();
+});
+over.addEventListener('pointerleave', () => { hover = null; renderCanvas(); });
+over.addEventListener('contextmenu', (e) => e.preventDefault());
+
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll('[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === t)));
+  updateStatus();
+}
+document.querySelectorAll('[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
+const toggle = (id, get, set) => { $(id).onclick = () => { set(!get()); $(id).setAttribute('aria-pressed', String(get())); renderCanvas(); }; };
+toggle('mirror', () => mirror, v => mirror = v);
+toggle('guide', () => showGuide, v => showGuide = v);
+toggle('gridtoggle', () => showGrid, v => showGrid = v);
+$('undo').onclick = undo; $('redo').onclick = redo;
+$('clear').onclick = () => { snapshot(); cur().px.fill(0); renderCanvas(); };
+$('layer-add').onclick = () => { if (layers.length >= 8) return msg('Up to 8 layers.', 'error'); snapshot(); layers.push(newLayer('Layer ' + (layers.length + 1))); active = layers.length - 1; renderAll(); };
+document.addEventListener('keydown', (e) => {
+  if (e.target.matches('input, select, textarea')) return;
+  const k = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); redo(); return; }
+  const map = { p: 'pencil', l: 'line', g: 'bucket', e: 'eraser', i: 'pick' };
+  if (map[k]) setTool(map[k]);
+  else if (k === 'm') $('mirror').click();
+  else if (k === 'h') $('guide').click();
+  else if (k === '#') $('gridtoggle').click();
+});
+
+// ---------------------------------------------------------------- colour
+function hexToRgba(h) { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255, 255]; }
+function rgbaToHex(c) { return '#' + [c[0], c[1], c[2]].map(v => v.toString(16).padStart(2, '0')).join(''); }
+function setColor(c) {
+  color = c; const h = rgbaToHex(c);
+  $('color').value = h; $('hex').textContent = h;
+  document.querySelectorAll('.sw').forEach(s => s.setAttribute('aria-pressed', String(s.dataset.hex === h)));
+}
+PALETTE.forEach(h => {
+  const b = document.createElement('button'); b.className = 'sw'; b.style.background = h; b.dataset.hex = h; b.title = h;
+  b.setAttribute('aria-label', 'Colour ' + h); b.setAttribute('aria-pressed', 'false');
+  b.onclick = () => { setColor(hexToRgba(h)); if (tool === 'eraser' || tool === 'pick') setTool('pencil'); };
+  $('swatches').appendChild(b);
+});
+$('color').oninput = (e) => setColor(hexToRgba(e.target.value));
+
+// ---------------------------------------------------------------- projects (local drafts, NOCK "projects" port)
+const PKEY = 'wotan.hatstudio.projects.v1';
+function loadProjects() { try { return JSON.parse(localStorage.getItem(PKEY) || '{}'); } catch (e) { return {}; } }
+function saveProjects(p) { try { localStorage.setItem(PKEY, JSON.stringify(p)); } catch (e) { msg('Could not save to this browser (storage is blocked).', 'error'); } }
+function refreshProjectList() {
+  const p = loadProjects(), sel = $('proj-select'); sel.innerHTML = '';
+  const names = Object.keys(p).sort();
+  if (!names.length) { const o = document.createElement('option'); o.textContent = '(no saved projects)'; o.value = ''; sel.appendChild(o); }
+  names.forEach(n => { const o = document.createElement('option'); o.value = o.textContent = n; if (n === currentName) o.selected = true; sel.appendChild(o); });
+}
+$('proj-save').onclick = () => {
+  const name = ($('proj-name').value || $('hat-name').value || 'untitled').trim().slice(0, 32);
+  const p = loadProjects(); p[name] = { saved: Date.now(), data: clone(), hatName: $('hat-name').value, desc: $('hat-desc').value, price: $('hat-price').value };
+  saveProjects(p); currentName = name; $('proj-name').value = name; refreshProjectList(); msg('Saved "' + name + '".', 'ok');
+};
+$('proj-load').onclick = () => {
+  const n = $('proj-select').value; const p = loadProjects()[n]; if (!p) return;
+  snapshot(); restore(p.data); active = 0; currentName = n; $('proj-name').value = n;
+  $('hat-name').value = p.hatName || ''; $('hat-desc').value = p.desc || ''; if (p.price) $('hat-price').value = p.price;
+  renderAll(); updateBreakdown(); msg('Opened "' + n + '".', 'ok');
+};
+$('proj-new').onclick = () => {
+  if (hasInk() && !confirm('Start a new hat? Unsaved changes are lost.')) return;
+  layers = [newLayer('Hat')]; active = 0; undoStack = []; redoStack = []; currentName = ''; $('proj-name').value = '';
+  $('hat-name').value = ''; $('hat-desc').value = ''; renderAll();
+};
+function hasInk() { return layers.some(l => { for (let i = 3; i < l.px.length; i += 4) if (l.px[i]) return true; return false; }); }
+
+// ---------------------------------------------------------------- export
+function flatPixels() { compose(main); return main.getContext('2d').getImageData(0, 0, N, N).data; }
+function download(name, blobOrUrl) {
+  const a = document.createElement('a'); a.download = name;
+  a.href = typeof blobOrUrl === 'string' ? blobOrUrl : URL.createObjectURL(blobOrUrl); a.click();
+}
+const safeName = () => ($('hat-name').value || 'hat').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'hat';
+$('dl-png').onclick = () => { compose(main); download(safeName() + '.png', main.toDataURL('image/png')); };
+// .hat: the format the BRAWLPIT client loads from its hats/ folder -- "HAT1", "32 32", then 32 rows of
+// 32 RRGGBBAA tokens. Plain text so it diffs, and trivial to parse in C with no image library.
+$('dl-hat').onclick = () => {
+  const d = flatPixels(); let out = 'HAT1\n' + N + ' ' + N + '\n';
+  for (let y = 0; y < N; y++) {
+    const row = []; for (let x = 0; x < N; x++) { const i = idx(x, y); row.push([0,1,2,3].map(k => d[i+k].toString(16).padStart(2, '0')).join('')); }
+    out += row.join(' ') + '\n';
+  }
+  download(safeName() + '.hat', new Blob([out], { type: 'text/plain' }));
+};
+
+// ---------------------------------------------------------------- price + publish
+const FEE = { creator: 88, burn: 12 };
+let guide = { p25: 50, median: 150, p75: 400, listed: 0 };
+function split(price) { const c = Math.floor(price * FEE.creator / 100); return [c, price - c]; }
+function updateBreakdown() {
+  const p = Math.floor(+$('hat-price').value);
+  const ok = Number.isFinite(p) && p >= 10 && p <= 100000;
+  if (!ok) { $('breakdown').innerHTML = 'Pick a price between <b>10</b> and <b>100,000</b> Flow.'; return; }
+  const [c, b] = split(p);
+  $('breakdown').innerHTML = `Buyer pays <b>${p}</b> Flow<br>You earn <b class="earn">${c}</b> &middot; <b class="burn">${b}</b> burned<br>` +
+    `<span class="small">${position(p)}</span>`;
+}
+function position(p) {
+  if (!guide.listed) return 'No other player hats listed yet -- you set the market.';
+  if (p < guide.p25) return 'Below most listings: an easy impulse buy.';
+  if (p <= guide.p75) return p <= guide.median ? 'Around the middle of the market.' : 'A little above the median.';
+  return 'Premium: above three quarters of listings.';
+}
+function buildChips() {
+  const box = $('price-chips'); box.innerHTML = '';
+  [['Cheap', guide.p25], ['Market', guide.median], ['Premium', guide.p75]].forEach(([n, v]) => {
+    v = Math.max(10, v); const b = document.createElement('button'); b.className = 'secondary chip'; b.textContent = n + ' ' + v;
+    b.onclick = () => { $('hat-price').value = v; updateBreakdown(); }; box.appendChild(b);
+  });
+}
+async function loadEconomy() {
+  try {
+    const r = await fetch('/api/v1/hats/economy'); if (!r.ok) throw 0; const e = await r.json();
+    if (e.listed) guide = { p25: e.p25, median: e.median, p75: e.p75, listed: e.listed };
+    else guide = { p25: 50, median: 150, p75: 400, listed: 0 };
+    $('econ-line').textContent = `So far: ${e.total_sales} hat sales, ${e.total_paid_to_creators} Flow paid to designers, ${e.total_burned} Flow burned.`;
+  } catch (e) { /* guide stays at defaults */ }
+  buildChips(); updateBreakdown();
+}
+$('hat-price').oninput = updateBreakdown;
+
+function msg(text, kind) { const el = $('publish-msg'); el.textContent = text; el.className = 'msg' + (kind ? ' ' + kind : ''); }
+function token() { const s = getIdunaSession(); return s ? s.token : ''; }
+async function api(path, opts) {
+  opts = opts || {}; opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+  const t = token(); if (t) opts.headers.Authorization = 'Bearer ' + t;
+  const res = await fetch('/api/v1' + path, opts); let body = null;
+  try { body = await res.json(); } catch (e) {}
+  if (!res.ok) throw new Error((body && (body.error || body.message)) || res.statusText);
+  return body;
+}
+let characterID = '';
+async function resolveCharacter() {
+  const s = getIdunaSession();
+  if (!s) { $('signin-link').hidden = false; $('signin-link').href = buildSsoURL(); return; }
+  try {
+    const c = await api('/characters/by-player/' + encodeURIComponent(s.playerID));
+    characterID = c.character_id; $('designs-card').hidden = false; loadDesigns();
+  } catch (e) { msg('No GFD character on this account yet -- create one in GFD Town, then come back to publish.', 'error'); }
+}
+$('publish-btn').onclick = async () => {
+  if (!getIdunaSession()) { msg('Sign in with IDUNA (top right) to publish.', 'error'); return; }
+  if (!characterID) { await resolveCharacter(); if (!characterID) return; }
+  const name = $('hat-name').value.trim(), price = Math.floor(+$('hat-price').value);
+  if (name.length < 2) return msg('Give your hat a name (2-32 characters).', 'error');
+  if (!hasInk()) return msg('Draw something first.', 'error');
+  if (!(price >= 10 && price <= 100000)) return msg('Price must be 10-100,000 Flow.', 'error');
+  compose(main);
+  const png = main.toDataURL('image/png');
+  $('publish-btn').disabled = true;
+  try {
+    const hat = await api('/characters/' + encodeURIComponent(characterID) + '/hats/design', {
+      method: 'POST', body: JSON.stringify({ name, description: $('hat-desc').value.trim(), flow_cost: price, png_base64: png.split(',')[1] }),
+    });
+    msg('Published "' + hat.name + '" for ' + hat.flow_cost + ' Flow. It is in the store now, and already in your hats.', 'ok');
+    loadDesigns(); loadEconomy();
+  } catch (e) { msg(e.message, 'error'); }
+  $('publish-btn').disabled = false;
+};
+
+// ---------------------------------------------------------------- my designs
+function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+async function loadDesigns() {
+  const list = $('designs-list'), sum = $('designs-summary'); list.innerHTML = '';
+  try {
+    const r = await api('/characters/' + encodeURIComponent(characterID) + '/hats/designs');
+    sum.textContent = r.designs.length
+      ? `${r.designs.length}/${r.max_designs} designs · ${r.total_sales} sold · ${r.total_earned} Flow earned · ${r.total_burned} burned`
+      : 'You have not published a hat yet.';
+    r.designs.forEach(d => {
+      const el = document.createElement('div'); el.className = 'design';
+      const state = d.status === 'listed' ? '<span class="badge accepted">Listed</span>' : d.status === 'unlisted' ? '<span class="badge pending">Unlisted</span>' : '<span class="badge declined">' + esc(d.status) + '</span>';
+      el.innerHTML = `<img src="${esc(d.image_url)}" alt="">` +
+        `<div><div><strong>${esc(d.name)}</strong> ${state}</div>` +
+        `<div class="small">${d.sales_count} sold · earned ${d.flow_earned} · burned ${d.flow_burned}${d.report_count ? ' · ' + d.report_count + ' reports' : ''}</div>` +
+        `<div class="row tight" style="margin-top:.4rem"><input type="number" min="10" max="100000" value="${d.flow_cost}" aria-label="Price">` +
+        `<button class="secondary chip" data-a="price">Set price</button>` +
+        `<button class="secondary chip" data-a="toggle">${d.status === 'listed' ? 'Unlist' : 'Relist'}</button></div></div>`;
+      const inp = el.querySelector('input');
+      const patch = async (body) => {
+        try { await api('/characters/' + encodeURIComponent(characterID) + '/hats/' + d.hat_id + '/listing', { method: 'PATCH', body: JSON.stringify(body) });
+              $('designs-msg').textContent = 'Updated.'; $('designs-msg').className = 'msg ok'; loadDesigns(); loadEconomy(); }
+        catch (e) { $('designs-msg').textContent = e.message; $('designs-msg').className = 'msg error'; }
+      };
+      el.querySelector('[data-a=price]').onclick = () => patch({ flow_cost: Math.floor(+inp.value) });
+      el.querySelector('[data-a=toggle]').onclick = () => patch({ listed: d.status !== 'listed' });
+      list.appendChild(el);
+    });
+  } catch (e) { sum.textContent = e.message; }
+}
+
+// ---------------------------------------------------------------- boot
+layers = [newLayer('Hat')];
+setColor(color); refreshProjectList(); renderAll(); loadEconomy(); resolveCharacter();
+</script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>
