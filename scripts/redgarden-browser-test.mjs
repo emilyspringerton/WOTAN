@@ -15,6 +15,7 @@
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { startIduna, serveWotan } from './lib/real-iduna.mjs';
@@ -33,8 +34,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const SECRET = 'redgarden-browser-test-secret';
 const base = 21000 + Math.floor(Math.random() * 9000);
 const children = [];
+// the C servers write var/matches and var/corpus under their working directory: keep that out of the repo
+const work = fs.mkdtempSync(path.join(os.tmpdir(), 'redgarden-'));
 function start(bin, args) {
-  const c = spawn(path.join(bins, bin), args, { env: { ...process.env, REDGARDEN_TICKET_SECRET: SECRET }, stdio: 'ignore' });
+  const c = spawn(path.join(bins, bin), args, { cwd: work, env: { ...process.env, REDGARDEN_TICKET_SECRET: SECRET }, stdio: 'ignore' });
   children.push(c); return c;
 }
 const serverBin = fs.existsSync(path.join(bins, 'arena_server_fast')) ? 'arena_server_fast' : 'arena_server';
