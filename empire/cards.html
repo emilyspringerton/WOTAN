@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1118">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-empire.css">
+<title>Cards — WOTAN EMPIRE</title>
+<meta name="description" content="The sixteen EMPIRE cards: what they do on the board, how often they are played and how they fare.">
+</head>
+<body class="em" data-page="cards">
+<header id="wotan-nav" data-skin="em" data-section="cards"></header>
+<main class="em-wrap" id="main">
+  <section class="em-hero">
+    <div>
+      <p class="em-eyebrow">EMPIRE &middot; sixteen cards</p>
+      <h1 class="em-h1">Cards</h1>
+      <p class="em-lede">Every card is one of ECOWAR's sixteen, with its hero and its base magnitude. The five <i>mundane</i> cards are quiet; the eleven <i>mythic</i> ones hit half as hard again and cost standing to cast &mdash; 25 of it, or 15 for the Goetia. At nothing, a faction is <i>cancelled</i> and cannot play a card at all. The numbers below are read from the game's own module when this site is built.</p>
+    </div>
+    <div class="em-stats"><div><b id="s-cm">&ndash;</b><span>Counted matches</span></div></div>
+  </section>
+  <div class="em-chips" role="group" aria-label="Sort the cards">
+    <button type="button" class="em-chip" data-sort="cost" aria-pressed="true">By cost</button>
+    <button type="button" class="em-chip" data-sort="win" aria-pressed="false">By win rate</button>
+    <button type="button" class="em-chip" data-sort="played" aria-pressed="false">By times cast</button>
+  </div>
+  <div id="cards" aria-live="polite"></div>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/empire-pages.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

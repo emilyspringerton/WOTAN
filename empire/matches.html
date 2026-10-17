@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1118">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-empire.css">
+<title>Matches — WOTAN EMPIRE</title>
+<meta name="description" content="The latest EMPIRE matches, ranked and AI league, each with a replay.">
+</head>
+<body class="em" data-page="matches">
+<header id="wotan-nav" data-skin="em" data-section="matches"></header>
+<main class="em-wrap" id="main">
+  <section class="em-hero">
+    <div>
+      <p class="em-eyebrow">EMPIRE &middot; recorded</p>
+      <h1 class="em-h1">Matches</h1>
+      <p class="em-lede">Every match is decided by the referee and recorded from its own board: the towers, what each side counted, both decks, and every play, so any of them can be replayed through the same game.</p>
+    </div>
+    <div class="em-stats"><div><b id="s-shown">&ndash;</b><span>Shown</span></div><div><b id="s-human">&ndash;</b><span>With a person</span></div></div>
+  </section>
+  <div class="em-chips" role="group" aria-label="Which matches">
+    <button type="button" class="em-chip" data-mode="" aria-pressed="true">All</button>
+    <button type="button" class="em-chip" data-mode="ranked" aria-pressed="false">Ranked</button>
+    <button type="button" class="em-chip" data-mode="league" aria-pressed="false">AI league</button>
+  </div>
+  <div class="em-panel" id="matches" aria-live="polite"></div>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/empire-pages.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

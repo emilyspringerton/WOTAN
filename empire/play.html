@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1118">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-empire.css">
+<title>Play EMPIRE — WOTAN</title>
+<meta name="description" content="EMPIRE in your browser: a quiet real-time game of cards and towers against another person or one of eight AIs. Guests welcome; sign in with IDUNA to keep your record. The whole game runs as WebAssembly compiled from PARENA.">
+</head>
+<body class="em" data-page="play">
+<header id="wotan-nav" data-skin="em" data-section="play"></header>
+<main class="em-wrap" id="main">
+  <div class="em-playhead">
+    <div>
+      <p class="em-eyebrow">EMPIRE &middot; cards and towers</p>
+      <h1 class="em-h1 sm">Play</h1>
+    </div>
+    <div class="em-toolbar" role="toolbar" aria-label="EMPIRE controls">
+      <span class="em-status" id="em-pill" role="status" aria-live="polite">Loading</span>
+      <span class="em-online" id="em-online" aria-live="off"></span>
+      <a class="em-tool" id="em-profile" href="/empire/" hidden>My profile</a>
+      <button type="button" class="em-tool" id="em-fullscreen" title="Fullscreen" disabled>Fullscreen</button>
+    </div>
+  </div>
+  <div class="em-stage" id="em-stage">
+    <div class="em-load" id="em-load">
+      <b>Starting</b>
+      <span id="em-load-msg">Fetching the game (a WebAssembly module, about 170 KB)&hellip;</span>
+      <noscript><span>EMPIRE is WebAssembly; it needs JavaScript enabled to load it.</span></noscript>
+    </div>
+    <canvas class="em-canvas" id="em-canvas" width="960" height="540" tabindex="0" role="application" hidden
+            aria-label="EMPIRE. Pick a card with the number keys or a click, then click your half of the table. Escape puts the card back."></canvas>
+  </div>
+  <p class="em-note" id="em-note" aria-live="polite"></p>
+  <p class="em-who" id="em-who"><span id="em-who-msg"></span> <a class="em-link" id="em-who-link" hidden></a></p>
+  <div class="em-tips">
+    <div class="em-tip"><b>Play</b>Pick a card from your hand (click it, or press <kbd>1</kbd>&ndash;<kbd>4</kbd>), then click your half of the table. Troops go on your side of the river; spells anywhere. <kbd>Esc</kbd> or a right click puts the card back. Once an enemy princess tower falls you may also put troops down beside the river on that side.</div>
+    <div class="em-tip"><b>Elixir</b>Ten at most, one every 2.8 seconds, twice as fast for the last minute. Every card costs some. A full bar is a quiet waste: it pulses gold.</div>
+    <div class="em-tip"><b>Standing</b>BIG_O's decorum, 0&ndash;100. A <i>mythic</i> card costs 25 of it (15 for the Goetia); a mundane one earns 1 back, and so does every few quiet seconds. Below 60 you are <i>watched</i>, below 30 <i>frayed</i>, and at 0 <i>cancelled</i>: no card can be played until it climbs back.</div>
+    <div class="em-tip"><b>Towers</b>Three minutes. A fallen king ends it at once; otherwise more crowns win. Level goes to one more minute where the first tower wins, and then to whoever has more tower health left.</div>
+    <div class="em-tip"><b>The AIs</b>Press play and, if nobody else is searching, one of eight AIs sits down with you in a few seconds. Choose one on the title screen to play it by name, or practise against any of them offline (nothing is recorded).</div>
+    <div class="em-tip"><b>What this is</b>The whole game is one WebAssembly module with no imports and no allocator, compiled from <a href="https://github.com/emilyspringerton/PARENA">PARENA</a>. IDUNA runs the very same module as the referee and hosts the AIs; your copy applies the plays it is sent and draws them. The only JavaScript here that runs the game is generated from PARENA too.</div>
+  </div>
+  <p class="em-stat" id="em-stat"></p>
+  <p class="em-wink">very mindful &middot; very demure</p>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script type="module" src="empire-host.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

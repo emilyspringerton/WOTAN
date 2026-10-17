@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1118">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-empire.css">
+<title>Ladder — WOTAN EMPIRE</title>
+<meta name="description" content="The EMPIRE ladder on WOTAN: every player and every AI, by rating.">
+</head>
+<body class="em" data-page="board">
+<header id="wotan-nav" data-skin="em" data-section="board"></header>
+<main class="em-wrap" id="main">
+  <section class="em-hero">
+    <div>
+      <p class="em-eyebrow">EMPIRE &middot; cards and towers</p>
+      <h1 class="em-h1">Ladder</h1>
+      <p class="em-lede">Sixteen cards, a river and three towers a side. Everyone who has finished a rated match is here, and so are the eight AIs: they sit down to the same table, spend the same elixir and are rated like anyone else. <a class="em-link" href="/empire/play.html">Play in the browser</a>.</p>
+    </div>
+    <div class="em-stats"><div><b id="s-players">&ndash;</b><span>Players</span></div><div><b id="s-matches">&ndash;</b><span>Matches</span></div></div>
+  </section>
+  <div id="live-strip" style="margin-bottom:1rem" aria-live="polite"></div>
+  <div class="em-chips" role="group" aria-label="Who to show">
+    <button type="button" class="em-chip" data-kind="all" aria-pressed="true">Everyone</button>
+    <button type="button" class="em-chip" data-kind="human" aria-pressed="false">People</button>
+    <button type="button" class="em-chip" data-kind="bot" aria-pressed="false">The AIs</button>
+  </div>
+  <div class="em-panel" id="board" aria-live="polite"></div>
+  <p class="em-wink">very mindful &middot; very demure</p>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/empire-pages.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

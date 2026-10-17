@@ -1,0 +1,165 @@
+/* WOTAN EMPIRE skin -- the same quiet slate as the D2 world: a blue-black ground, cool white ink, one warm gold and a soft teal, hairlines instead
+   of boxes. Loaded together with wotan-hs.css (which owns the shared .wn-* topbar rules); this file only adds the em nav skin + body.em components
+   (all prefixed .em-). Profiles are per game on purpose: /empire/u.html shows EMPIRE stats only. */
+#wotan-nav[data-skin="em"] {
+  --wn-bg: #0f1118;
+  --wn-fg: #e2e4ec;
+  --wn-dim: #969cac;
+  --wn-line: #2a2f40;
+  --wn-accent: #d6b062;
+  --wn-accent-fg: #14161d;
+  --wn-hover: #171a24;
+  --wn-pop: #181b26;
+  --wn-focus: #e6c985;
+  --wn-display: "Space Grotesk", ui-monospace, Menlo, Consolas, monospace;
+  --wn-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --wn-shadow: 0 18px 50px rgba(0, 0, 0, .6);
+  border-bottom-width: 2px;
+}
+#wotan-nav[data-skin="em"] .wn-brand { font-weight: 700; font-size: 1.05rem; letter-spacing: .12em; }
+
+body.em {
+  --em-bg: #0c0e14; --em-panel: #151822; --em-raise: #1b1f2c; --em-line: #2a2f40;
+  --em-ink: #e2e4ec; --em-soft: #aab0c0; --em-faint: #747b90;
+  --em-red: #d6b062; --em-red-deep: #b8924a; --em-gold: #d6b062; --em-win: #76ba8c; --em-loss: #ce6268; --em-teal: #5cb0a4;
+  margin: 0; background: var(--em-bg); color: var(--em-ink);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+.em-wrap { max-width: 1100px; margin: 0 auto; padding: 1.75rem 1rem 5rem; }
+.em-wrap.narrow { max-width: 820px; }
+.em-eyebrow { font-size: .68rem; letter-spacing: .26em; text-transform: uppercase; color: var(--em-faint); margin: 0 0 .5rem; }
+.em-h1 { font: 700 clamp(2rem, 6vw, 3rem)/1.1 "Space Grotesk", system-ui, sans-serif; margin: 0; }
+.em-h2 { font: 700 1.25rem/1.2 "Space Grotesk", system-ui, sans-serif; margin: 0 0 .75rem; }
+.em-lede { color: var(--em-soft); max-width: 62ch; margin: .75rem 0 0; }
+.em-hero { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem 2rem;
+  padding: 1.25rem 0 1.5rem; border-bottom: 2px solid var(--em-line); margin-bottom: 1.5rem; }
+.em-hero > div:first-child { flex: 1 1 20rem; }
+.em-stats { display: flex; gap: 1.6rem; flex-wrap: wrap; }
+.em-stats b { display: block; font: 700 2rem/1 "Space Grotesk", system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+.em-stats span { font-size: .66rem; letter-spacing: .2em; text-transform: uppercase; color: var(--em-faint); }
+.em-grid { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .em-grid.two { grid-template-columns: 1.4fr 1fr; } }
+.em-panel { background: var(--em-panel); border: 1px solid var(--em-line); border-radius: 8px; padding: 1rem 1.1rem; }
+.em-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.em-table th { text-align: left; font-size: .66rem; letter-spacing: .16em; text-transform: uppercase; color: var(--em-faint); font-weight: 600; padding: .35rem .5rem; border-bottom: 1px solid var(--em-line); }
+.em-table td { padding: .55rem .5rem; border-bottom: 1px solid var(--em-line); }
+.em-table tr:last-child td { border-bottom: 0; }
+.em-table .n { text-align: right; }
+.em-table a { color: var(--em-ink); font-weight: 600; text-decoration: none; }
+.em-table a:hover { color: var(--em-gold); }
+.em-rank { color: var(--em-faint); width: 2rem; }
+.em-bar { height: 6px; background: var(--em-raise); border-radius: 3px; overflow: hidden; min-width: 70px; }
+.em-bar i { display: block; height: 100%; background: var(--em-win); }
+.em-win { color: var(--em-win); } .em-loss { color: var(--em-loss); }
+.em-pill { display: inline-block; padding: .05rem .5rem; border-radius: 999px; font-size: .72rem; font-weight: 700; border: 1px solid; }
+.em-pill.win { color: var(--em-win); border-color: var(--em-win); }
+.em-pill.loss { color: var(--em-loss); border-color: var(--em-loss); }
+.em-search { width: 100%; max-width: 22rem; padding: .55rem .75rem; border-radius: 6px; border: 1px solid var(--em-line);
+  background: var(--em-raise); color: var(--em-ink); font: inherit; margin-bottom: 1rem; }
+.em-btn { display: inline-block; padding: .6rem 1.1rem; border-radius: 6px; background: var(--em-red); color: #14161d; font-weight: 700;
+  text-decoration: none; border: 0; cursor: pointer; }
+.em-btn:hover { background: var(--em-red-deep); }
+.em-empty { text-align: center; padding: 2.4rem 1rem; color: var(--em-soft); border: 1px dashed var(--em-line); border-radius: 8px; }
+.em-note { color: var(--em-faint); font-size: .85rem; }
+.em-steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: .8rem; }
+.em-steps li { counter-increment: s; padding-left: 2.6rem; position: relative; }
+.em-steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 1.9rem; height: 1.9rem; border-radius: 50%;
+  background: var(--em-red); color: #14161d; font-weight: 700; display: grid; place-items: center; }
+.em a.em-link { color: var(--em-gold); }
+
+/* ---- /empire/play.html: the game stage (the client is a wasm canvas; nothing here is game logic) ---- */
+.em-playhead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .6rem 1.5rem; margin-bottom: .7rem; }
+.em-h1.sm { font-size: clamp(1.4rem, 3.5vw, 1.9rem); }
+.em-playhead .em-eyebrow { margin-bottom: .2rem; }
+.em-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.em-grow { flex: 1 1 1rem; }
+.em-status { display: inline-flex; align-items: center; gap: .4rem; font: 600 .72rem/1 "Space Grotesk", system-ui, sans-serif; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--em-soft); border: 1px solid var(--em-line); background: var(--em-panel); border-radius: 999px; padding: .38rem .8rem; }
+.em-status::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--em-faint); }
+.em-online { font-size: .78rem; color: var(--em-faint); font-variant-numeric: tabular-nums; }
+.em-tool { appearance: none; font: 600 .78rem/1 "Space Grotesk", system-ui, sans-serif; letter-spacing: .06em; color: var(--em-ink); background: var(--em-panel);
+  border: 1px solid var(--em-line); border-radius: 6px; padding: .5rem .85rem; cursor: pointer; text-decoration: none; }
+.em-tool:hover:not(:disabled) { border-color: var(--em-gold); }
+.em-tool:focus-visible, .em-canvas:focus-visible { outline: 2px solid var(--em-gold); outline-offset: 2px; }
+.em-tool:disabled { opacity: .5; cursor: default; }
+.em-tool[hidden] { display: none; }
+/* the whole canvas fits the window: its width is capped by the height left under the page header */
+.em-stage { position: relative; width: min(100%, max(640px, calc((100vh - 300px) * 16 / 9))); margin: 0 auto;
+  border: 1px solid var(--em-line); border-radius: 8px; background: #0f1118; aspect-ratio: 16 / 9; overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .45); }
+.em-canvas { display: block; width: 100%; height: 100%; background: #0f1118; outline: none; touch-action: none; cursor: default; }
+.em-canvas[hidden] { display: none; }
+.em-stage:fullscreen { width: auto; aspect-ratio: auto; border: 0; border-radius: 0; box-shadow: none; background: #000; }
+.em-stage:fullscreen .em-canvas { width: auto; height: 100%; max-width: 100%; aspect-ratio: 16 / 9; margin: 0 auto; }
+.em-load { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: .4rem; color: var(--em-soft); padding: 1rem; }
+.em-load b { font: 700 1.2rem/1 "Space Grotesk", system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--em-ink); }
+.em-load[hidden] { display: none; }
+.em-who { margin: .7rem 0 0; font-size: .86rem; color: var(--em-soft); }
+.em-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .75rem; margin-top: 1.1rem; }
+.em-tip { border: 1px solid var(--em-line); border-radius: 8px; padding: .8rem .95rem; background: var(--em-panel); font-size: .88rem; color: var(--em-soft); line-height: 1.5; }
+.em-tip b { display: block; letter-spacing: .22em; text-transform: uppercase; font-size: .66rem; color: var(--em-faint); margin-bottom: .4rem; }
+.em-tip kbd { font: 600 .72rem/1 "Space Grotesk", system-ui, sans-serif; padding: .12rem .36rem; border: 1px solid var(--em-line); border-bottom-width: 2px; border-radius: 4px; background: var(--em-raise); color: var(--em-ink); }
+.em-tip a { color: var(--em-gold); }
+.em-stat { margin: 1rem 0 0; font-size: .72rem; color: var(--em-faint); font-variant-numeric: tabular-nums; }
+.em-native { margin-top: 1.6rem; border-top: 1px solid var(--em-line); padding-top: 1rem; color: var(--em-soft); }
+.em-native summary { cursor: pointer; font-size: .86rem; color: var(--em-faint); }
+.em-native .em-steps { margin-top: 1rem; }
+.em-match-hero { font-weight: 600; }
+.em-kd { font-variant-numeric: tabular-nums; color: var(--em-soft); }
+
+/* ---- ladder, profile, matches ---- */
+.em-tag { display: inline-block; font: 600 .62rem/1 "Space Grotesk", system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase;
+  padding: .16rem .4rem; border: 1px solid var(--em-line); border-radius: 4px; color: var(--em-faint); margin-left: .45rem; vertical-align: .08em; }
+.em-tag.bot { color: var(--em-teal); border-color: #2c4d4a; }
+.em-chips { display: flex; gap: .4rem; margin: 0 0 1rem; flex-wrap: wrap; }
+.em-chip { appearance: none; font: 600 .74rem/1 "Space Grotesk", system-ui, sans-serif; letter-spacing: .08em; color: var(--em-soft); background: transparent;
+  border: 1px solid var(--em-line); border-radius: 999px; padding: .42rem .8rem; cursor: pointer; }
+.em-chip[aria-pressed="true"] { color: #14161d; background: var(--em-gold); border-color: var(--em-gold); }
+.em-delta.up { color: var(--em-win); } .em-delta.down { color: var(--em-loss); }
+.em-pill.tie, .em-pill.forfeit { color: var(--em-faint); border-color: var(--em-line); }
+.em-ship { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; width: min(100%, 15rem); aspect-ratio: 1; background: var(--em-line); padding: 2px; border-radius: 6px; }
+.em-ship i { display: block; background: var(--em-raise); border-radius: 2px; position: relative; }
+
+/* ---- EMPIRE: the deck rows, card tiles, crowns, and the few things the other game worlds do not have ---- */
+body.em .em-mark { display: inline-grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 50%; background: var(--em-raise); border: 1px solid var(--em-line); vertical-align: middle; }
+body.em .em-mark svg { width: 1.15rem; height: 1.15rem; display: block; }
+body.em .em-mark.myth { border-color: #6b5a33; }
+body.em .em-deckrow { display: inline-flex; gap: .3rem; flex-wrap: wrap; vertical-align: middle; }
+body.em .em-crowns { display: inline-flex; gap: .2rem; vertical-align: middle; }
+body.em .em-crowns i { width: .62rem; height: .62rem; border-radius: 50%; background: var(--em-raise); border: 1px solid var(--em-line); display: block; }
+body.em .em-crowns i.on { background: var(--em-gold); border-color: var(--em-gold); }
+body.em .em-vs { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+body.em .em-vs b { font-weight: 600; }
+body.em .em-vs .em-tag { margin-left: 0; }
+body.em .em-fac { font-size: .72rem; color: var(--em-faint); letter-spacing: .04em; }
+body.em .em-fac.f0 { color: #d6b062; } body.em .em-fac.f1 { color: #ce6268; } body.em .em-fac.f2 { color: #5cb0a4; }
+body.em .em-grid3 { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr)); }
+body.em .em-tile { background: var(--em-panel); border: 1px solid var(--em-line); border-radius: 8px; padding: .85rem .95rem; display: grid; gap: .45rem; align-content: start; }
+body.em .em-tile.myth { border-top: 2px solid #8a7440; }
+body.em .em-tile h3 { margin: 0; font: 700 1rem/1.2 "Space Grotesk", system-ui, sans-serif; display: flex; gap: .55rem; align-items: center; }
+body.em .em-tile .sub { color: var(--em-faint); font-size: .78rem; margin: 0; }
+body.em .em-tile p { margin: 0; color: var(--em-soft); font-size: .88rem; }
+body.em .em-kv { display: grid; grid-template-columns: auto 1fr; gap: .15rem .8rem; font-size: .82rem; color: var(--em-soft); font-variant-numeric: tabular-nums; margin: 0; }
+body.em .em-kv dt { color: var(--em-faint); } body.em .em-kv dd { margin: 0; text-align: right; color: var(--em-ink); }
+body.em .em-bar { height: 6px; background: var(--em-raise); border-radius: 3px; overflow: hidden; }
+body.em .em-bar i { display: block; height: 100%; background: var(--em-teal); }
+body.em .em-bar.gold i { background: var(--em-gold); }
+body.em .em-two { display: grid; gap: 1.1rem; grid-template-columns: 1fr; }
+@media (min-width: 880px) { body.em .em-two { grid-template-columns: 1fr 1fr; } }
+body.em .em-statrow { display: grid; grid-template-columns: 1fr auto 1fr; gap: .8rem; padding: .32rem 0; border-bottom: 1px solid var(--em-line); font-variant-numeric: tabular-nums; }
+body.em .em-statrow:last-child { border-bottom: 0; }
+body.em .em-statrow span:first-child { text-align: right; } body.em .em-statrow span:nth-child(2) { color: var(--em-faint); font-size: .8rem; text-align: center; min-width: 11rem; }
+body.em .em-live { display: grid; gap: .6rem; }
+body.em .em-liverow { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; padding: .7rem .9rem; background: var(--em-panel); border: 1px solid var(--em-line); border-radius: 8px; }
+body.em .em-liverow .grow { flex: 1 1 14rem; }
+body.em .em-dot { width: .5rem; height: .5rem; border-radius: 50%; background: var(--em-win); display: inline-block; margin-right: .4rem; animation: em-breathe 3.2s ease-in-out infinite; }
+@keyframes em-breathe { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { body.em .em-dot { animation: none; } }
+body.em .em-note { margin: .6rem 0 0; font-size: .86rem; color: var(--em-soft); min-height: 1.2rem; }
+body.em .em-hint { color: var(--em-faint); font-size: .8rem; margin: .4rem 0 0; }
+body.em tr.em-open { cursor: pointer; }
+body.em .em-pill.draw { color: var(--em-faint); border-color: var(--em-line); }
+body.em .em-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
+body.em a.em-btn.ghost { background: transparent; color: var(--em-ink); border: 1px solid var(--em-line); }
+body.em a.em-btn.ghost:hover { border-color: var(--em-gold); }
+body.em .em-wink { text-align: center; color: var(--em-faint); letter-spacing: .3em; text-transform: uppercase; font-size: .62rem; margin-top: 2.2rem; }

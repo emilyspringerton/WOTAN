@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1118">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-empire.css">
+<title>Watch EMPIRE — WOTAN</title>
+<meta name="description" content="Watch an EMPIRE match: a live one, or the replay of a recorded one, played through the same game.">
+</head>
+<body class="em" data-page="watch">
+<header id="wotan-nav" data-skin="em" data-section="live"></header>
+<main class="em-wrap" id="main">
+  <div class="em-playhead">
+    <div>
+      <p class="em-eyebrow">EMPIRE &middot; watching</p>
+      <h1 class="em-h1 sm">Watch</h1>
+    </div>
+    <div class="em-toolbar" role="toolbar" aria-label="EMPIRE controls">
+      <span class="em-status" id="em-pill" role="status" aria-live="polite">Loading</span>
+      <span class="em-online" id="em-online" aria-live="off"></span>
+      <a class="em-tool" href="/empire/live.html">Live matches</a>
+      <a class="em-tool" href="/empire/matches.html">Matches</a>
+      <button type="button" class="em-tool" id="em-fullscreen" title="Fullscreen" disabled>Fullscreen</button>
+    </div>
+  </div>
+  <div class="em-stage" id="em-stage">
+    <div class="em-load" id="em-load">
+      <b>Starting</b>
+      <span id="em-load-msg">Fetching the game (a WebAssembly module, about 170 KB)&hellip;</span>
+      <noscript><span>EMPIRE is WebAssembly; it needs JavaScript enabled to load it.</span></noscript>
+    </div>
+    <canvas class="em-canvas" id="em-canvas" width="960" height="540" tabindex="0" role="application" hidden
+            aria-label="EMPIRE. Pick a card with the number keys or a click, then click your half of the table. Escape puts the card back."></canvas>
+  </div>
+  <p class="em-note" id="em-note" aria-live="polite"></p>
+  <p class="em-who" id="em-who"><span id="em-who-msg"></span> <a class="em-link" id="em-who-link" hidden></a></p>
+  <p class="em-lede">A replay is the recorded match run again through the game: the same seed, the same decks, and every play at the tick it happened. A live match is sent to you play by play. Either way your copy of the game only draws it. In a replay, click the bar to jump, and turn the board round to see it from the other side.</p>
+  <p class="em-stat" id="em-stat"></p>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script type="module" src="empire-host.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

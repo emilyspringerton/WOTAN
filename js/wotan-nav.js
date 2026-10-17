@@ -26,7 +26,7 @@
   if (!mount) return;
 
   var skinAttr = mount.getAttribute('data-skin');
-  var SKINS = { dw: 1, rg: 1, d2: 1, gfd: 1, bp: 1, sp: 1, acct: 1 };
+  var SKINS = { dw: 1, rg: 1, d2: 1, em: 1, gfd: 1, bp: 1, sp: 1, acct: 1 };
   var skin = SKINS[skinAttr] ? skinAttr : 'hs';
   var section = mount.getAttribute('data-section') || '';
 
@@ -52,6 +52,14 @@
       ['matches', 'Matches', '/d2/matches.html'],
       ['play', 'Play', '/d2/play.html'],
       ['gfd', 'GFD', '/GFD/']
+    ],
+    em: [
+      ['board', 'Ladder', '/empire/'],
+      ['ais', 'The AIs', '/empire/ais.html'],
+      ['cards', 'Cards', '/empire/cards.html'],
+      ['live', 'Live', '/empire/live.html'],
+      ['matches', 'Matches', '/empire/matches.html'],
+      ['play', 'Play', '/empire/play.html']
     ],
     gfd: [
       ['play', 'Play', '/GFD/'],
@@ -169,6 +177,7 @@
       ['hs', 'Hearthstone', 'Shared deck library', '/hearthstone/'],
       ['rg', 'Redgarden', 'Knights of the Void', '/redgarden/'],
       ['d2', 'D2', 'Hold Battles \u00b7 Backpack battler', '/d2/'],
+      ['em', 'EMPIRE', 'Cards \u00b7 Towers \u00b7 Standing', '/empire/'],
       ['gfd', 'GoblinFoxDragon', 'MUD \u00b7 Hat Store', '/GFD/'],
       ['bp', 'Brawlpit', 'Arena fighter \u00b7 Hat Store', '/BRAWLPIT/'],
       ['sp', 'shankpit-460', 'Arena shooter \u00b7 Free-for-all', '/shankpit-460/']
@@ -188,7 +197,7 @@
       el('small', { text: 'EINHORN_INDUSTRIAL' })
     ]);
 
-    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'd2' ? 'D2 sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : (skin === 'bp' ? 'Brawlpit sections' : (skin === 'sp' ? 'shankpit-460 sections' : (skin === 'acct' ? 'Account sections' : 'WOTAN sections')))))) });
+    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'd2' ? 'D2 sections' : (skin === 'em' ? 'EMPIRE sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : (skin === 'bp' ? 'Brawlpit sections' : (skin === 'sp' ? 'shankpit-460 sections' : (skin === 'acct' ? 'Account sections' : 'WOTAN sections'))))))) });
     TABS[skin].forEach(function (t) {
       tabs.appendChild(el('a', { href: t[2], text: t[1], 'aria-current': t[0] === section ? 'page' : null }));
     });
@@ -248,7 +257,13 @@
       el('span', { text: label })
     ]);
     var menu = el('div', { 'class': 'wn-menu', id: 'wn-menu', role: 'menu', hidden: true });
-    if (skin === 'd2') {
+    if (skin === 'em') {
+      menu.appendChild(el('a', {
+        role: 'menuitem',
+        href: '/empire/u.html?id=' + encodeURIComponent(s.playerID || ''),
+        text: 'My EMPIRE profile'
+      }));
+    } else if (skin === 'd2') {
       // Profiles are per game: on the D2 tab the account menu opens the D2 profile (keyed by the IDUNA player id).
       menu.appendChild(el('a', {
         role: 'menuitem',
@@ -272,7 +287,7 @@
       }));
     }
     // Clubs (Phase 2): my clubs, tracker sync target, roster toggles. Not on the REDGARDEN tab (profiles are per game).
-    if (skin !== 'rg' && skin !== 'd2') menu.appendChild(el('a', { role: 'menuitem', href: '/clubs/settings.html', text: 'My clubs & sync' }));
+    if (skin !== 'rg' && skin !== 'd2' && skin !== 'em') menu.appendChild(el('a', { role: 'menuitem', href: '/clubs/settings.html', text: 'My clubs & sync' }));
     // Identity federation: linked accounts (Battle.net/Google/Twitch), privacy, tracker upload keys. Site-wide.
     menu.appendChild(el('a', { role: 'menuitem', href: '/account/', text: 'Account & linked accounts' }));
     // Redeem a code (founder real-time 2026-10-16, like Battle.net's account menu): Founder status, tickets and other perks.
