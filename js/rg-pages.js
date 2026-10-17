@@ -1,7 +1,7 @@
 // REDGARDEN tab pages (/redgarden/*.html). One script, page chosen by <body data-page>.
 // Data comes from IDUNA's public REDGARDEN reads (same-origin via nginx /api/):
 //   GET /api/v1/redgarden/leaderboard?limit=&q=   GET /api/v1/redgarden/hero-leaderboard
-//   GET /api/v1/redgarden/players/{player_id}
+//   GET /api/v1/redgarden/players/{player_id}   GET /api/v1/redgarden/web-matches?limit=&player_id=
 // House rule (same as the Hearthstone section): user text only ever goes through textContent.
 (function () {
   'use strict';
@@ -18,11 +18,13 @@
       else if (k === 'style') n.style.cssText = v;
       else n.setAttribute(k, v === true ? '' : v);
     });
-    for (var i = 2; i < arguments.length; i++) {
-      var c = arguments[i];
-      if (c === null || c === undefined || c === false) continue;
+    // children may be nodes, text, null/false (skipped) or ARRAYS of those (a table's rows are an array)
+    function add(c) {
+      if (c === null || c === undefined || c === false) return;
+      if (Array.isArray(c)) { c.forEach(add); return; }
       n.appendChild(typeof c === 'object' ? c : document.createTextNode(String(c)));
     }
+    for (var i = 2; i < arguments.length; i++) add(arguments[i]);
     return n;
   }
   function $(id) { return document.getElementById(id); }
@@ -140,6 +142,8 @@
           h('td', { text: r.hero_id >= 0 ? hero(r.hero_id) : '—' }),
           h('td', { 'class': 'n rg-note', text: ago(r.played_at) }));
       });
+      var web = [];
+      try { web = (await getJSON('/web-matches?limit=20&player_id=' + encodeURIComponent(id))).matches || []; } catch (e) { web = []; }
       body.appendChild(h('div', { 'class': 'rg-grid two' },
         h('section', { 'class': 'rg-panel' }, h('h2', { 'class': 'rg-h2', text: 'Heroes played' }),
           hs.length ? table([{ t: 'Hero' }, { t: 'W', n: 1 }, { t: 'L', n: 1 }, { t: 'Win rate', n: 1 }, { t: '' }], hs)
@@ -147,11 +151,50 @@
         h('section', { 'class': 'rg-panel' }, h('h2', { 'class': 'rg-h2', text: 'Recent matches' }),
           rc.length ? table([{ t: 'Result' }, { t: 'Hero' }, { t: '', n: 1 }], rc)
                     : h('p', { 'class': 'rg-note', text: 'No per-match history yet.' }))));
+      if (web.length) {
+        body.appendChild(h('section', { 'class': 'rg-panel', style: 'margin-top:1.25rem' },
+          h('h2', { 'class': 'rg-h2', text: 'Played in the browser' }), matchTable(web, false)));
+      }
     } catch (e) {
       clear(body).appendChild(e.status === 404
         ? empty('No REDGARDEN record', 'This player has not finished a REDGARDEN match yet.')
         : errBox(e.message));
     }
+  }
+
+  function secs(n) { n = Math.max(0, n | 0); var m = Math.floor(n / 60), s = n % 60; return m + ':' + (s < 10 ? '0' : '') + s; }
+  function matchRows(list, withPlayer) {
+    return (list || []).map(function (m) {
+      var win = m.result === 'win';
+      return h('tr', null,
+        h('td', null, h('span', { 'class': 'rg-pill ' + (win ? 'win' : 'loss'), text: win ? 'WIN' : 'LOSS' })),
+        withPlayer ? h('td', null, h('a', { href: '/redgarden/u.html?id=' + encodeURIComponent(m.player_id), text: m.display_name || 'Player' })) : null,
+        h('td', { 'class': 'rg-match-hero', text: m.hero_id >= 0 ? hero(m.hero_id) : '—' }),
+        h('td', { 'class': 'n rg-kd', text: m.kills + ' / ' + m.deaths }),
+        h('td', { 'class': 'n rg-kd', text: secs(m.seconds) }),
+        h('td', { 'class': 'n rg-note', text: m.mode || '' }),
+        h('td', { 'class': 'n rg-note', text: ago(m.played_at) }));
+    });
+  }
+  function matchTable(list, withPlayer) {
+    var cols = [{ t: 'Result' }];
+    if (withPlayer) cols.push({ t: 'Player' });
+    cols.push({ t: 'Hero' }, { t: 'K / D', n: 1 }, { t: 'Time', n: 1 }, { t: 'Mode', n: 1 }, { t: '', n: 1 });
+    return table(cols, matchRows(list, withPlayer));
+  }
+
+  // ---- matches (played in the browser) ----
+  async function pageMatches() {
+    var box = $('matches');
+    try {
+      var d = await getJSON('/web-matches?limit=50');
+      var list = d.matches || [];
+      clear(box);
+      if (!list.length) { box.appendChild(empty('No browser matches yet', 'Press play on the Play page and your first match lands here.')); return; }
+      box.appendChild(matchTable(list, true));
+      $('s-shown').textContent = String(list.length);
+      $('s-wins').textContent = String(list.filter(function (m) { return m.result === 'win'; }).length);
+    } catch (e) { clear(box).appendChild(errBox(e.message)); }
   }
 
   async function init() {
@@ -163,6 +206,7 @@
     if (page === 'board') pageBoard();
     else if (page === 'heroes') pageHeroes();
     else if (page === 'profile') pageProfile();
+    else if (page === 'matches') pageMatches();
   }
   init();
 })();

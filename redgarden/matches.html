@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0e1a14">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-rg.css">
+<title>Matches — WOTAN Redgarden</title>
+<meta name="description" content="Recent Red Garden matches played in the browser: hero, result, kills and deaths.">
+</head>
+<body class="rg" data-page="matches">
+<header id="wotan-nav" data-skin="rg" data-section="matches"></header>
+<main class="rg-wrap" id="main">
+  <section class="rg-hero">
+    <div>
+      <p class="rg-eyebrow">Redgarden</p>
+      <h1 class="rg-h1">Matches</h1>
+      <p class="rg-lede">The latest matches played in the browser on <a class="rg-link" href="/redgarden/play.html">the Play page</a>: who played which hero, how it ended, and their kills and deaths. Every one was recorded by the arena's own snapshots.</p>
+    </div>
+    <div class="rg-stats"><div><b id="s-shown">&ndash;</b><span>Shown</span></div><div><b id="s-wins">&ndash;</b><span>Wins</span></div></div>
+  </section>
+  <div class="rg-panel" id="matches" aria-live="polite"></div>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/rg-pages.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

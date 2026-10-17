@@ -67,3 +67,43 @@ body.rg {
 .rg-steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 1.9rem; height: 1.9rem; border-radius: 50%;
   background: var(--rg-red); color: #fff; font-weight: 700; display: grid; place-items: center; }
 .rg a.rg-link { color: var(--rg-gold); }
+
+/* ---- /redgarden/play.html: the game stage (the client is a wasm canvas; nothing here is game logic) ---- */
+.rg-playhead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .6rem 1.5rem; margin-bottom: .7rem; }
+.rg-h1.sm { font-size: clamp(1.4rem, 3.5vw, 1.9rem); }
+.rg-playhead .rg-eyebrow { margin-bottom: .2rem; }
+.rg-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.rg-grow { flex: 1 1 1rem; }
+.rg-status { display: inline-flex; align-items: center; gap: .4rem; font: 600 .72rem/1 "Space Grotesk", system-ui, sans-serif; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--rg-soft); border: 1px solid var(--rg-line); background: var(--rg-panel); border-radius: 999px; padding: .38rem .8rem; }
+.rg-status::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--rg-faint); }
+.rg-online { font-size: .78rem; color: var(--rg-faint); font-variant-numeric: tabular-nums; }
+.rg-tool { appearance: none; font: 600 .78rem/1 "Space Grotesk", system-ui, sans-serif; letter-spacing: .06em; color: var(--rg-ink); background: var(--rg-panel);
+  border: 1px solid var(--rg-line); border-radius: 6px; padding: .5rem .85rem; cursor: pointer; text-decoration: none; }
+.rg-tool:hover:not(:disabled) { border-color: var(--rg-gold); }
+.rg-tool:focus-visible, .rg-canvas:focus-visible { outline: 2px solid var(--rg-gold); outline-offset: 2px; }
+.rg-tool:disabled { opacity: .5; cursor: default; }
+.rg-tool[hidden] { display: none; }
+/* the whole canvas fits the window: its width is capped by the height left under the page header */
+.rg-stage { position: relative; width: min(100%, max(640px, calc((100vh - 300px) * 16 / 9))); margin: 0 auto;
+  border: 1px solid var(--rg-line); border-radius: 8px; background: #0b1510; aspect-ratio: 16 / 9; overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .45); }
+.rg-canvas { display: block; width: 100%; height: 100%; background: #0e1a14; outline: none; touch-action: none; cursor: default; }
+.rg-canvas[hidden] { display: none; }
+.rg-stage:fullscreen { width: auto; aspect-ratio: auto; border: 0; border-radius: 0; box-shadow: none; background: #000; }
+.rg-stage:fullscreen .rg-canvas { width: auto; height: 100%; max-width: 100%; aspect-ratio: 16 / 9; margin: 0 auto; }
+.rg-load { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: .4rem; color: var(--rg-soft); padding: 1rem; }
+.rg-load b { font: 700 1.2rem/1 "Space Grotesk", system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--rg-ink); }
+.rg-load[hidden] { display: none; }
+.rg-who { margin: .7rem 0 0; font-size: .86rem; color: var(--rg-soft); }
+.rg-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .75rem; margin-top: 1.1rem; }
+.rg-tip { border: 1px solid var(--rg-line); border-radius: 8px; padding: .8rem .95rem; background: var(--rg-panel); font-size: .88rem; color: var(--rg-soft); line-height: 1.5; }
+.rg-tip b { display: block; letter-spacing: .22em; text-transform: uppercase; font-size: .66rem; color: var(--rg-faint); margin-bottom: .4rem; }
+.rg-tip kbd { font: 600 .72rem/1 "Space Grotesk", system-ui, sans-serif; padding: .12rem .36rem; border: 1px solid var(--rg-line); border-bottom-width: 2px; border-radius: 4px; background: var(--rg-raise); color: var(--rg-ink); }
+.rg-tip a { color: var(--rg-gold); }
+.rg-stat { margin: 1rem 0 0; font-size: .72rem; color: var(--rg-faint); font-variant-numeric: tabular-nums; }
+.rg-native { margin-top: 1.6rem; border-top: 1px solid var(--rg-line); padding-top: 1rem; color: var(--rg-soft); }
+.rg-native summary { cursor: pointer; font-size: .86rem; color: var(--rg-faint); }
+.rg-native .rg-steps { margin-top: 1rem; }
+.rg-match-hero { font-weight: 600; }
+.rg-kd { font-variant-numeric: tabular-nums; color: var(--rg-soft); }

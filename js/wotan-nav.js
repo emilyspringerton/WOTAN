@@ -42,6 +42,7 @@
     rg: [
       ['board', 'Leaderboard', '/redgarden/'],
       ['heroes', 'Heroes', '/redgarden/heroes.html'],
+      ['matches', 'Matches', '/redgarden/matches.html'],
       ['play', 'Play', '/redgarden/play.html'],
       ['gfd', 'GFD', '/GFD/']
     ],

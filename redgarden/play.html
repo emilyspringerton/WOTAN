@@ -9,30 +9,64 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/wotan-hs.css">
 <link rel="stylesheet" href="/css/wotan-rg.css">
-<title>Play — WOTAN Redgarden</title>
-<meta name="description" content="How to play REDGARDEN and have your stats show up on WOTAN.">
+<title>Play Red Garden — WOTAN</title>
+<meta name="description" content="Red Garden, the arena MOBA, in your browser: press play and you are in a 10v10 against the arena's resident bots. Guests welcome; sign in with IDUNA to keep your record. The whole client runs as WebAssembly compiled from PARENA.">
 </head>
 <body class="rg" data-page="play">
 <header id="wotan-nav" data-skin="rg" data-section="play"></header>
-<main class="rg-wrap narrow" id="main">
-  <section class="rg-hero">
+
+<main class="rg-wrap" id="main">
+  <div class="rg-playhead">
     <div>
-      <p class="rg-eyebrow">Redgarden</p>
-      <h1 class="rg-h1">Play &amp; save your progress</h1>
-      <p class="rg-lede">Your name and results are tied to an IDUNA account, the same one you use on the rest of WOTAN.</p>
+      <p class="rg-eyebrow">Redgarden &middot; Knights of the Void</p>
+      <h1 class="rg-h1 sm">Play</h1>
     </div>
-  </section>
-  <ol class="rg-steps">
-    <li><b>Start the game.</b> The first time, your browser opens to a short <a class="rg-link" href="/redgarden/connect.html">connect page</a>. Pick a name, or sign in with the IDUNA account you already have.</li>
-    <li><b>Save your progress (optional, 20 seconds).</b> Right after picking a name you can add an email and password. That is what lets you sign in again on another computer.</li>
-    <li><b>Play.</b> Every finished match is reported under your name: wins, losses and the hero you played. The game remembers you next time, no browser needed.</li>
-    <li><b>Check your profile.</b> Sign in at the top of this page, then open the account menu &rarr; <i>My REDGARDEN profile</i>.</li>
-  </ol>
-  <p class="rg-note" style="margin-top:1.5rem">Skip the email step and the account lives only on that computer: lose the saved login and the account is gone, there is no recovery path.</p>
+    <div class="rg-toolbar" role="toolbar" aria-label="Red Garden controls">
+      <span class="rg-status" id="rg-pill" role="status" aria-live="polite">Loading</span>
+      <span class="rg-online" id="rg-online" aria-live="off"></span>
+      <a class="rg-tool" id="rg-profile" href="/redgarden/" hidden>My profile</a>
+      <button type="button" class="rg-tool" id="rg-fullscreen" title="Fullscreen" disabled>Fullscreen</button>
+    </div>
+  </div>
+
+  <div class="rg-stage" id="rg-stage">
+    <div class="rg-load" id="rg-load">
+      <b>Starting</b>
+      <span id="rg-load-msg">Fetching the game (a WebAssembly module, about 120 KB)&hellip;</span>
+      <noscript><span>Red Garden is WebAssembly; it needs JavaScript enabled to load it.</span></noscript>
+    </div>
+    <canvas class="rg-canvas" id="rg-canvas" width="960" height="540" tabindex="0" role="application" hidden
+            aria-label="Red Garden. Left or right click to move or attack. Q W E are your abilities, B opens the shop, Tab shows the scores."></canvas>
+  </div>
+  <p class="rg-who" id="rg-who" aria-live="polite"><span id="rg-who-msg"></span> <a class="rg-link" id="rg-who-link" hidden></a></p>
+  <p class="rg-lede" id="rg-sub">An arena MOBA. Press play and you are matched into a 10v10 with the arena's resident bots: pick a hero, take the five nodes, hold them, and be the first side to 2000. Every finished match lands on your WOTAN profile.</p>
+
+  <div class="rg-tips">
+    <div class="rg-tip"><b>Move &amp; fight</b><kbd>Left</kbd> or <kbd>Right</kbd> click moves, or locks onto and attacks the hero you click. <kbd>A</kbd> then click is attack-move, <kbd>S</kbd> stops. Hold the right button to keep steering. The wheel zooms.</div>
+    <div class="rg-tip"><b>Abilities</b><kbd>Q</kbd> <kbd>W</kbd> <kbd>E</kbd> are your three abilities, aimed at the pointer (W is a toggle for some heroes). <kbd>`</kbd> uses a Blink Dagger or Donkey you own. <kbd>H</kbd> shows what your hero's abilities do.</div>
+    <div class="rg-tip"><b>The match</b>Take the five nodes and hold them: each one you own feeds your side's score, and the first side to 2000 wins the garden. Lane creeps march, towers shoot, jungle camps and their kings can be farmed. <kbd>Tab</kbd> shows the scoreboard.</div>
+    <div class="rg-tip"><b>Shop</b><kbd>B</kbd> opens it. Kills and creeps pay Flow; walk to your shop in your corner of the map, then press <kbd>1</kbd>&ndash;<kbd>9</kbd> or click to buy, <kbd>Shift</kbd>+<kbd>1</kbd>&ndash;<kbd>5</kbd> for another page. Click a worn item to sell it back for half.</div>
+    <div class="rg-tip"><b>Guests &amp; sign-in</b>You can play as a guest at once: IDUNA makes you a named account and this browser remembers it. Sign in with IDUNA to keep your record on your account and see it on any device.</div>
+    <div class="rg-tip"><b>What this is</b>The match is Red Garden's real arena server and its resident bot pool, the same game the native client plays. This page is a client for it: one WebAssembly module with no imports and no allocator, compiled from <a class="rg-link" href="https://github.com/emilyspringerton/PARENA">PARENA</a>. The only JavaScript here is generated from PARENA too.</div>
+  </div>
+
+  <p class="rg-stat" id="rg-stat"></p>
+
+  <details class="rg-native">
+    <summary>Playing the native client instead?</summary>
+    <ol class="rg-steps">
+      <li><b>Start the game.</b> The first time, your browser opens to a short <a class="rg-link" href="/redgarden/connect.html">connect page</a>. Pick a name, or sign in with the IDUNA account you already have.</li>
+      <li><b>Save your progress (optional, 20 seconds).</b> Right after picking a name you can add an email and password. That is what lets you sign in again on another computer.</li>
+      <li><b>Play.</b> Every finished match is reported under your name: wins, losses and the hero you played. The game remembers you next time, no browser needed.</li>
+      <li><b>Check your profile.</b> Sign in at the top of this page, then open the account menu &rarr; <i>My REDGARDEN profile</i>.</li>
+    </ol>
+    <p class="rg-note">Skip the email step and the account lives only on that computer: lose the saved login and the account is gone, there is no recovery path.</p>
+  </details>
 </main>
+
 <script src="/js/iduna-sso.js"></script>
 <script src="/js/wotan-nav.js"></script>
-<script src="/js/rg-pages.js"></script>
+<script type="module" src="rg-host.js"></script>
 <script src="/js/cookie-consent.js"></script>
 </body>
 </html>
