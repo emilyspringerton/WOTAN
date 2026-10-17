@@ -17,6 +17,8 @@ let identBusy          = false;
 let identName         = "";
 let identGuest          = true;
 let identId         = "";
+let identFallback          = false;
+let ssoPending      = null;
 let playId         = "";
 
 export function doc()      {
@@ -271,6 +273,29 @@ export function ssoSession()      {
     return ((typeof getIdunaSession !== "undefined") ? getIdunaSession() : null);
 }
 
+export function postAuth(path        , token     )      {
+    {
+        let opts      = {};
+        let hdrs      = {};
+        hdrs["Content-Type"] = "application/json";
+        hdrs.Authorization = ("" + "Bearer " + token);
+        opts.method = "POST";
+        opts.headers = hdrs;
+        opts.body = "{}";
+        return fetch(("" + api() + path), opts).then(jsonOrReject);
+    }
+}
+
+export function ssoAccepted(r     )      {
+    ssoPending.sso = true;
+    return ssoPending;
+}
+
+export function ssoRefused(e     )      {
+    identFallback = true;
+    return guestFlow(0).then(markGuest);
+}
+
 export function identityFlow(ignored     )      {
     {
         let s      = ssoSession();
@@ -280,8 +305,9 @@ export function identityFlow(ignored     )      {
                 o.token = s.token;
                 o.display_name = s.displayName;
                 o.player_id = s.playerID;
-                o.sso = true;
-                return o;
+                o.sso = false;
+                ssoPending = o;
+                return postAuth("/sso-exchange", s.token).then(ssoAccepted).catch(ssoRefused);
             }
         } else {
             return guestFlow(ignored).then(markGuest);
@@ -344,7 +370,7 @@ export function signInUrl()      {
 
 export function syncWhoBang()       {
     if (identGuest) {
-        setTextBang("d2-who-msg", ("" + "You are playing as " + identName + ", a guest. Your matches are kept in this browser."));
+        setTextBang("d2-who-msg", (identFallback ? ("" + "Your IDUNA account is tied to another game, so you are playing D2 as " + identName + ", a guest. Your matches are kept in this browser.") : ("" + "You are playing as " + identName + ", a guest. Your matches are kept in this browser.")));
         {
             let a      = el("d2-who-link");
             if ((!((a == null)))) {
