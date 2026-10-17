@@ -93,8 +93,13 @@ async function fbMove(p, x, y) {
   const box = await p.locator('#d2-canvas').boundingBox();
   await p.mouse.move(box.x + (x / 960) * box.width, box.y + (y / 540) * box.height);
 }
-const cellXY = (r, c) => [282 + c * 58 + 29, 100 + r * 58 + 29];
+const cellXY = (r, c) => [296 + c * 50 + 25, 104 + r * 50 + 25];
+const BTN = { example: [49, 441], undo: [116, 441], clear: [171, 441], split: [223, 441], ready: [778, 514], forfeit: [64, 520] };
 const SHOT = (n) => path.join(outdir, n + '.png');
+// the globals the page's footer and this test read (stdlib/d2/web/d2_mem.prn)
+const G_STAGE = 90, G_WEAPONS = 121, G_POWERED = 122, G_LOOPS = 123, G_CELLS = 126, G_COST = 154, G_WEIGHT = 155, G_STRUCT = 156, G_EVADE = 157, G_TOAST = 100;
+const G_FX = 138, G_STRUCT_YOU = 400, G_STRUCT0_YOU = 402, G_EV_N = 411;
+const shots = (p, kind, lane) => p.evaluate(([l, k]) => window.__d2.d2_t_shots_to_open(l, k), [lane, kind]);
 
 // ---- 1. a guest ----
 const G = await newPage('guest');
@@ -113,56 +118,96 @@ const G = await newPage('guest');
   await page.screenshot({ path: SHOT('02-pack-empty') });
 
   // parts by key, placed by click: generator, conductor, railgun in a row
-  ok((await gs(page, 90)) === 0, 'the hold starts empty');
+  ok((await gs(page, G_STAGE)) === 0, 'the hold starts empty');
+  ok((await g(page, G_COST)) === 0 && (await g(page, G_WEIGHT)) === 0, 'and costs nothing and weighs nothing');
   await key(page, '1'); await fb(page, ...cellXY(0, 0)); await sleep(70);
-  await key(page, '2'); await fb(page, ...cellXY(0, 1)); await sleep(70);
-  ok((await gs(page, 90)) === 2, 'two parts placed by click');
-  ok((await gs(page, 121)) === 0, 'no railgun yet: nothing to fire');
-  await key(page, '4'); await fb(page, ...cellXY(0, 2)); await sleep(70);
-  { const n = await gs(page, 90), fed = await g(page, 122); ok(n === 3 && fed === 1, `a generator, a wire and a railgun: the railgun is fed (the readout says ${fed} of 1; ${n} parts)`); }
-  await fbMove(page, ...cellXY(1, 4)); await sleep(100);
+  await key(page, '7'); await fb(page, ...cellXY(0, 1)); await sleep(70);
+  ok((await gs(page, G_STAGE)) === 2, 'two parts placed by click');
+  ok((await gs(page, G_WEAPONS)) === 0, 'no railgun yet: nothing to fire');
+  await key(page, 'e'); await fb(page, ...cellXY(0, 2)); await sleep(70);
+  { const n = await gs(page, G_STAGE), fed = await g(page, G_POWERED); ok(n === 3 && fed === 1, `a generator, a wire and a railgun: the railgun is fed (the readout says ${fed} of 1; ${n} parts)`); }
+  ok((await g(page, G_COST)) === 100 + 10 + 240 && (await g(page, G_WEIGHT)) === 4 + 1 + 9, `the budget bars add up: ${await g(page, G_COST)} credits, ${await g(page, G_WEIGHT)} tons`);
+  ok((await g(page, G_STRUCT)) === 20 + 10 + 30, `the structure is the HP of every cell (${await g(page, G_STRUCT)})`);
+  // the lanes: how many shots it takes to open the railgun's lane, and an empty lane is OPEN (0)
+  ok((await shots(page, 1, 2)) === 5 && (await shots(page, 2, 2)) === 1 && (await shots(page, 3, 2)) === 1, 'lane 3 holds a 30 HP railgun: 5 laser shots, 1 slug, 1 shell to open it');
+  ok((await shots(page, 1, 4)) === 0, 'a lane with nothing in it is open (0 shots)');
+  await fbMove(page, ...cellXY(0, 2)); await sleep(150);
   await page.screenshot({ path: SHOT('03-pack-wired') });
   // a part that does not fit is refused; undo and right click take parts off
   await key(page, '1'); await fb(page, ...cellXY(0, 0));
-  ok((await gs(page, 90)) === 3, 'placing on an occupied cell does nothing');
+  ok((await gs(page, G_STAGE)) === 3, 'placing on an occupied cell does nothing');
   await key(page, 'z');
-  ok((await gs(page, 90)) === 2, 'Z undoes the last part');
+  ok((await gs(page, G_STAGE)) === 2, 'Z undoes the last part');
   await fb(page, ...cellXY(0, 1), 'right'); await sleep(50);
-  ok((await gs(page, 90)) === 1, 'a right click removes the part under the pointer');
+  ok((await gs(page, G_STAGE)) === 1, 'a right click removes the part under the pointer');
+  // the budget: Bulwark Plates weigh 5 t, so eight fit in 40 t and the ninth is refused
+  await fb(page, ...BTN.clear); await sleep(80);
+  ok((await gs(page, G_STAGE)) === 0, 'CLEAR empties the hold');
+  await key(page, 'u');
+  let placed = 0;
+  for (let c = 0; c < 6; c++) for (let r = 0; r < 6 && placed < 9; r++) { if (placed >= 9) break; await fb(page, ...cellXY(r, c)); await sleep(35); placed++; if (r === 5 && c === 0) break; }
+  { const n = await gs(page, G_STAGE), w = await g(page, G_WEIGHT);
+    ok(n === 8 && w === 40, `eight Bulwarks fill the 40 t weight budget and the ninth is refused (${n} parts, ${w} t)`);
+    ok((await g(page, G_TOAST)) === 8, 'the refusal says it is too heavy'); }
+  await page.screenshot({ path: SHOT('04-pack-budget') });
+  await fb(page, ...BTN.clear); await sleep(80);
+  // SPLIT: a Titanium Beam becomes two Shards on exactly the cells it held; the pieces cost and weigh more
+  await key(page, 'i'); await fb(page, ...cellXY(1, 1)); await sleep(80);
+  ok((await gs(page, G_STAGE)) === 1 && (await g(page, G_COST)) === 90 && (await g(page, G_WEIGHT)) === 8 && (await g(page, G_CELLS)) === 4, 'a Titanium Beam: 90 credits, 8 t, four cells');
+  await fbMove(page, ...cellXY(1, 2)); await sleep(120);
+  await page.screenshot({ path: SHOT('05-pack-split-preview') });
+  await key(page, 'c');
+  ok((await gs(page, G_STAGE)) === 2 && (await g(page, G_COST)) === 110 && (await g(page, G_WEIGHT)) === 10 && (await g(page, G_CELLS)) === 4,
+     `C splits it into two Shards in place: ${await g(page, G_STAGE)} parts, ${await g(page, G_COST)} credits (the tax is +20), ${await g(page, G_WEIGHT)} t, still four cells`);
+  await page.screenshot({ path: SHOT('06-pack-split') });
+  await key(page, 'z');
+  ok((await gs(page, G_STAGE)) === 1 && (await g(page, G_COST)) === 90, 'Z undoes the split: the Beam is whole again');
+  // Aether Ore into four Chips
+  await key(page, 'p'); await fb(page, ...cellXY(3, 3)); await sleep(80);
+  const costWithOre = await g(page, G_COST);
+  await fbMove(page, ...cellXY(3, 3)); await sleep(100);
+  await key(page, 'c');
+  ok((await g(page, G_STAGE)) === 5 && (await g(page, G_COST)) === costWithOre + 20, `Aether Ore splits into four Chips (${await g(page, G_STAGE)} parts, ${await g(page, G_COST)} credits)`);
   // a closed loop of wire is called out: the textbook ring
-  await page.evaluate(() => { const w = window.__d2; w.d2_t_clear(); [[0,0,0,0],[2,0,1,3],[2,0,2,3],[2,1,2,0],[2,1,1,1]].forEach(([i,r,c,rot]) => w.d2_t_add(i, r, c, rot, 0)); w.d2_t_rebuild(); });
-  ok((await gs(page, 123)) === 1, 'a ring of splitters is recognised as a closed loop (the readout warns it will burn out)');
-  await page.screenshot({ path: SHOT('04-pack-loop') });
-  // the example ships
-  await fb(page, 74, 473); await sleep(100);
-  ok((await gs(page, 90)) === 16 && (await gs(page, 122)) === 3, 'EXAMPLE lays the starter ship: 16 parts, three railguns all fed');
-  await page.screenshot({ path: SHOT('05-pack-starter') });
-  await fb(page, 74, 473);                   // the cutter: uses Panic Cut on both cargo pieces
-  ok((await gs(page, 90)) === 6 && (await g(page, 125)) > 0, 'EXAMPLE cycles to the cutter ship (6 parts, both cargo pieces cut: their waste is armor)');
-  const cutArmor = await g(page, 124);
-  ok(cutArmor === 4 * 8 + 2 * 8, `cutting the Titanium Beam (2 waste squares) and the Aether Ore (4) makes armor from the waste (${cutArmor})`);
-  await fbMove(page, ...cellXY(0, 3)); await sleep(100);
-  await page.screenshot({ path: SHOT('06-pack-cutter') });
-  await fb(page, 74, 473);                   // a bot pool ship
-  ok((await gs(page, 90)) === 16, 'EXAMPLE cycles to a bot pool ship (16 parts)');
-  await page.screenshot({ path: SHOT('07-pack-botship') });
-  await fb(page, 74, 473); ok((await gs(page, 90)) === 16, 'and to a second one');
-  await fb(page, 74, 473); ok((await gs(page, 90)) === 16, 'and back to the starter');
-  await fb(page, 836, 478); // READY
+  await page.evaluate(() => { const w = window.__d2; w.d2_t_clear(); [[0,0,0,0],[2,0,1,3],[2,0,2,3],[2,1,2,0],[2,1,1,1]].forEach(([i,r,c,rot]) => w.d2_t_add(i, r, c, rot)); w.d2_t_rebuild(); });
+  ok((await gs(page, G_LOOPS)) === 1, 'a ring of splitters is recognised as a closed loop (the readout warns it will burn out)');
+  await page.screenshot({ path: SHOT('07-pack-loop') });
+  // the example ships: all of them lay down legal ships
+  let allLegal = true, lastCost = 0, laserLine = null;
+  for (let k = 0; k < 12; k++) {
+    await fb(page, ...BTN.example); await sleep(130);
+    const n = await g(page, G_STAGE), cost = await g(page, G_COST), wt = await g(page, G_WEIGHT);
+    if (n === 0 || cost > 1000 || wt > 40) { allLegal = false; console.log('example', k, 'is not legal:', n, cost, wt); }
+    if (k === 0) { ok(n === 4 && (await g(page, G_POWERED)) === 2 && (await g(page, G_WEAPONS)) === 2, 'EXAMPLE 1 is the hot Core: a laser and a railgun, both fed by the Core'); await page.screenshot({ path: SHOT('08-pack-core') }); }
+    if (k === 2) { laserLine = { n, cost, wt, fed: await g(page, G_POWERED), guns: await g(page, G_WEAPONS) }; await fbMove(page, ...cellXY(1, 1)); await sleep(150); await page.screenshot({ path: SHOT('09-pack-laserline') }); }
+    if (k === 6) { await fbMove(page, ...cellXY(3, 1)); await sleep(150); await page.screenshot({ path: SHOT('10-pack-cannons') }); }
+    lastCost = cost;
+  }
+  ok(allLegal, 'every EXAMPLE ship is legal: inside the credit and weight budgets');
+  ok(laserLine && laserLine.guns === 4 && laserLine.fed === 4 && laserLine.cost <= 1000, `the laser line has four lasers, all fed (${JSON.stringify(laserLine)})`);
+  await fb(page, ...BTN.example); await sleep(120);   // back to laser line x4 (index 2) after a full cycle of 12 + this one wraps to index 0; take index 2
+  await fb(page, ...BTN.example); await sleep(120); await fb(page, ...BTN.example); await sleep(120);
+  ok((await g(page, G_STAGE)) === laserLine.n, 'the examples cycle round');
+  const shipN = await g(page, G_STAGE), shipStruct = await g(page, G_STRUCT);
+  await fb(page, ...BTN.ready);
   await sleep(300);
-  await page.screenshot({ path: SHOT('08-pack-locked') });
+  await page.screenshot({ path: SHOT('11-pack-locked') });
   ok(await waitPill(page, /In a fight/, 25000), 'READY sends the ship and the fight starts when the bot is ready too');
   ok((await g(page, 40)) <= 100 && (await g(page, 41)) <= 100, 'the fight opens with both hulls');
-  await sleep(1500);
-  await page.screenshot({ path: SHOT('09-fight') });
+  ok((await g(page, G_STRUCT0_YOU)) === shipStruct && (await g(page, G_STRUCT_YOU)) === shipStruct, `the fight starts with the ship's structure (${shipStruct} HP)`);
+  await sleep(2600);
+  await page.screenshot({ path: SHOT('12-fight') });
+  ok((await g(page, G_FX)) > 0, 'shots were fired and the second\'s events became animation (the effects counter moved)');
+  await fbMove(page, 358 + 38 * 1 + 19, 290 + 38 * 0 + 19); await sleep(200);
+  await page.screenshot({ path: SHOT('13-fight-inspect') });
 
   // every round break: press OVERCHARGE / BRACE on the line
   let breaks = 0, good = 0, perfect = 0;
   const t0 = Date.now();
-  while (Date.now() - t0 < 90000 && !/Match over/.test(await pill(page))) {
+  while (Date.now() - t0 < 100000 && !/Match over/.test(await pill(page))) {
     if ((await g(page, 55)) === 1 && (await g(page, 61)) === 0) {
       const target = await g(page, 58), rtt = await g(page, 20), start = await g(page, 60);
-      if (breaks === 0) { await sleep(400); await page.screenshot({ path: SHOT('10-round-break') }); }
+      if (breaks === 0) { await sleep(400); await page.screenshot({ path: SHOT('14-round-break') }); }
       const want = Math.max(40, target - rtt);
       for (;;) { const now = await g(page, 2); if (now - start >= want - 12) break; await sleep(4); }
       await page.keyboard.press(breaks % 2 === 0 ? 'o' : 'b');
@@ -170,7 +215,7 @@ const G = await newPage('guest');
       await waitG(page, 63, (v) => v > 0, 3000);
       const gr = await g(page, 65);
       if (gr >= 2) good++; if (gr === 3) perfect++;
-      if (breaks === 1) { await sleep(300); await page.screenshot({ path: SHOT('11-round-result') }); }
+      if (breaks === 1) { await sleep(300); await page.screenshot({ path: SHOT('15-round-result') }); }
       await sleep(300);
     }
     await sleep(25);
@@ -181,12 +226,13 @@ const G = await newPage('guest');
   await sleep(1500);
   ok((await g(page, 76)) === 1 && (await g(page, 77)) === 1, 'the gateway reports the match recorded and rated');
   ok([0, 1, 2].includes(await g(page, 72)), 'the result is a win, a loss or a draw');
-  await page.screenshot({ path: SHOT('12-result') });
+  await page.screenshot({ path: SHOT('16-result') });
 
   // the page links to the player's profile once the gateway has said who they are
   const href = await page.locator('#d2-profile').getAttribute('href');
   ok(/\/d2\/u\.html\?id=/.test(href || ''), 'the page links the player to their D2 profile');
   G.pid = (href || '').split('id=')[1];
+  G.shipN = shipN;
 }
 
 // ---- what IDUNA now holds ----
@@ -199,7 +245,7 @@ const G = await newPage('guest');
   const m = feed.matches[0];
   ok(feed.matches.length === 1 && m.opp_kind === 'bot' && m.counted, 'the match is in the web-match feed against a bot, counted');
   const full = await api('/api/v1/d2/web-matches/' + m.id);
-  ok(full.loadout.length === 16 && full.rounds.length >= 1 && full.rounds.every((r) => r.target_ms >= 300), `the stored match has the packed ship (${full.loadout.length} parts) and ${full.rounds.length} round breaks`);
+  ok(full.loadout.length === G.shipN && full.rounds.length >= 1 && full.rounds.every((r) => r.target_ms >= 300), `the stored match has the packed ship (${full.loadout.length} of ${G.shipN} parts) and ${full.rounds.length} round breaks`);
   const prof = await api('/api/v1/d2/players/' + G.pid);
   ok(prof.rank >= 1 && prof.player.matches === 1 && prof.recent.length === 1, 'the profile endpoint has the rank, the record and the match');
   const st = await api('/api/v1/d2/status');
@@ -224,7 +270,7 @@ const G = await newPage('guest');
   ok((await page.locator('#matches tbody tr').count()) === 1, 'the Matches tab lists the match');
   await page.locator('#matches tbody tr').first().click();
   await page.waitForSelector('.d2-ship i[title]', { timeout: 5000 });
-  ok((await page.locator('.d2-ship i[title]').count()) >= 16, 'opening the match draws the ship that was packed');
+  ok((await page.locator('.d2-ship i[title]').count()) >= 10, 'opening the match draws the ship that was packed');
   await page.screenshot({ path: SHOT('21-match-open') });
   await page.goto(`${wotan.base}/d2/u.html?id=${G.pid}`);
   await page.waitForSelector('#profile table', { timeout: 10000 });
@@ -241,13 +287,13 @@ const G = await newPage('guest');
   ok(/Signed in as/.test(await page.locator('#d2-who-msg').textContent()), 'a signed-in visitor plays as their IDUNA identity');
   await fb(page, 480, 340);
   ok(await waitPill(page, /Packing/, 25000), 'the SSO player is paired with a bot');
-  await fb(page, 74, 473); await sleep(100);
-  await fb(page, 836, 478);
+  await fb(page, ...BTN.example); await sleep(100); await fb(page, ...BTN.example); await sleep(100); await fb(page, ...BTN.example); await sleep(100);
+  await fb(page, ...BTN.ready);
   ok(await waitPill(page, /In a fight/, 25000), 'the SSO player reaches the fight');
   await sleep(800);
-  await fb(page, 104, 507); await sleep(200);   // FORFEIT (first click asks)
+  await fb(page, ...BTN.forfeit); await sleep(200);   // FORFEIT (first click asks)
   await page.screenshot({ path: SHOT('30-forfeit-ask') });
-  await fb(page, 104, 507);                     // confirm
+  await fb(page, ...BTN.forfeit);                     // confirm
   ok(await waitPill(page, /Match over/, 15000), 'forfeiting ends the match');
   ok((await g(page, 72)) === 0 && (await g(page, 73)) === 2, 'a forfeit is a loss by forfeit');
   await sleep(1200);

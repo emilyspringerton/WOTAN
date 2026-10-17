@@ -89,51 +89,67 @@
   }
 
   // ---- a packed ship, drawn from the stored placements ----
-  // Display only: this mirrors DEADWEIGHT_2/core/items.c (dx, dy, ports, role per cell) so a stored ship can be shown; the game
-  // itself never reads it. Ports N 8 E 4 S 2 W 1. Roles 0 cargo, 1 generator, 2 wire, 3 splitter, 4 railgun, 5 armor, 6 dead square.
+  // Display only: this mirrors DEADWEIGHT_2/core/items.c (dx, dy, ports, role per cell, cost, weight) so a stored ship can be shown; the game itself never
+  // reads it. Ports N 8 E 4 S 2 W 1. Roles 0 body, 1 generator, 2 wire, 3 splitter, 4 weapon, 5 plate, 7 amplifier, 8 mender, 9 aegis, 10 resistor, 11 capacitor,
+  // 12 battery, 13 transistor, 14 delayer, 15 cryo-vent, 16 biomass. Row 0 is the bow.
   var ITEMS = [
-    { n: 'Generator', k: 1, b: [[0, 0, 4, 1]] },
-    { n: 'Conductor', k: 1, b: [[0, 0, 5, 2]] },
-    { n: 'Splitter', k: 1, b: [[0, 0, 11, 3]] },
-    { n: 'Railgun', k: 0, b: [[0, 0, 1, 4]] },
-    { n: 'Bulwark', k: 2, b: [[0, 0, 0, 5]] },
-    { n: 'Titanium Beam', k: 0, b: [[0, 0, 0, 0], [1, 0, 0, 0], [2, 0, 0, 0], [3, 0, 0, 0]],
-      f: [[0, 0, 0, 0], [1, 0, 0, 0], [2, 0, 0, 6], [0, 1, 0, 0], [1, 1, 0, 0], [2, 1, 0, 6]] },
-    { n: 'Aether Ore', k: 2, b: [[0, 0, 0, 0], [1, 0, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0]],
-      f: [[0, 0, 0, 0], [1, 0, 0, 6], [0, 1, 0, 0], [1, 1, 0, 6], [0, 2, 0, 0], [1, 2, 0, 6], [0, 3, 0, 0], [1, 3, 0, 6]] }
+    { n: 'Generator', k: 1, c: 100, w: 4, b: [[0, 0, 4, 1]] },
+    { n: 'Conductor', k: 1, c: 10, w: 1, b: [[0, 0, 5, 2]] },
+    { n: 'Splitter Node', k: 1, c: 25, w: 1, b: [[0, 0, 11, 3]] },
+    { n: 'Railgun', k: 0, c: 240, w: 9, b: [[0, 0, 1, 4]] },
+    { n: 'Bulwark Plate', k: 2, c: 55, w: 5, b: [[0, 0, 0, 5]] },
+    { n: 'Titanium Beam', k: 0, c: 90, w: 8, b: [[0, 0, 0, 0], [1, 0, 0, 0], [2, 0, 0, 0], [3, 0, 0, 0]] },
+    { n: 'Aether Ore', k: 2, c: 100, w: 6, b: [[0, 0, 0, 0], [1, 0, 0, 0], [0, 1, 0, 0], [1, 1, 0, 0]] },
+    { n: 'Pulse Laser', k: 0, c: 120, w: 3, b: [[0, 0, 1, 4]] },
+    { n: 'Siege Cannon', k: 0, c: 230, w: 10, b: [[0, 0, 1, 4], [1, 0, 0, 0]] },
+    { n: 'Amplifier', k: 1, c: 90, w: 2, b: [[0, 0, 5, 7]] },
+    { n: 'Mender', k: 1, c: 130, w: 3, b: [[0, 0, 1, 8]] },
+    { n: 'Aegis Emitter', k: 2, c: 140, w: 3, b: [[0, 0, 1, 9]] },
+    { n: 'Resistor 1R', k: 1, c: 20, w: 1, b: [[0, 0, 5, 10]] },
+    { n: 'Resistor 2R', k: 1, c: 20, w: 1, b: [[0, 0, 5, 10]] },
+    { n: 'Resistor 4R', k: 1, c: 20, w: 1, b: [[0, 0, 5, 10]] },
+    { n: 'Capacitor', k: 1, c: 70, w: 2, b: [[0, 0, 5, 11]] },
+    { n: 'Battery', k: 1, c: 110, w: 4, b: [[0, 0, 5, 12]] },
+    { n: 'Transistor', k: 1, c: 80, w: 1, b: [[0, 0, 13, 13]] },
+    { n: 'Delayer', k: 1, c: 60, w: 1, b: [[0, 0, 5, 14]] },
+    { n: 'Quantum Core', k: 1, c: 320, w: 10, b: [[0, 0, 9, 1], [1, 0, 12, 1], [0, 1, 3, 1], [1, 1, 6, 1]] },
+    { n: 'Cryo-Vent', k: 2, c: 60, w: 3, b: [[0, 0, 0, 15], [1, 0, 0, 15]] },
+    { n: 'Xeno-Biomass', k: 2, c: 90, w: 4, b: [[0, 0, 0, 16], [0, 1, 0, 16], [0, 2, 0, 16], [1, 2, 0, 16]] },
+    { n: 'Titanium Shard', k: 0, c: 55, w: 5, b: [[0, 0, 0, 0], [1, 0, 0, 0]] },
+    { n: 'Ore Chip', k: 2, c: 30, w: 2, b: [[0, 0, 0, 0]] }
   ];
   var KIND = ['#cc6058', '#d6a456', '#6094d0'];
-  var GLYPH = ['', 'G', '+', 'Y', 'R', '#', 'x'];
-  function cells(it, rot, ar, ac, cut) {
-    var src = cut && it.f ? it.f : it.b, out = [], mnx = 99, mny = 99;
-    src.forEach(function (c) {
+  // a letter for each part, so a stored ship reads at a glance
+  var GLYPH_ITEM = { 0: 'G', 1: '+', 2: 'Y', 3: 'R', 4: '#', 5: 'T', 6: 'o', 7: 'L', 8: 'C', 9: 'A', 10: 'M', 11: 'E', 12: 'r', 13: 'r', 14: 'r', 15: 'c', 16: 'b', 17: 't', 18: 'd',
+    19: 'Q', 20: 'V', 21: 'N', 22: 't', 23: 'o' };
+  function cells(it, rot, ar, ac) {
+    var out = [], mnx = 99, mny = 99;
+    it.b.forEach(function (c) {
       var x = c[0], y = c[1];
       for (var k = 0; k < rot; k++) { var nx = -y; y = x; x = nx; }
       out.push([x, y, c[2], c[3]]);
       if (x < mnx) mnx = x; if (y < mny) mny = y;
     });
     return out.map(function (c) {
-      var p = c[2];
-      for (var k = 0; k < rot; k++) p = ((p >> 1) | ((p & 1) << 3)) & 15;
-      return { r: ar + (c[1] - mny), c: ac + (c[0] - mnx), role: c[3], port: p };
+      return { r: ar + (c[1] - mny), c: ac + (c[0] - mnx), role: c[3] };
     });
   }
   function shipGrid(loadout) {
-    var grid = [];
+    var grid = [], cost = 0, weight = 0;
     for (var i = 0; i < 36; i++) grid.push(null);
     (loadout || []).forEach(function (p) {
       var it = ITEMS[p.item];
       if (!it) return;
-      cells(it, p.rot | 0, p.row | 0, p.col | 0, !!p.cut).forEach(function (c) {
-        if (c.r >= 0 && c.r < 6 && c.c >= 0 && c.c < 6) grid[c.r * 6 + c.c] = { kind: it.k, role: c.role, name: it.n };
+      cost += it.c; weight += it.w;
+      cells(it, p.rot | 0, p.row | 0, p.col | 0).forEach(function (c) {
+        if (c.r >= 0 && c.r < 6 && c.c >= 0 && c.c < 6) grid[c.r * 6 + c.c] = { kind: it.k, name: it.n, glyph: GLYPH_ITEM[p.item] || '' };
       });
     });
-    return h('div', { 'class': 'd2-ship', role: 'img', 'aria-label': 'The ship that was packed' }, grid.map(function (c) {
+    var box = h('div', { 'class': 'd2-ship', role: 'img', 'aria-label': 'The ship that was packed. The top row is the bow.' }, grid.map(function (c) {
       if (!c) return h('i');
-      var dead = c.role === 6;
-      return h('i', { title: c.name + (dead ? ' (waste, now armor)' : ''), style: 'background:' + (dead ? '#222633' : KIND[c.kind] + 'b0') +
-        ';color:#14161d;font:700 .7rem/1 "Space Grotesk",system-ui;display:grid;place-items:center', text: GLYPH[c.role] });
+      return h('i', { title: c.name, style: 'background:' + KIND[c.kind] + 'b0;color:#14161d;font:700 .7rem/1 "Space Grotesk",system-ui;display:grid;place-items:center', text: c.glyph });
     }));
+    return h('div', null, box, h('p', { 'class': 'd2-note', style: 'margin:.35rem 0 0', text: 'bow at the top · ' + cost + ' credits · ' + weight + ' t' }));
   }
 
   var GRADE = ['', 'miss', 'good', 'perfect'];
