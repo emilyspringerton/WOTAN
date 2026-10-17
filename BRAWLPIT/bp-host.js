@@ -80,6 +80,7 @@ export function onInstance(result     )       {
     canvas.focus({"preventScroll": true});
     updatePadLabel();
     loadSprites();
+    loadDuck();
     loadHat();
     window.requestAnimationFrame(tick);
 }
@@ -324,6 +325,28 @@ export function onSprites(bmp     )       {
                         break;
                     }
                 }
+            }
+        }
+    }
+}
+
+export function loadDuck()       {
+    fetch("duck.png").then(blobOf).then(decodeBitmap).then(onDuck).catch(ignoreBang);
+}
+
+export function onDuck(bmp     )       {
+    {
+        let c2      = doc().createElement("canvas");
+        c2.width = 640;
+        c2.height = 340;
+        {
+            let g      = c2.getContext("2d");
+            g.imageSmoothingEnabled = false;
+            g.drawImage(bmp, 0, 0);
+            {
+                let data      = g.getImageData(0, 0, 640, 340).data;
+                new Uint8Array(memory.buffer, wasm.bp_duck_addr(), 870400).set(data);
+                wasm.bp_duck_set(1);
             }
         }
     }
