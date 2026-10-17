@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1118">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-d2.css">
+<title>Player — WOTAN D2</title>
+<meta name="description" content="A D2 player profile on WOTAN.">
+</head>
+<body class="d2" data-page="profile">
+<header id="wotan-nav" data-skin="d2" data-section="board"></header>
+<main class="d2-wrap" id="main">
+  <section class="d2-hero">
+    <div>
+      <p class="d2-eyebrow">D2 player</p>
+      <h1 class="d2-h1" id="p-name">Player</h1>
+    </div>
+    <div class="d2-stats">
+      <div><b id="p-r">&ndash;</b><span>Rating</span></div><div><b id="p-rank">&ndash;</b><span>Rank</span></div>
+      <div><b id="p-w">&ndash;</b><span>Wins</span></div><div><b id="p-l">&ndash;</b><span>Losses</span></div>
+      <div><b id="p-wr">&ndash;</b><span>Win rate</span></div>
+    </div>
+  </section>
+  <div id="profile" aria-live="polite"></div>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/d2-pages.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

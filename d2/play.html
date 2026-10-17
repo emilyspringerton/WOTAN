@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f1118">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-d2.css">
+<title>Play D2 — WOTAN</title>
+<meta name="description" content="D2 (DEADWEIGHT_2, Hold Battles) in your browser: pack a ship on a 6x6 grid, wire it, and fight a bot or another player. Guests welcome; sign in with IDUNA to keep your record. The whole client runs as WebAssembly compiled from PARENA.">
+</head>
+<body class="d2" data-page="play">
+<header id="wotan-nav" data-skin="d2" data-section="play"></header>
+
+<main class="d2-wrap" id="main">
+  <div class="d2-playhead">
+    <div>
+      <p class="d2-eyebrow">D2 &middot; Hold Battles</p>
+      <h1 class="d2-h1 sm">Play</h1>
+    </div>
+    <div class="d2-toolbar" role="toolbar" aria-label="D2 controls">
+      <span class="d2-status" id="d2-pill" role="status" aria-live="polite">Loading</span>
+      <span class="d2-online" id="d2-online" aria-live="off"></span>
+      <a class="d2-tool" id="d2-profile" href="/d2/" hidden>My profile</a>
+      <button type="button" class="d2-tool" id="d2-fullscreen" title="Fullscreen" disabled>Fullscreen</button>
+    </div>
+  </div>
+
+  <div class="d2-stage" id="d2-stage">
+    <div class="d2-load" id="d2-load">
+      <b>Starting</b>
+      <span id="d2-load-msg">Fetching the game (a WebAssembly module, about 120 KB)&hellip;</span>
+      <noscript><span>D2 is WebAssembly; it needs JavaScript enabled to load it.</span></noscript>
+    </div>
+    <canvas class="d2-canvas" id="d2-canvas" width="960" height="540" tabindex="0" role="application" hidden
+            aria-label="D2. Click to place a part on your ship, R turns it, right click removes it, Enter says ready. In the fight, O or B answer the round break."></canvas>
+  </div>
+  <p class="d2-who" id="d2-who" aria-live="polite"><span id="d2-who-msg"></span> <a class="d2-link" id="d2-who-link" hidden></a></p>
+  <p class="d2-lede" id="d2-sub">A one-on-one ship battler. Press play and you are matched with a bot, or with another person if one is waiting. You have sixty seconds to pack a ship, then thirty to fight with it. Every finished match is rated and lands on your WOTAN profile.</p>
+
+  <div class="d2-tips">
+    <div class="d2-tip"><b>Pack</b>Pick a part (<kbd>1</kbd>&ndash;<kbd>7</kbd>), <kbd>R</kbd> or the wheel turns it, click puts it on the 6&times;6 grid. Nothing is sent until you press <kbd>Enter</kbd> or time runs out, so move things freely: right click removes a part, <kbd>Z</kbd> undoes. The <b style="display:inline;letter-spacing:0;text-transform:none;font-size:inherit;color:inherit">EXAMPLE</b> button lays down a ship to learn from.</div>
+    <div class="d2-tip"><b>Wire</b>A <i>generator</i> makes 10 energy a second out of its east side. Wires and splitters carry it; a <i>railgun</i> that is fed fires every third second for 15 damage. Two feeds into one cell do nothing, and wire that loops back on itself burns out. The readout on the right says what your ship will do.</div>
+    <div class="d2-tip"><b>Cut</b><i>Titanium Beam</i> and <i>Aether Ore</i> are cargo that can be cut into smaller pieces. Each piece needs room of its own, but the waste squares become armor. Hover a cargo piece and press <kbd>C</kbd> before the fight, or press <kbd>1</kbd>&ndash;<kbd>4</kbd> to Panic Cut one live.</div>
+    <div class="d2-tip"><b>Fight</b>Thirty one-second ticks. The more hull you have at the end wins, or the one still standing. Your opponent's hold is sealed: you see only their hull and armor. Every five seconds there is a round break.</div>
+    <div class="d2-tip"><b>Round break</b>A marker crosses a bar; press <kbd>O</kbd> (overcharge: harder shots, or a backfire if you miss) or <kbd>B</kbd> (brace: armor) as it meets the line. The line is placed for your connection's delay. When you are behind, a good press pays more.</div>
+    <div class="d2-tip"><b>What this is</b>The match is D2's real server and its bot pool, the same game the native client plays. This page is a client for it: one WebAssembly module with no imports and no allocator, compiled from <a href="https://github.com/emilyspringerton/PARENA">PARENA</a>. The only JavaScript here that runs the game is generated from PARENA too.</div>
+  </div>
+
+  <p class="d2-stat" id="d2-stat"></p>
+</main>
+
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script type="module" src="d2-host.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>
