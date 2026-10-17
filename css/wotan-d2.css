@@ -65,7 +65,7 @@ body.d2 {
 .d2-steps li { counter-increment: s; padding-left: 2.6rem; position: relative; }
 .d2-steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 1.9rem; height: 1.9rem; border-radius: 50%;
   background: var(--d2-red); color: #14161d; font-weight: 700; display: grid; place-items: center; }
-.d2 a.rg-link { color: var(--d2-gold); }
+.d2 a.d2-link { color: var(--d2-gold); }
 
 /* ---- /d2/play.html: the game stage (the client is a wasm canvas; nothing here is game logic) ---- */
 .d2-playhead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .6rem 1.5rem; margin-bottom: .7rem; }
