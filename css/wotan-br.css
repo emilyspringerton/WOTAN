@@ -1,0 +1,46 @@
+/* WOTAN /bedrockracers/ play page (shankpit-460's page, renamed). The same IDUNA front-page style guide as /BRAWLPIT/ and /GFD/ (cream paper,
+   gold-edged panels), a little quieter: the stage is a near-black slate well, the type small, nothing shouts. */
+
+.br-wrap { max-width: 1120px; margin: 0 auto; padding: .6rem 1rem 4rem; }
+.br-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .4rem 1.5rem; padding: 1.1rem 0 1rem; margin-bottom: .9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--i-gold) 55%, var(--i-line) 45%); position: relative; }
+.br-head::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 5.5rem; height: 3px; background: var(--i-gold); }
+.br-eyebrow { letter-spacing: .35em; text-transform: uppercase; font-size: .68rem; color: var(--i-muted); margin: 0 0 .3rem; }
+.br-h1 { font: 500 clamp(1.9rem, 4.6vw, 2.9rem)/1.05 var(--i-display); letter-spacing: .01em; margin: 0; text-transform: none; }
+.br-sub { color: var(--i-muted); margin: 0; font-size: .95rem; max-width: 36rem; }
+
+.br-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin-bottom: .7rem; }
+.br-bar .br { flex: 1 1 1rem; }
+.br-online { font: 500 .78rem/1 var(--i-body); color: var(--i-muted); letter-spacing: .02em; }
+.br-btn { appearance: none; font: 500 .9rem/1 var(--i-body); letter-spacing: .02em; color: var(--i-text); cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: .35rem; height: 2.4rem; padding: 0 .95rem; box-sizing: border-box; border-radius: 5px;
+  border: 1px solid color-mix(in srgb, var(--i-gold) 80%, #7b6640 20%); background: color-mix(in srgb, var(--i-paper) 88%, #e5dac7 12%);
+  transition: border-color 160ms ease, background-color 160ms ease, transform 120ms ease; }
+.br-btn:hover:not(:disabled) { border-color: #c7ac72; background: color-mix(in srgb, var(--i-paper) 70%, #e5dac7 30%); }
+.br-btn:active:not(:disabled) { transform: translateY(1px); }
+.br-btn:focus-visible, .br-stage:focus-visible { outline: 2px solid var(--i-gold-deep); outline-offset: 2px; }
+.br-btn:disabled { opacity: .5; cursor: default; }
+.br-pill { display: inline-flex; align-items: center; gap: .4rem; font: 600 .75rem/1 var(--i-body); letter-spacing: .04em; text-transform: uppercase;
+  padding: .3rem .7rem; border-radius: 999px; background: color-mix(in srgb, var(--i-gold) 18%, transparent); color: var(--i-gold-deep); }
+
+.br-stage { position: relative; border: 1px solid color-mix(in srgb, var(--i-gold) 55%, var(--i-line) 45%); border-radius: 8px;
+  background: #0b0c10; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--i-gold) 14%, transparent), 0 18px 44px rgba(60, 46, 18, .20); }
+.br-canvas { display: block; width: 100%; height: 100%; background: #0b0c10; outline: none; touch-action: none;
+  image-rendering: pixelated; image-rendering: crisp-edges; cursor: default; }
+.br-canvas[hidden] { display: none; }
+.br-stage:fullscreen { aspect-ratio: auto; border: 0; border-radius: 0; box-shadow: none; background: #000; }
+.br-stage:fullscreen .br-canvas { width: auto; height: 100%; max-width: 100%; aspect-ratio: 16/9; }
+.br-load { color: #cfc9d8; text-align: center; max-width: 30rem; padding: 2rem; font: 500 1rem/1.5 var(--i-body); display: flex; flex-direction: column; gap: .4rem; }
+.br-load[hidden] { display: none; }
+.br-load b { color: var(--i-gold); letter-spacing: .08em; text-transform: uppercase; font-size: .72rem; }
+.br-who { margin-top: .6rem; font-size: .78rem; color: var(--i-muted); }
+.br-who a { color: var(--i-gold-deep); }
+
+.br-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .7rem; margin-top: 1rem; }
+.br-tip { border: 1px solid color-mix(in srgb, var(--i-gold) 45%, var(--i-line) 55%); border-radius: 6px; padding: .75rem .9rem; background: var(--i-paper);
+  font-size: .86rem; line-height: 1.55; color: var(--i-muted); }
+.br-tip b { display: block; letter-spacing: .24em; text-transform: uppercase; font-size: .66rem; color: var(--i-text); margin-bottom: .35rem; }
+.br-tip kbd { font: 600 .74rem/1 var(--i-body); padding: .12rem .35rem; border: 1px solid var(--i-line); border-bottom-width: 2px; border-radius: 4px; background: #fffdf8; color: var(--i-text); }
+.br-tip a { color: var(--i-gold-deep); }
+.br-stat { margin: .9rem 0 0; font: 500 .72rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--i-faint, var(--i-muted)); letter-spacing: .02em; }

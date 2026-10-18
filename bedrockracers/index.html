@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4f1ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Spectral:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-iduna.css">
+<link rel="stylesheet" href="/css/wotan-br.css">
+<title>Play Bedrock Racers &mdash; WOTAN</title>
+<meta name="description" content="Bedrock Racers: four teams of three rocket cars, one Quaffle, four upside-down goals. Carry the ball with your magnet, pass it, throw it into a tower. The whole game runs in your browser as WebAssembly compiled from PARENA.">
+</head>
+<body class="iduna br" data-page="play">
+<header id="wotan-nav" data-skin="br" data-section="play"></header>
+
+<main class="br-wrap" id="main">
+  <div class="br-head">
+    <div>
+      <p class="br-eyebrow">WOTAN &middot; Rocket cars</p>
+      <h1 class="br-h1">Bedrock Racers</h1>
+    </div>
+    <p class="br-sub" id="br-sub">Four teams of three rocket cars in one stadium. Carry the Quaffle with your magnet, pass it to a team-mate, and throw it up through one of the four upside-down goals. Two goals in a row and you are on fire.</p>
+  </div>
+
+  <div class="br-bar" role="toolbar" aria-label="Bedrock Racers controls">
+    <span class="br-pill" id="br-pill" role="status" aria-live="polite">Loading</span>
+    <span class="br"></span>
+    <button type="button" class="br-btn" id="br-fullscreen" title="Fullscreen" disabled>Fullscreen</button>
+  </div>
+
+  <div class="br-stage" id="br-stage">
+    <div class="br-load" id="br-load">
+      <b>Starting</b>
+      <span id="br-load-msg">Fetching the game (a WebAssembly module, about 215 KB)&hellip;</span>
+      <noscript><span>Bedrock Racers is WebAssembly; it needs JavaScript enabled to load it.</span></noscript>
+    </div>
+    <canvas class="br-canvas" id="br-canvas" width="640" height="360" tabindex="0" role="application"
+            aria-label="Bedrock Racers. Press Enter to play against bots. W and S throttle and brake, A and D steer, Space lifts, Shift boosts, right mouse or F holds the magnet." hidden></canvas>
+  </div>
+
+  <div class="br-tips">
+    <div class="br-tip"><b>Drive</b><kbd>W</kbd> <kbd>S</kbd> throttle and brake &middot; <kbd>A</kbd> <kbd>D</kbd> steer &middot; <kbd>Space</kbd> lift (hold it) &middot; <kbd>Shift</kbd> boost &middot; <kbd>C</kbd> fans off. Air is your fuel: lift and boost spend it, the road refills it, and nothing refills while you carry the ball.</div>
+    <div class="br-tip"><b>Fly</b><kbd>&darr;</kbd> pitches the nose up and <kbd>&uarr;</kbd> down, like a flight stick pulled back &middot; <kbd>&larr;</kbd> <kbd>&rarr;</kbd> roll &middot; <kbd>Q</kbd> <kbd>E</kbd> strafe. Drive up a wall and over onto the ceiling: the camera turns the world with you.</div>
+    <div class="br-tip"><b>The Quaffle</b>Hold <kbd>F</kbd> or the right mouse button near the ball: the magnet pulls it in and carries it. Let go to throw it along your nose, at your speed and then some. Hold it toward a team-mate who is holding their own magnet and the throw is a pass. Bump a carrier and the ball comes loose.</div>
+    <div class="br-tip"><b>Scoring</b>A ball that goes up into a shaft above the ceiling at one of the four corners is a goal. The bread-and-butter shot is a hard throw at a corner on the run: the ball climbs the curve and drops up into the tower. Be in on two of your team's goals in a row and you are <i>on fire</i> for 45 seconds.</div>
+    <div class="br-tip"><b>Matches</b>Pick your team and the bots' skill on the title (arrows, <kbd>A</kbd> <kbd>D</kbd> or click), then <kbd>Enter</kbd> to play or <kbd>B</kbd> to watch twelve bots. <kbd>V</kbd> ball cam &middot; <kbd>Tab</kbd> scores &middot; <kbd>Esc</kbd> pause. First to the goal limit or the clock, then a golden goal.</div>
+    <div class="br-tip"><b>Gamepad</b>Left stick steers and pitches &middot; RT throttle, LT brake &middot; A lift &middot; B magnet &middot; RB boost &middot; LB fans off &middot; right stick rolls and strafes &middot; Start pauses.</div>
+    <div class="br-tip"><b>What this is</b>The game is one WebAssembly module with no imports and no allocator, compiled from <a href="https://github.com/emilyspringerton/PARENA">PARENA</a>: the rocket-car physics, the bots and a software 3D renderer. The only JavaScript here is generated from PARENA too. It runs entirely in your browser: there is no sign-in, matchmaking or stat tracking yet.</div>
+  </div>
+
+  <p class="br-stat" id="br-stat"></p>
+</main>
+
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script type="module" src="br-host.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

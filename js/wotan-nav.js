@@ -26,7 +26,7 @@
   if (!mount) return;
 
   var skinAttr = mount.getAttribute('data-skin');
-  var SKINS = { dw: 1, rg: 1, d2: 1, em: 1, gfd: 1, bp: 1, sp: 1, acct: 1 };
+  var SKINS = { dw: 1, rg: 1, d2: 1, em: 1, gfd: 1, bp: 1, sp: 1, br: 1, acct: 1 };
   var skin = SKINS[skinAttr] ? skinAttr : 'hs';
   var section = mount.getAttribute('data-section') || '';
 
@@ -74,6 +74,10 @@
     ],
     sp: [
       ['play', 'Play', '/shankpit-460/'],
+      ['account', 'Account', '/account/']
+    ],
+    br: [
+      ['play', 'Play', '/bedrockracers/'],
       ['account', 'Account', '/account/']
     ],
     // Account-level pages (not tied to one game): /account/ and /redeem/. Cream like the hs skin, no theme picker.
@@ -180,7 +184,8 @@
       ['em', 'EMPIRE', 'Cards \u00b7 Towers \u00b7 Standing', '/empire/'],
       ['gfd', 'GoblinFoxDragon', 'MUD \u00b7 Hat Store', '/GFD/'],
       ['bp', 'Brawlpit', 'Arena fighter \u00b7 Hat Store', '/BRAWLPIT/'],
-      ['sp', 'shankpit-460', 'Arena shooter \u00b7 Free-for-all', '/shankpit-460/']
+      ['sp', 'shankpit-460', 'Arena shooter \u00b7 Free-for-all', '/shankpit-460/'],
+      ['br', 'Bedrock Racers', 'Rocket cars \u00b7 Quaffle', '/bedrockracers/']
     ];
     var games = el('div', { 'class': 'wn-games' }, [
       el('div', { 'class': 'wn-games-in' }, [el('span', { 'class': 'wn-games-label', text: 'Games' })].concat(GAMES.map(function (g) {
@@ -197,7 +202,7 @@
       el('small', { text: 'EINHORN_INDUSTRIAL' })
     ]);
 
-    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'd2' ? 'D2 sections' : (skin === 'em' ? 'EMPIRE sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : (skin === 'bp' ? 'Brawlpit sections' : (skin === 'sp' ? 'shankpit-460 sections' : (skin === 'acct' ? 'Account sections' : 'WOTAN sections'))))))) });
+    var tabs = el('nav', { 'class': 'wn-tabs', 'aria-label': skin === 'hs' ? 'Hearthstone sections' : (skin === 'rg' ? 'Redgarden sections' : (skin === 'd2' ? 'D2 sections' : (skin === 'em' ? 'EMPIRE sections' : (skin === 'gfd' ? 'GoblinFoxDragon sections' : (skin === 'bp' ? 'Brawlpit sections' : (skin === 'sp' ? 'shankpit-460 sections' : (skin === 'br' ? 'Bedrock Racers sections' : (skin === 'acct' ? 'Account sections' : 'WOTAN sections')))))))) });
     TABS[skin].forEach(function (t) {
       tabs.appendChild(el('a', { href: t[2], text: t[1], 'aria-current': t[0] === section ? 'page' : null }));
     });

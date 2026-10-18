@@ -82,6 +82,16 @@ already signed in.
   Chromium only (not Firefox/Safari/phones; no touch controls); the gamepad and the sound were not exercised by a person;
   the referee stops impossible hits, walls and speed hacks but not aimbots or wallhacks. **Stats and the bot league are the
   next pass** -- nothing is persisted yet.
+- **`/bedrockracers/` — Bedrock Racers, playable in the browser** (2026-10-18). A Rocket League-style Quidditch esport: four teams
+  of three rocket cars in one stadium, one ball (the Quaffle) and four upside-down corner goals. Hold the magnet (`F` or the right
+  mouse button) to pull the ball in and carry it, let go to throw it, hold it at a team-mate to pass, throw it up into a tower
+  to score; two goals in a row and you are ON FIRE. The whole game -- the rocket-car physics, the magnet, the bots, a software 3D
+  renderer, the HUD and the screens -- is one WebAssembly module compiled from PARENA (`PARENA/stdlib/bedrockracers/`): no malloc,
+  no imports. The page's only JavaScript is `bedrockracers/br-host.js`, *generated* from PARENA like the others. Rebuild with
+  `scripts/build-bedrockracers.sh` and commit both outputs; `scripts/bedrockracers-browser-test.mjs` drives the real page in
+  headless Chromium. **Honest limits:** local play against bots only -- there is no sign-in, matchmaking or stat tracking yet (the
+  second pass); verified in Node and headless Chromium only (not Firefox/Safari/phones; no touch controls; the gamepad path was
+  driven through a Gamepad API shim); no audio.
 - `/store.html` — the BRAWLPIT hat store. Login is a real redirect to IDUNA's own hosted SSO
   page (`iam.okemily.com`) — this page has no password field of its own.
 - **`/profile.html` — public DEADWEIGHT player profiles** (no login): look up any player by
