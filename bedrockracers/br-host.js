@@ -86,19 +86,40 @@ export function onInstance(result     )       {
         }
     }
     focusCanvasBang();
+    if (padAllowedP()) {
+        window.requestAnimationFrame(padTick);
+    }
     window.requestAnimationFrame(tick);
 }
 
 export function tick(t        )       {
-    pollPads();
     wasm.br_frame(t);
     ctx.putImageData(image, 0, 0);
     syncLabelsBang();
     window.requestAnimationFrame(tick);
 }
 
+export function padTick(t        )       {
+    pollPads();
+    window.requestAnimationFrame(padTick);
+}
+
+export function padAllowedP()          {
+    {
+        let pp      = doc().permissionsPolicy;
+        let fp      = doc().featurePolicy;
+        let p      = ((pp == null) ? fp : pp);
+        return ((p == null) ? true : p.allowsFeature("gamepad"));
+    }
+}
+
 export function onFullscreen(e     )       {
-    el("br-stage").requestFullscreen();
+    {
+        let r      = el("br-stage").requestFullscreen();
+        if (((typeof r) === "object")) {
+            r.catch(ignoreBang);
+        }
+    }
 }
 
 export function gameKeyP(e     )          {
