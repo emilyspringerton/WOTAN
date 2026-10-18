@@ -163,6 +163,133 @@
     return n;
   }
 
+
+  // ---- GAMES strip + "All games" panel (2026-10-18 design: pinned strip, searchable panel) ----
+  // The strip shows the games the visitor pinned (stars in the panel, kept in localStorage); the game they are
+  // on is always shown. Everything else lives in the panel under MORE GAMES. Add a game: one row in GAMES.
+  var PIN_KEY = 'wotan_pinned_games';
+  var DEFAULT_PINNED = ['dw', 'hs', 'rg', 'd2', 'em', 'gfd', 'bp', 'sp'];
+  var STAR = 'M8 1.5 9.9 5.6 14.3 6.2 11.1 9.3 11.9 13.7 8 11.6 4.1 13.7 4.9 9.3 1.7 6.2 6.1 5.6Z';
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+  function icon(w, kids, attrs) {
+    var a = { width: w, height: w, viewBox: '0 0 ' + (attrs && attrs.vb || w) + ' ' + (attrs && attrs.vb || w), 'aria-hidden': 'true' };
+    var svg = svgEl('svg', a);
+    kids.forEach(function (k) { svg.appendChild(k); });
+    return svg;
+  }
+  function loadPins(ids) {
+    var v = null;
+    try { v = JSON.parse(localStorage.getItem(PIN_KEY)); } catch (e) { v = null; }
+    if (!Array.isArray(v)) return DEFAULT_PINNED.filter(function (i) { return ids.indexOf(i) >= 0; });
+    return v.filter(function (i) { return ids.indexOf(i) >= 0; });
+  }
+  function savePins(p) { try { localStorage.setItem(PIN_KEY, JSON.stringify(p)); } catch (e) { /* storage blocked */ } }
+
+  function gamesBar(GAMES) {
+    var ids = GAMES.map(function (g) { return g[0]; });
+    var pins = loadPins(ids);
+    var wrap = el('div', { 'class': 'wn-games' });
+    var strip = el('div', { 'class': 'wn-games-in' });
+    var allBtn = el('button', { type: 'button', 'class': 'wn-allgames', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'wn-allpanel' });
+    var panel = el('section', { 'class': 'wn-allpanel', id: 'wn-allpanel', 'aria-label': 'All games', hidden: true });
+    var scrim = el('div', { 'class': 'wn-scrim', hidden: true });
+    var open = false;
+
+    function gameLink(g, inPanel) {
+      return el('a', { 'class': inPanel ? 'wn-pg-link' : 'wn-game', href: g[3], 'aria-current': skin === g[0] ? 'true' : null }, [
+        el('b', { text: g[1] }), el('small', { text: g[2] })
+      ]);
+    }
+    function setOpen(v) {
+      open = v;
+      panel.hidden = !v; scrim.hidden = !v;
+      allBtn.setAttribute('aria-expanded', String(v));
+      allBtn.classList.toggle('wn-open', v);
+      if (v) { var q = panel.querySelector('input'); if (q) { q.value = ''; filter(''); q.focus(); } }
+    }
+    function filter(q) {
+      q = q.trim().toLowerCase();
+      [].forEach.call(panel.querySelectorAll('.wn-pg'), function (c) {
+        c.hidden = !!q && c.getAttribute('data-q').indexOf(q) < 0;
+      });
+      [].forEach.call(panel.querySelectorAll('.wn-pg-sec'), function (sec) {
+        sec.hidden = !sec.querySelector('.wn-pg:not([hidden])');
+      });
+    }
+    function pinBtn(g) {
+      var on = pins.indexOf(g[0]) >= 0;
+      var b = el('button', { type: 'button', 'class': 'wn-pin', 'aria-pressed': String(on),
+        'aria-label': (on ? 'Unpin ' : 'Pin ') + g[1] + (on ? ' from' : ' to') + ' the top menu' });
+      b.appendChild(icon(16, [svgEl('path', { d: STAR, fill: on ? '#f5b82e' : 'none', stroke: on ? '#a56f00' : '#6b6885', 'stroke-width': '1.2', 'stroke-linejoin': 'round' })], { vb: 16 }));
+      b.addEventListener('click', function () {
+        var i = pins.indexOf(g[0]);
+        if (i >= 0) pins.splice(i, 1); else pins.push(g[0]);
+        savePins(pins); draw();
+        var again = panel.querySelector('.wn-pin[aria-label$="' + g[1] + (i >= 0 ? ' to the top menu"' : ' from the top menu"') + ']');
+        if (again) again.focus();
+      });
+      return b;
+    }
+    function section(label, list, withHint) {
+      var head = el('div', { 'class': 'wn-pg-head' }, [
+        el('div', { 'class': 'wn-pg-title' }, [document.createTextNode(label), el('span', { text: String(list.length) })])
+      ]);
+      if (withHint) {
+        var hint = el('div', { 'class': 'wn-pg-hint' });
+        hint.appendChild(icon(14, [svgEl('path', { d: STAR, fill: 'none', stroke: '#6b6885', 'stroke-width': '1.3', 'stroke-linejoin': 'round' })], { vb: 16 }));
+        hint.appendChild(document.createTextNode('Pin a game to keep it in the top menu'));
+        head.appendChild(hint);
+      }
+      var grid = el('div', { 'class': 'wn-pg-grid' }, list.map(function (g) {
+        return el('div', { 'class': 'wn-pg', 'data-q': (g[1] + ' ' + g[2]).toLowerCase(), 'aria-current': skin === g[0] ? 'true' : null }, [gameLink(g, true), pinBtn(g)]);
+      }));
+      return el('div', { 'class': 'wn-pg-sec' }, [head, grid]);
+    }
+    function draw() {
+      strip.textContent = '';
+      strip.appendChild(el('span', { 'class': 'wn-games-label', text: 'Games' }));
+      GAMES.forEach(function (g) {
+        if (pins.indexOf(g[0]) >= 0 || skin === g[0]) strip.appendChild(gameLink(g, false));
+      });
+      var pinned = GAMES.filter(function (g) { return pins.indexOf(g[0]) >= 0; });
+      var more = GAMES.filter(function (g) { return pins.indexOf(g[0]) < 0; });
+      allBtn.textContent = '';
+      allBtn.appendChild(icon(14, [[0, 0], [5, 0], [10, 0], [0, 5], [5, 5], [10, 5], [0, 10], [5, 10], [10, 10]].map(function (xy) {
+        return svgEl('rect', { x: xy[0], y: xy[1], width: 4, height: 4, rx: 1, fill: 'currentColor' });
+      }), { vb: 14 }));
+      allBtn.appendChild(el('span', { 'class': 'wn-allgames-t', text: 'All games' }));
+      allBtn.appendChild(el('span', { 'class': 'wn-allgames-n', text: String(GAMES.length) }));
+      allBtn.appendChild(icon(10, [svgEl('path', { d: open ? 'M1.5 6.5 5 3l3.5 3.5' : 'M1.5 3.5 5 7l3.5-3.5', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.6', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })], { vb: 10 }));
+
+      var q = el('input', { type: 'search', 'aria-label': 'Search games', placeholder: 'Search ' + GAMES.length + ' games' });
+      q.addEventListener('input', function () { filter(q.value); });
+      var search = el('div', { 'class': 'wn-pg-search' }, [q, el('span', { 'class': 'wn-pg-kbd', text: '/' })]);
+      var inner = el('div', { 'class': 'wn-pg-in' }, [search]);
+      if (pinned.length) inner.appendChild(section('In your menu', pinned, true));
+      if (more.length) inner.appendChild(section('More games', more, !pinned.length));
+      panel.textContent = '';
+      panel.appendChild(inner);
+    }
+    draw();
+    allBtn.addEventListener('click', function (e) { e.stopPropagation(); setOpen(!open); draw(); setOpen(open); });
+    scrim.addEventListener('click', function () { setOpen(false); draw(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && open) { setOpen(false); draw(); allBtn.focus(); return; }
+      var t = e.target && e.target.tagName;
+      if (e.key === '/' && !open && t !== 'INPUT' && t !== 'TEXTAREA' && !(e.target && e.target.isContentEditable)) {
+        e.preventDefault(); setOpen(true); draw(); setOpen(true);
+      }
+    });
+    wrap.appendChild(el('div', { 'class': 'wn-games-row' }, [strip, allBtn]));
+    wrap.appendChild(panel);
+    wrap.appendChild(scrim);
+    return wrap;
+  }
+
   var accountBox = el('div', { 'class': 'wn-account' });
 
   function build() {
@@ -187,14 +314,7 @@
       ['sp', 'shankpit-460', 'Arena shooter \u00b7 Free-for-all', '/shankpit-460/'],
       ['br', 'Bedrock Racers', 'Rocket cars \u00b7 Quaffle', '/bedrockracers/']
     ];
-    var games = el('div', { 'class': 'wn-games' }, [
-      el('div', { 'class': 'wn-games-in' }, [el('span', { 'class': 'wn-games-label', text: 'Games' })].concat(GAMES.map(function (g) {
-        return el('a', { 'class': 'wn-game', href: g[3], 'aria-current': skin === g[0] ? 'true' : null }, [
-          el('b', { text: g[1] }), el('small', { text: g[2] })
-        ]);
-      })))
-    ]);
-    mount.appendChild(games);
+    mount.appendChild(gamesBar(GAMES));
 
     // Row 2: brand bar -- wordmark, section tabs, the ONE account widget.
     var brand = el('a', { 'class': 'wn-brand', href: '/', 'aria-label': 'WOTAN home' }, [
