@@ -140,14 +140,14 @@ const G = await newPage('guest');
   ok((await gs(page, G_STAGE)) === 2, 'Z undoes the last part');
   await fb(page, ...cellXY(0, 1), 'right'); await sleep(50);
   ok((await gs(page, G_STAGE)) === 1, 'a right click removes the part under the pointer');
-  // the budget: Bulwark Plates weigh 5 t, so eight fit in 40 t and the ninth is refused
+  // the budget: Bulwark Plates weigh 5 t, so 21 fit in 105 t and the 22nd is refused
   await fb(page, ...BTN.clear); await sleep(80);
   ok((await gs(page, G_STAGE)) === 0, 'CLEAR empties the hold');
   await key(page, 'u');
   let placed = 0;
-  for (let c = 0; c < 6; c++) for (let r = 0; r < 6 && placed < 9; r++) { if (placed >= 9) break; await fb(page, ...cellXY(r, c)); await sleep(35); placed++; if (r === 5 && c === 0) break; }
+  for (let c = 0; c < 6; c++) for (let r = 0; r < 6 && placed < 22; r++) { await fb(page, ...cellXY(r, c)); await sleep(35); placed++; }
   { const n = await gs(page, G_STAGE), w = await g(page, G_WEIGHT);
-    ok(n === 8 && w === 40, `eight Bulwarks fill the 40 t weight budget and the ninth is refused (${n} parts, ${w} t)`);
+    ok(n === 21 && w === 105, `21 Bulwarks fill the 105 t weight budget and the 22nd is refused (${n} parts, ${w} t)`);
     ok((await g(page, G_TOAST)) === 8, 'the refusal says it is too heavy'); }
   await page.screenshot({ path: SHOT('04-pack-budget') });
   await fb(page, ...BTN.clear); await sleep(80);

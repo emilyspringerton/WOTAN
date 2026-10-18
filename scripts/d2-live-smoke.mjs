@@ -1,5 +1,5 @@
 // Plays one short real session against production (or any WOTAN origin): a guest account, the D2 gateway, the live dw2_server and a live
-// bot, a packed ship (ruleset 2: 1000 credits and 40 tons, an over-budget part refused), READY, the opponent's ship, the fight's EVENTS
+// bot, a packed ship (ruleset 2: 2618 credits and 105 tons, an over-budget part refused), READY, the opponent's ship, the fight's EVENTS
 // frames and every round break answered on the line, the result and the recording. No browser.
 //   node scripts/d2-live-smoke.mjs [https://wotan.okemily.com]
 // Leaves one guest account ("Runner-...") and one recorded match in production, like any player.
@@ -58,8 +58,10 @@ const ship = [[7,0,0,3],[7,0,1,3],[7,0,2,3],[7,0,3,3],[0,1,0,3],[0,1,1,3],[0,1,2
 const place = async (p) => { send(4, ...p); const f = await nextOf([0x84, 0x85], 10000); return f[0] === 0x84 ? 0 : f[1]; };
 for (const p of ship) { if (await place(p) !== 0) throw new Error('placement refused: ' + p); }
 ok(true, `the server accepted all ${ship.length} placements`);
-// the budget is the server's rule, not just the page's: a Siege Cannon weighs 10 t and the ship already carries 38 of 40
-ok((await place([8, 4, 4, 0])) === 3, 'a part that would take the ship over 40 tons is refused as over budget (reason 3)');
+// the budget is the server's rule, not just the page's: keep adding 5 t Bulwark plates (38 t carried of 105) until one is refused
+let refused = 0;
+for (let r = 3; r < 6 && !refused; r++) for (let c = 0; c < 6 && !refused; c++) { send(4, 4, r, c, 0); const f = await nextOf([0x84, 0x85], 10000); if (f[0] === 0x85) refused = f[1]; }
+ok(refused === 3, 'a part that would take the ship over 105 tons is refused as over budget (reason 3)');
 send(6); // READY
 const cs = await next(0x88, 60000);
 ok(cs[1] === 100 && cs[2] === 100 && (cs[3] | cs[4] << 8) === 0, `combat started: both hulls 100, no shield yet (cargo ${cs[7] | cs[8] << 8} / ${cs[9] | cs[10] << 8})`);
