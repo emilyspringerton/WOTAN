@@ -8,6 +8,14 @@ let memory      = null;
 let wasmBytes         = 0;
 let wasmImports         = 0;
 let lastStatus         = -1;
+let view      = null;
+let sock      = null;
+let nextTry         = 0.0;
+let idleSince         = 0.0;
+let identReady          = false;
+let identBusy          = false;
+let identFallback          = false;
+let ssoPending      = null;
 
 export function doc()      {
     return document;
@@ -73,6 +81,7 @@ export function onInstance(result     )       {
     memory = wasm.memory;
     wasmImports = WebAssembly.Module.imports(result.module).length;
     wasm.br_init();
+    view = new DataView(memory.buffer);
     image = new ImageData(new Uint8ClampedArray(memory.buffer, wasm.br_fb_addr(), ((wasm.br_fb_w() * wasm.br_fb_h()) * 4)), wasm.br_fb_w(), wasm.br_fb_h());
     installListeners();
     setHiddenBang("br-load", true);
@@ -86,6 +95,7 @@ export function onInstance(result     )       {
         }
     }
     focusCanvasBang();
+    refreshIdentityBang();
     if (padAllowedP()) {
         window.requestAnimationFrame(padTick);
     }
@@ -94,6 +104,8 @@ export function onInstance(result     )       {
 
 export function tick(t        )       {
     wasm.br_frame(t);
+    ensureSocketBang();
+    pumpOutBang();
     ctx.putImageData(image, 0, 0);
     syncLabelsBang();
     window.requestAnimationFrame(tick);
@@ -268,12 +280,250 @@ export function pollPads()       {
     }
 }
 
+export function win()      {
+    return window;
+}
+
+export function now()         {
+    return performance.now();
+}
+
+export function api()         {
+    return "/api/v1/games/bedrockracers";
+}
+
+export function jsonOrReject(r     )      {
+    return (r.ok ? r.json() : Promise.reject(r.status));
+}
+
+export function postJson(path        , body     )      {
+    {
+        let opts      = {};
+        let hdrs      = {};
+        hdrs["Content-Type"] = "application/json";
+        opts.method = "POST";
+        opts.headers = hdrs;
+        opts.body = JSON.stringify(body);
+        return fetch(("" + api() + path), opts).then(jsonOrReject);
+    }
+}
+
+export function postAuth(path        , token     )      {
+    {
+        let opts      = {};
+        let hdrs      = {};
+        hdrs["Content-Type"] = "application/json";
+        hdrs.Authorization = ("" + "Bearer " + token);
+        opts.method = "POST";
+        opts.headers = hdrs;
+        opts.body = "{}";
+        return fetch(("" + api() + path), opts).then(jsonOrReject);
+    }
+}
+
+export function store()      {
+    return win().localStorage;
+}
+
+export function saveGuestBang(d     )      {
+    {
+        let o      = {};
+        o.player_id = d.player_id;
+        o.guest_secret = d.guest_secret;
+        store().setItem("br_guest", JSON.stringify(o));
+        return d;
+    }
+}
+
+export function registerGuestBang()      {
+    return postJson("/guest-register", {}).then(saveGuestBang);
+}
+
+export function reloginFailed(e     )      {
+    return registerGuestBang();
+}
+
+export function guestFlow(ignored     )      {
+    {
+        let raw      = store().getItem("br_guest");
+        if ((raw == null)) {
+            return registerGuestBang();
+        } else {
+            {
+                let g      = JSON.parse(raw);
+                let body      = {};
+                body.player_id = g.player_id;
+                body.guest_secret = g.guest_secret;
+                return postJson("/guest-login", body).catch(reloginFailed);
+            }
+        }
+    }
+}
+
+export function ssoSession()      {
+    return ((typeof getIdunaSession !== "undefined") ? getIdunaSession() : null);
+}
+
+export function markGuest(d     )      {
+    d.sso = false;
+    return d;
+}
+
+export function ssoAccepted(r     )      {
+    ssoPending.sso = true;
+    return ssoPending;
+}
+
+export function ssoRefused(e     )      {
+    identFallback = true;
+    return guestFlow(0).then(markGuest);
+}
+
+export function identityFlow(ignored     )      {
+    {
+        let s      = ssoSession();
+        if (((!((s == null))) && (!((s.token == null))))) {
+            {
+                let o      = {};
+                o.token = s.token;
+                o.display_name = s.displayName;
+                o.sso = false;
+                ssoPending = o;
+                return postAuth("/sso-exchange", s.token).then(ssoAccepted).catch(ssoRefused);
+            }
+        } else {
+            return guestFlow(ignored).then(markGuest);
+        }
+    }
+}
+
+export function putAsciiBang(s     , addr        , cap        )         {
+    {
+        let u8      = new Uint8Array(memory.buffer, addr, cap);
+        let n         = Math.min(cap, s.length);
+        {
+            let i         = 0;
+            while (true) {
+                if ((i < n)) {
+                    u8[i] = Math.min(126, s.charCodeAt(i));
+                    i = (i + 1);
+                    continue;
+                }
+                break;
+            }
+        }
+        return n;
+    }
+}
+
+export function applyIdentityBang(d     )       {
+    wasm.br_name_set(putAsciiBang(d.display_name, wasm.br_name_addr(), 24));
+    wasm.br_token_set(putAsciiBang(d.token, wasm.br_token_addr(), 2000));
+    identReady = true;
+    identBusy = false;
+}
+
+export function identityFailed(e     )       {
+    identBusy = false;
+    nextTry = (now() + 5000.0);
+}
+
+export function refreshIdentityBang()       {
+    if ((!(identBusy))) {
+        identBusy = true;
+        Promise.resolve(0).then(identityFlow).then(applyIdentityBang).catch(identityFailed);
+    }
+}
+
+export function socketUrl()         {
+    return ("" + ((win().location.protocol === "https:") ? "wss://" : "ws://") + win().location.host + "/api/v1/bedrockracers/play");
+}
+
+export function onOpen(e     )       {
+    wasm.br_net_socket(2);
+}
+
+export function onMessage(e     )       {
+    {
+        let data      = e.data;
+        let len      = data.byteLength;
+        if ((len <= 2000)) {
+            new Uint8Array(memory.buffer, wasm.br_net_in_addr(), len).set(new Uint8Array(data));
+            wasm.br_net_recv(len);
+        }
+    }
+}
+
+export function onClose(e     )       {
+    sock = null;
+    nextTry = (now() + 3000.0);
+    identReady = false;
+    wasm.br_token_set(0);
+    wasm.br_net_socket(3);
+    refreshIdentityBang();
+}
+
+export function openSocketBang()       {
+    wasm.br_net_socket(1);
+    sock = new WebSocket(socketUrl());
+    sock.binaryType = "arraybuffer";
+    sock.addEventListener("open", onOpen);
+    sock.addEventListener("message", onMessage);
+    sock.addEventListener("close", onClose);
+    sock.addEventListener("error", onClose);
+}
+
+export function ensureSocketBang()       {
+    {
+        let t         = now();
+        if ((wasm.br_net_wanted() === 1)) {
+            idleSince = t;
+            if ((((sock == null) && (t >= nextTry)) && identReady)) {
+                openSocketBang();
+            }
+        } else {
+            if (((!((sock == null))) && ((t - idleSince) > 20000.0))) {
+                sock.close();
+            }
+        }
+    }
+}
+
+export function pumpOutBang()       {
+    {
+        let total      = wasm.br_net_out_len();
+        if ((total > 0)) {
+            {
+                let open          = ((!((sock == null))) && (sock.readyState === 1));
+                let base      = wasm.br_net_out_addr();
+                if (open) {
+                    {
+                        let off         = 0;
+                        while (true) {
+                            if (((off + 2) < total)) {
+                                {
+                                    let len      = (view.getUint8((base + off)) + (256 * view.getUint8((base + (off + 1)))));
+                                    sock.send(new Uint8Array(memory.buffer, (base + (off + 2)), len));
+                                    off = (off + (2 + len));
+                                    continue;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                wasm.br_net_out_clear();
+            }
+        }
+    }
+}
+
 export function syncLabelsBang()       {
     {
         let st      = wasm.br_status();
         if ((st !== lastStatus)) {
             lastStatus = st;
-            setTextBang("br-pill", ((st === 1) ? "In a match" : ((st === 2) ? "Watching bots" : ((st === 3) ? "Paused" : ((st === 4) ? "Match over" : "Ready")))));
+            setTextBang("br-pill", ((st === 1) ? "In a match" : ((st === 2) ? "Watching bots" : ((st === 3) ? "Paused" : ((st === 4) ? "Match over" : ((st === 5) ? "Online match" : ((st === 6) ? "Searching for a match" : ((st === 7) ? "Match found" : "Ready"))))))));
         }
     }
 }
