@@ -41,7 +41,7 @@ export async function startIduna(extraEnv = {}) {
     await new Promise((r) => setTimeout(r, 500));
   }
   return {
-    base, port, dbPath, log: () => log,
+    base, port, dbPath, pid: proc.pid, log: () => log,
     stop: () => proc.kill(),
     // a generic IDUNA account the way WOTAN's SSO page registers one, and the SSO JWT a signed-in visitor holds
     async ssoIdentity(email) {
