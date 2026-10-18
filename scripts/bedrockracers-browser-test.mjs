@@ -48,7 +48,10 @@ ok(/Bedrock Racers/.test(await page.locator('#wotan-nav .wn-game[aria-current="t
 ok((await page.locator('#wotan-nav .wn-tabs a[aria-current="page"]').textContent()) === 'Play', 'the Play tab is current');
 ok(await page.locator('#br-fullscreen').isEnabled(), 'the fullscreen button is enabled once the game runs');
 await sleep(500);
+ok((await page.evaluate(() => window.scrollY)) === 0, 'loading the page does not scroll it (the game takes keyboard focus with preventScroll)');
 ok(distinct(await pixels()) > 40, 'the title is a picture, not a blank');
+{ const box = await page.locator('#br-canvas').boundingBox(); await page.mouse.click(box.x + box.width / 2, box.y + 40); await sleep(150);
+  ok((await page.evaluate(() => window.scrollY)) === 0, 'clicking the game does not scroll the page either'); }
 await page.screenshot({ path: path.join(outdir, '01-page.png'), fullPage: false });
 await page.keyboard.press('Enter');
 ok(await waitPill('In a match'), 'Enter starts a match');

@@ -44,6 +44,14 @@ export function failBang(msg     )       {
 export function ignoreBang(e     )       {
 }
 
+export function focusCanvasBang()       {
+    {
+        let opts      = {};
+        opts.preventScroll = true;
+        canvas.focus(opts);
+    }
+}
+
 export function boot(canvasId        , wasmUrl        )       {
     canvas = el(canvasId);
     ctx = canvas.getContext("2d");
@@ -77,7 +85,7 @@ export function onInstance(result     )       {
             b.addEventListener("click", onFullscreen);
         }
     }
-    canvas.focus();
+    focusCanvasBang();
     window.requestAnimationFrame(tick);
 }
 
@@ -146,7 +154,7 @@ export function onMousemove(e     )       {
 export function onMousedown(e     )       {
     onMousemove(e);
     wasm.br_button(e.button, 1);
-    canvas.focus();
+    focusCanvasBang();
     e.preventDefault();
 }
 
