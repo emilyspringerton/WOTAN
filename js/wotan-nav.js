@@ -304,11 +304,11 @@
 
     // Row 1: GAMES bar -- the three games, each with a one-line subtitle, active one underlined.
     var GAMES = [
-      ['dw', 'Deadweight', 'Drafts \u00b7 Matches \u00b7 Duels', '/decks.html'],
+      ['dw', 'Deadweight', 'Drafts \u00b7 Matches \u00b7 Duels', '/DEADWEIGHT/'],
       ['hs', 'Hearthstone', 'Shared deck library', '/hearthstone/'],
-      ['rg', 'Redgarden', 'Knights of the Void', '/redgarden/'],
-      ['d2', 'D2', 'Hold Battles \u00b7 Backpack battler', '/d2/'],
-      ['em', 'EMPIRE', 'Cards \u00b7 Towers \u00b7 Standing', '/empire/'],
+      ['rg', 'Redgarden', 'Knights of the Void', '/redgarden/play.html'],
+      ['d2', 'D2', 'Hold Battles \u00b7 Backpack battler', '/d2/play.html'],
+      ['em', 'EMPIRE', 'Cards \u00b7 Towers \u00b7 Standing', '/empire/play.html'],
       ['gfd', 'GoblinFoxDragon', 'MUD \u00b7 Hat Store', '/GFD/'],
       ['bp', 'Brawlpit', 'Arena fighter \u00b7 Hat Store', '/BRAWLPIT/'],
       ['sp', 'shankpit-460', 'Arena shooter \u00b7 Free-for-all', '/shankpit-460/'],
