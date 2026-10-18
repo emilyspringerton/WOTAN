@@ -132,6 +132,7 @@
         <select id="f-mode">
           <option value="">All modes</option>
           <option value="draft">Draft</option>
+          <option value="constructed">Constructed</option>
           <option value="card">Random catalog</option>
         </select>
       </div>
@@ -151,6 +152,8 @@
 
 <script>
   var $ = function (id) { return document.getElementById(id); };
+  // the match log's "mode": draft, constructed (DEADWEIGHT HELLO mode 3, 2026-10-18) or absent (the random catalog queue)
+  function modeLabel(mode) { return mode === 'draft' ? 'Draft' : mode === 'constructed' ? 'Constructed' : 'Random'; }
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
 
   /* ---- card catalog + emoji (mirrors decks.html's cardOf/KIND_LABEL convention) ----
@@ -189,7 +192,7 @@
           '<td>' + (w === 0 ? '<span class="win">' + n0 + '</span>' : '<span class="loss">' + n0 + '</span>') + '<span class="kindbadge ' + k0 + '">' + k0 + '</span></td>' +
           '<td>' + (w === 1 ? '<span class="win">' + n1 + '</span>' : '<span class="loss">' + n1 + '</span>') + '<span class="kindbadge ' + k1 + '">' + k1 + '</span></td>' +
           '<td>' + (w < 0 ? '<span class="draw">Draw</span>' : '') + '</td>' +
-          '<td><span class="modebadge">' + (m.mode === 'draft' ? 'Draft' : 'Random') + '</span></td>' +
+          '<td><span class="modebadge">' + modeLabel(m.mode) + '</span></td>' +
           '<td class="num">' + m.rounds + '</td>' +
           '<td class="num">#' + m.match_id + '</td>' +
           '</tr>';
@@ -268,7 +271,7 @@
     var html = '';
     html += '<div class="vs-head">' +
       '<div class="seat-name seat0">' + n0 + '</div>' +
-      '<div class="vs-mid">' + (replay.mode === 'draft' ? 'Draft' : 'Random') + ' &middot; ' + winLabel + ' &middot; ' + reasonLabel + ' &middot; match #' + replay.match_id + '</div>' +
+      '<div class="vs-mid">' + modeLabel(replay.mode) + ' &middot; ' + winLabel + ' &middot; ' + reasonLabel + ' &middot; match #' + replay.match_id + '</div>' +
       '<div class="seat-name seat1">' + n1 + '</div>' +
       '</div>';
 
