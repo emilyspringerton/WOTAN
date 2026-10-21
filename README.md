@@ -89,9 +89,14 @@ already signed in.
   renderer, the HUD and the screens -- is one WebAssembly module compiled from PARENA (`PARENA/stdlib/bedrockracers/`): no malloc,
   no imports. The page's only JavaScript is `bedrockracers/br-host.js`, *generated* from PARENA like the others. Rebuild with
   `scripts/build-bedrockracers.sh` and commit both outputs; `scripts/bedrockracers-browser-test.mjs` drives the real page in
-  headless Chromium. **Honest limits:** local play against bots only -- there is no sign-in, matchmaking or stat tracking yet (the
-  second pass); verified in Node and headless Chromium only (not Firefox/Safari/phones; no touch controls; the gamepad path was
-  driven through a Gamepad API shim); no audio.
+  headless Chromium. **Online (2026-10-21):** PLAY queues you on IDUNA (`/api/v1/bedrockracers/play`, a WebSocket through the
+  Gateway's `/api/` route): up to four teams in one lockstep room, the server steps the same wasm as the referee and checks a
+  hash every 250 ticks, a person who drops becomes a bot at an exact tick, and a signed-in match is rated (4-team Elo) and
+  recorded with a replay; an IDUNA that is down or old just leaves PLAY as a bot match. `scripts/bedrockracers-online-test.mjs`
+  plays two Chromium pages against a real IDUNA binary; `scripts/bedrockracers-live-smoke.mjs [origin]` does the same against a
+  deployed site. **Honest limits:** no ladder, Matches or profile pages yet (IDUNA's stats routes are live and unread); only two
+  humans have been tested in a room; verified in Node and headless Chromium only (not Firefox/Safari/phones; no touch controls;
+  the gamepad path was driven through a Gamepad API shim); no audio.
 - `/store.html` — the BRAWLPIT hat store. Login is a real redirect to IDUNA's own hosted SSO
   page (`iam.okemily.com`) — this page has no password field of its own.
 - **`/profile.html` — public DEADWEIGHT player profiles** (no login): look up any player by
