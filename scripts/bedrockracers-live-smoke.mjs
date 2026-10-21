@@ -2,8 +2,8 @@
 // guests, PLAY on both, the live IDUNA seats them in one room, ~12 s of lockstep play (the server's hash checks end either copy with ERROR 6
 // if it drifts from the referee), then one leaves and the other plays on. Nothing is stubbed; use it after every deploy of either side.
 //   NODE_PATH=<dir with node_modules/playwright> PLAYWRIGHT_BROWSERS_PATH=... node scripts/bedrockracers-live-smoke.mjs [https://wotan.okemily.com]
-// Leaves two guest accounts and one match row in the target's IDUNA, like any two players. The room waits out the lobby timer (a few seconds
-// to half a minute) before it starts.
+// Leaves two guest accounts in the target's IDUNA, like any two players; the match is abandoned (everyone leaves), and IDUNA records nothing
+// for a room that empties, so no match row. The room waits out the lobby timer (a few seconds to half a minute) before it starts.
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
