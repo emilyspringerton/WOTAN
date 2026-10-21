@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-21
+
+- feat(bedrockracers): **online multiplayer is live at `/bedrockracers/`** (founder real-time: "we need to ship multiplayer bedrock racers"). PLAY now seats you in a lockstep room on IDUNA (`/api/v1/bedrockracers/play`, merged and deployed first: `/status` says `configured: true`), up to four teams, a dropped person becomes a bot at an exact tick, and a signed-in match is rated. An old or unreachable IDUNA still leaves PLAY as a bot match. Ships `e673f26` (the online build + `scripts/bedrockracers-online-test.mjs`) with the two small nav/home commits that rode the same branch (top game tabs and the Redgarden card land on the play page). Tested: the offline page test 13/13, and the two-Chromium-pages online test against a real IDUNA built from the deployed tree 10/10 (both seated, 12 s of play with the server's hash checks passing, drop-to-bot). Not built yet: ladder, Matches and profile pages (IDUNA's stats routes are live and unread).
+
 ## 2026-10-18
 
 - feat(bedrockracers): **Bedrock Racers is playable at `/bedrockracers/`** (founder real-time: "MAKE IT NICE VERY TOUGHTFUL VERY DEMURE"). Four teams of three rocket cars, one Quaffle held by a magnet (`F` / right mouse), four upside-down goals, ON FIRE. `bedrockracers/index.html` + `bedrockracers.wasm` + `br-host.js` (the wasm is `PARENA/stdlib/bedrockracers/web`, the host is generated from PARENA), `css/wotan-br.css`, a `br` nav skin + Games-bar entry, a home-page card, `scripts/build-bedrockracers.sh`, `scripts/bedrockracers-browser-test.mjs` (real Chromium, 13 checks). Local play against bots only: no sign-in, matchmaking, stats or audio yet.
