@@ -1,0 +1,132 @@
+name: Pages
+
+# WOTAN is a static site -- 186 tracked files, no site build step -- so publishing to Pages is a copy,
+# not a compile. Two things the copy has to get right, both found by reading the site rather than assuming:
+#
+#   1. The pages use ROOT-ABSOLUTE paths: 71 refs of the form href="/css/wotan-theme.css",
+#      src="/js/shankpit-net.js", href="/store.html". That is correct for the box, where nginx serves
+#      WOTAN at the domain root (wotan.okemily.com). A *project* Pages site lives at
+#      https://<owner>.github.io/WOTAN/, where "/css" means the domain root and 404s. So the staging
+#      copy rebases those refs onto /WOTAN/ and the repo keeps its absolute paths untouched.
+#      There are zero absolute "/api/" refs, and this step REFUSES to run if one appears -- rewriting an
+#      API call would hide a real bug behind a path that still 404s.
+#
+#   2. Pages has to be switched on for the repo. configure-pages' `enablement: true` does that with this
+#      workflow's own token (pages:write), so this works on a repo that has never had Pages enabled.
+#
+# This is NOT the same pipeline as .github/workflows/deploy.yml: that one builds the static-site image
+# and pushes it to Artifact Registry for the in-cluster gitops loop. This one publishes the site and cuts
+# a versioned release. Both can run on the same push.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md']
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One Pages deployment at a time, and never cancel one mid-flight: a cancelled deploy can leave the
+# environment pointing at a half-uploaded artifact.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stage the site and rebase its root-absolute paths onto the project base
+        run: |
+          set -euo pipefail
+          base="/${GITHUB_REPOSITORY#*/}/"
+          site="$RUNNER_TEMP/site"
+          mkdir -p "$site"
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'node_modules' ./ "$site/"
+          cd "$site"
+
+          if grep -rIn '"/api/' --include='*.html' . ; then
+            echo "::error::absolute /api/ reference found -- it must be fixed in the repo, not rewritten"
+            exit 1
+          fi
+
+          before="$(grep -rho '\(href\|src\)="/[^"]*"' --include='*.html' . | wc -l)"
+          # NOTE the '#' delimiter. GNU sed reads "\|" as alternation ONLY when the delimiter is not "|";
+          # with s|...\|...| the "\|" is an escaped delimiter, the pattern never matches, and the rewrite
+          # silently does nothing -- which is what this step did until the post-check below caught it.
+          find . -name '*.html' -print0 | xargs -0 sed -i "s#\(href\|src\)=\"/#\1=\"${base}#g"
+          # "not at the domain root" -- the previous version counted refs matching ="/, which includes the
+          # just-rebased ="${base}..." ones, so it would have failed every build.
+          after="$(grep -rho '\(href\|src\)="/[^"]*"' --include='*.html' . | grep -vF "=\"${base}" | wc -l)"
+          echo "rebased $before root-absolute refs to ${base}; $after still at the domain root"
+          [ "$after" = "0" ] || { echo "::error::$after root-absolute refs survived the rewrite"; exit 1; }
+
+          # Every rebased target must exist in the artifact, or the deploy would publish dead links.
+          missing=0
+          for path in $(grep -rho "\(href\|src\)=\"${base}[^\"]*\"" --include='*.html' . \
+                        | sed "s|.*=\"||; s|\"$||; s|^${base}||; s|[?#].*$||" | sort -u); do
+            [ -e "$path" ] || { echo "::warning::rebased ref points at nothing: $path"; missing=$((missing+1)); }
+          done
+          echo "dangling refs: $missing"
+
+          # Pages runs Jekyll unless this exists; Jekyll would drop files starting with an underscore.
+          touch .nojekyll
+          echo "staged $(find . -type f | wc -l) files, $(du -sh . | cut -f1)"
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  release:
+    # Only after the site is actually live: a release that claims a deploy which failed is worse than none.
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cut the next patch release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+          latest="$(git tag --list 'v*' --sort=-v:refname | head -1)"
+          if [[ "$latest" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            next="v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))"
+          else
+            next="v0.1.0"
+          fi
+          if git rev-parse -q --verify "refs/tags/$next" >/dev/null; then
+            echo "tag $next already exists -- not releasing again"
+            exit 0
+          fi
+          echo "latest=$latest next=$next"
+          git config user.name "WOTAN Release"
+          git config user.email "release@einhorn.industrial"
+          git tag -a "$next" -m "WOTAN $next" "$GITHUB_SHA"
+          git push origin "$next"
+          # Notes come from the commit log since the previous tag; nothing is hand-written or guessed.
+          gh release create "$next" --title "$next" --generate-notes --verify-tag
