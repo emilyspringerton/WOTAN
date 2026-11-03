@@ -3,11 +3,15 @@
 // scripts/shankpit-net-test.js can never drift apart.
 //
 // The feed is served by SHANKPIT's own tools/shankpit_netd.c -- the citizens' DEADWEIGHT ladder as the
-// SHANKPIT process publishes it (SHANKPIT/packages/simulation/dw_net.c, schema 1). It is a READ-ONLY
+// SHANKPIT process publishes it (SHANKPIT/packages/simulation/dw_net.c, schema 2). It is a READ-ONLY
 // view of one world; identities and real match history stay in IDUNA.
 //
 //   GET /api/v1/shankpit-net/deadweight -> {schema, generated_ms, population, meta, records[],
 //                                           challenges[], results[], recent[]}
+//
+// Schema 2 added `rating` (the ladder's own field, from PARENA/stdlib/deadweight/rating.prn). The
+// export deliberately does NOT ship a pre-sorted ranking: the order is (rating desc, wins desc, pid
+// asc) and it is computed here, once, so two pages can never disagree about who is first.
 //   GET /api/v1/shankpit-net/health     -> {ok, snapshot, snapshot_bytes, snapshot_age_ms, schema}
 //   Errors: {error:<prose>}  -- the daemon's own sentence, which friendlyError passes through.
 (function (root) {
@@ -117,7 +121,7 @@
   // a broken deploy looks like an empty world.
   function describe(raw, now) {
     if (!raw || typeof raw !== 'object') throw new Error('empty snapshot');
-    if (num(raw.schema, -1) !== 1) throw new Error('unknown snapshot schema ' + raw.schema);
+    if (num(raw.schema, -1) !== 2) throw new Error('unknown snapshot schema ' + raw.schema);
     var at = num(now, Date.now());
     var records = Array.isArray(raw.records) ? raw.records.map(function (r) {
       var games = num(r.games), wins = num(r.wins);
@@ -130,15 +134,20 @@
         wins: wins,
         games: games,
         winratePermille: num(r.winrate_permille, 500),
+        rating: num(r.rating, 0),
+        unknownRating: !(num(r.rating) > 0),
         unknownRecord: games === 0,
         aggression: num(r.aggression),
         deck: Array.isArray(r.deck) ? r.deck.slice() : [],
         mix: deckMix(r.deck)
       };
     }) : [];
+    // THE LADDER'S ORDER, and the same tie-break NOOBTOPIA's own board uses (rating, then wins, then
+    // pid): the number a player climbs comes first, so a page and the game never rank the same
+    // population differently.
     records.sort(function (a, b) {
+      if (b.rating !== a.rating) return b.rating - a.rating;
       if (b.wins !== a.wins) return b.wins - a.wins;
-      if (b.winratePermille !== a.winratePermille) return b.winratePermille - a.winratePermille;
       return a.pid - b.pid;
     });
 
@@ -177,7 +186,7 @@
     records.forEach(function (r) { byPid[r.pid] = r.name; });
 
     return {
-      schema: 1,
+      schema: 2,
       generatedMs: num(raw.generated_ms),
       population: {
         citizens: num((raw.population || {}).citizens),

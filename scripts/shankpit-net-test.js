@@ -117,7 +117,7 @@ async function waitForHealth(deadline) {
     // ---- the module turns that JSON into the page's model, with no invented numbers ----
     const raw = JSON.parse(snap.body);
     const model = NET.describe(raw, Number(raw.generated_ms) + 1200);
-    eq(model.schema, 1, 'model schema');
+    eq(model.schema, 2, 'model schema');
     ok(model.records.length >= 1, 'the model has the citizen the game created');
     const citizen = model.records.filter((r) => !r.player)[0];
     ok(!!citizen, 'a citizen record survives the round trip');
@@ -127,6 +127,15 @@ async function waitForHealth(deadline) {
     eq(citizen.mix.total, 16, 'the deck mix counts sixteen cards');
     eq(citizen.games >= 1, true, 'the match the game played is on the record');
     ok(citizen.winratePermille >= 0 && citizen.winratePermille <= 1000, 'the win rate is a real permille');
+    // schema 2: the number a leaderboard climbs, straight off the ladder (dw_rating.c <- rating.prn)
+    ok(citizen.rating >= 100, 'the record carries the ladder rating');
+    eq(citizen.unknownRating, false, 'a rated record is not flagged unknown');
+    // and the page's order is the ladder's order, not the JSON's arrival order
+    for (let i = 1; i < model.records.length; i++) {
+      ok(model.records[i - 1].rating >= model.records[i].rating, 'records are ordered by rating');
+    }
+    // the JSON on disk really carries it -- the model is not inventing a number
+    ok(/"rating":\d+/.test(snap.body), 'the snapshot itself carries a rating field');
 
     eq(model.population.citizens, 1, 'population citizens');
     eq(model.population.players, 1, 'population players');

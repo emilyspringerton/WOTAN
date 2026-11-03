@@ -91,14 +91,15 @@
 
     function renderLadder(model) {
       if (model.empty) { $('ladder').innerHTML = '<p class="msg">No citizens have joined this world\'s ladder yet.</p>'; return; }
-      var html = '<table><thead><tr><th>#</th><th>Citizen</th><th>Path</th><th class="num">W&ndash;L</th>' +
-        '<th class="num">Win rate</th><th>Deck it built for itself</th></tr></thead><tbody>';
+      var html = '<table><thead><tr><th>#</th><th>Citizen</th><th>Path</th><th class="num">Rating</th>' +
+        '<th class="num">W&ndash;L</th><th class="num">Win rate</th><th>Deck it built for itself</th></tr></thead><tbody>';
       model.records.forEach(function (r, i) {
         var mix = r.mix, total = mix.total || 1;
         html += '<tr><td class="rank' + (i === 0 ? ' top1' : '') + '">' + (i + 1) + '</td>' +
           '<td><span class="who' + (r.hero ? ' hero' : '') + '">' + esc(r.name) + '</span>' +
           (r.player ? ' <span class="path">player</span>' : '') + '</td>' +
           '<td><span class="path">' + esc(r.path) + '</span></td>' +
+          '<td class="num">' + (r.unknownRating ? '&mdash;' : r.rating) + '</td>' +
           '<td class="num">' + r.wins + '&ndash;' + (r.games - r.wins) + '</td>' +
           '<td class="num">' + (r.unknownRecord ? '&mdash;' : ShankpitNet.pct(r.winratePermille)) + '</td>' +
           '<td><div class="mix">' +
