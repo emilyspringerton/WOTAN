@@ -55,14 +55,16 @@ jobs:
             exit 1
           fi
 
-          before="$(grep -rho '\(href\|src\)="/[^"]*"' --include='*.html' . | wc -l)"
+          # `|| true` on both counts: under `set -e` + `pipefail` a `grep`/`grep -v` that selects nothing exits
+          # 1 and aborts the step -- which burned the first real run, failing exactly when the rewrite WORKED.
+          before="$(grep -rho '\(href\|src\)="/[^"]*"' --include='*.html' . | wc -l || true)"
           # NOTE the '#' delimiter. GNU sed reads "\|" as alternation ONLY when the delimiter is not "|";
           # with s|...\|...| the "\|" is an escaped delimiter, the pattern never matches, and the rewrite
           # silently does nothing -- which is what this step did until the post-check below caught it.
           find . -name '*.html' -print0 | xargs -0 sed -i "s#\(href\|src\)=\"/#\1=\"${base}#g"
           # "not at the domain root" -- the previous version counted refs matching ="/, which includes the
           # just-rebased ="${base}..." ones, so it would have failed every build.
-          after="$(grep -rho '\(href\|src\)="/[^"]*"' --include='*.html' . | grep -vF "=\"${base}" | wc -l)"
+          after="$(grep -rho '\(href\|src\)="/[^"]*"' --include='*.html' . | grep -vF "=\"${base}" | wc -l || true)"
           echo "rebased $before root-absolute refs to ${base}; $after still at the domain root"
           [ "$after" = "0" ] || { echo "::error::$after root-absolute refs survived the rewrite"; exit 1; }
 
