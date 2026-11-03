@@ -9,7 +9,9 @@
 //   GET /api/v1/shankpit-net/deadweight -> {schema, generated_ms, population, meta, records[],
 //                                           challenges[], results[], recent[]}
 //
-// Schema 2 added `rating` (the ladder's own field, from PARENA/stdlib/deadweight/rating.prn). The
+// Schema 3 added `stage` -- the world's own tournament bracket (`"stage":null` when nobody is running
+// one), which is what makes an esports stage publishable at all: this page can only read the file the
+// game writes. Schema 2 added `rating` (the ladder's own field, from PARENA/stdlib/deadweight/rating.prn). The
 // export deliberately does NOT ship a pre-sorted ranking: the order is (rating desc, wins desc, pid
 // asc) and it is computed here, once, so two pages can never disagree about who is first.
 //   GET /api/v1/shankpit-net/health     -> {ok, snapshot, snapshot_bytes, snapshot_age_ms, schema}
@@ -121,7 +123,7 @@
   // a broken deploy looks like an empty world.
   function describe(raw, now) {
     if (!raw || typeof raw !== 'object') throw new Error('empty snapshot');
-    if (num(raw.schema, -1) !== 2) throw new Error('unknown snapshot schema ' + raw.schema);
+    if (num(raw.schema, -1) !== 3) throw new Error('unknown snapshot schema ' + raw.schema);
     var at = num(now, Date.now());
     var records = Array.isArray(raw.records) ? raw.records.map(function (r) {
       var games = num(r.games), wins = num(r.wins);
@@ -171,6 +173,31 @@
       };
     }) : [];
 
+    // THE STAGE: the world's bracket, or null. A page that invents an "empty" stage instead of showing
+    // nothing is a page that cannot tell a quiet night from a server that stopped publishing.
+    var stage = null;
+    if (raw.stage && typeof raw.stage === 'object') {
+      stage = {
+        name: String(raw.stage.name || 'THE PIT'),
+        round: num(raw.stage.round),
+        rounds: num(raw.stage.rounds),
+        roundName: String(raw.stage.round_name || ''),
+        entrants: num(raw.stage.entrants),
+        byes: num(raw.stage.byes),
+        over: !!raw.stage.over,
+        champion: num(raw.stage.champion, -1),
+        match: (raw.stage.match && typeof raw.stage.match === 'object')
+          ? { aPid: num(raw.stage.match.a_pid), bPid: num(raw.stage.match.b_pid) }
+          : null,
+        results: Array.isArray(raw.stage.results) ? raw.stage.results.map(function (r) {
+          return {
+            round: num(r.round), aPid: num(r.a_pid), bPid: num(r.b_pid),
+            winnerPid: num(r.winner_pid, -1), played: !!r.played
+          };
+        }) : []
+      };
+    }
+
     var metaRaw = raw.meta || {};
     var meta = {
       kind: num(metaRaw.kind, -1),
@@ -186,13 +213,14 @@
     records.forEach(function (r) { byPid[r.pid] = r.name; });
 
     return {
-      schema: 2,
+      schema: 3,
       generatedMs: num(raw.generated_ms),
       population: {
         citizens: num((raw.population || {}).citizens),
         players: num((raw.population || {}).players)
       },
       meta: meta,
+      stage: stage,
       records: records,
       challenges: challenges,
       results: results,

@@ -117,7 +117,7 @@ async function waitForHealth(deadline) {
     // ---- the module turns that JSON into the page's model, with no invented numbers ----
     const raw = JSON.parse(snap.body);
     const model = NET.describe(raw, Number(raw.generated_ms) + 1200);
-    eq(model.schema, 2, 'model schema');
+    eq(model.schema, 3, 'model schema');
     ok(model.records.length >= 1, 'the model has the citizen the game created');
     const citizen = model.records.filter((r) => !r.player)[0];
     ok(!!citizen, 'a citizen record survives the round trip');
@@ -136,6 +136,27 @@ async function waitForHealth(deadline) {
     }
     // the JSON on disk really carries it -- the model is not inventing a number
     ok(/"rating":\d+/.test(snap.body), 'the snapshot itself carries a rating field');
+
+    // ---- schema 3: the stage travels in the same snapshot ----
+    ok(/"stage":/.test(snap.body), 'the snapshot carries a stage key');
+    eq(model.stage, null, 'no stage is running in this snapshot, and it says so instead of inventing one');
+    {
+      const staged = NET.describe(Object.assign({}, raw, {
+        stage: {
+          name: 'THE PIT', round: 1, rounds: 2, entrants: 4, byes: 0, over: 0, champion: -1,
+          round_name: 'SEMIFINAL',
+          match: { a_pid: 4, b_pid: 0 },
+          results: [{ round: 1, a_pid: 4, b_pid: 0, winner_pid: 4, played: 1 }]
+        }
+      }), 5200);
+      eq(staged.stage.roundName, 'SEMIFINAL', 'the round is named by the world');
+      eq(staged.stage.match.aPid, 4, 'the match on the stage is read');
+      eq(staged.stage.match.bPid, 0, 'both seats of the stage match are read');
+      eq(staged.stage.results[0].winnerPid, 4, 'a bracket result is read');
+      eq(staged.stage.results[0].played, true, 'a played match is not mistaken for a bye');
+      eq(staged.stage.over, false, 'a running stage is not reported over');
+      eq(staged.stage.entrants, 4, 'the field size is carried');
+    }
 
     eq(model.population.citizens, 1, 'population citizens');
     eq(model.population.players, 1, 'population players');
@@ -160,6 +181,7 @@ async function waitForHealth(deadline) {
     const page = fs.readFileSync(path.join(ROOT, 'shankpit-citizens.html'), 'utf8');
     ok(page.includes('/js/shankpit-net.js'), 'the page loads the module');
     ok(page.includes('data-skin="dw"') && page.includes('data-section="citizens"'), 'the page mounts the nav as Citizens');
+    ok(page.includes('id=\"stage\"'), 'the page has a stage section');
     ok(page.includes('/api/v1/shankpit/leaderboard'), 'the page also reads IDUNA\'s real SHANKPIT leaderboard');
     const nav = fs.readFileSync(path.join(ROOT, 'js/wotan-nav.js'), 'utf8');
     ok(nav.includes("'/shankpit-citizens.html'"), 'the nav has a Citizens tab');

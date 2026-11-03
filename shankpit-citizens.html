@@ -59,6 +59,9 @@
   <h2 class="sec">The ladder</h2>
   <div id="ladder"><p class="msg">Loading the ladder&hellip;</p></div>
 
+  <h2 class="sec">The stage</h2>
+  <div id="stage"><p class="msg">Loading the bracket&hellip;</p></div>
+
   <div class="panels">
     <div>
       <h2 class="sec">Live challenges</h2>
@@ -111,6 +114,31 @@
       $('ladder').innerHTML = html + '</tbody></table>';
     }
 
+    // THE STAGE: the world's own tournament bracket, published through the same snapshot. `null` means no
+    // tournament is running -- said plainly, because an invented empty bracket is a lie about a quiet night.
+    function renderStage(model) {
+      var t = model.stage;
+      if (!t) { $('stage').innerHTML = '<p class="msg">No tournament is running in this world right now.</p>'; return; }
+      var html = '<p class="msg">' + esc(t.name) + ' &middot; ' + esc(t.roundName) +
+        ' &middot; round ' + t.round + ' of ' + t.rounds + ' &middot; ' + t.entrants + ' entrants' +
+        (t.byes ? ' (' + t.byes + ' bye' + (t.byes === 1 ? '' : 's') + ')' : '') + '</p>';
+      if (t.over) {
+        html += '<p><span class="who hero">CHAMPION: ' + esc(model.nameFor(t.champion)) + '</span></p>';
+      } else if (t.match) {
+        html += '<p>On stage: ' + esc(model.nameFor(t.match.aPid)) + ' vs ' + esc(model.nameFor(t.match.bPid)) + '</p>';
+      }
+      if (t.results.length) {
+        html += '<table><thead><tr><th>Round</th><th>Match</th><th>Went through</th></tr></thead><tbody>';
+        t.results.forEach(function (r) {
+          html += '<tr><td class="rank">R' + r.round + '</td>' +
+            '<td>' + esc(model.nameFor(r.aPid)) + ' vs ' + esc(model.nameFor(r.bPid)) + '</td>' +
+            '<td>' + (r.played ? '' : 'bye &middot; ') + esc(model.nameFor(r.winnerPid)) + '</td></tr>';
+        });
+        html += '</tbody></table>';
+      }
+      $('stage').innerHTML = html;
+    }
+
     function renderChallenges(model) {
       if (!model.challenges.length) { $('challenges').innerHTML = '<li class="msg">Nobody is waiting on an answer right now.</li>'; return; }
       $('challenges').innerHTML = model.challenges.map(function (c) {
@@ -133,11 +161,12 @@
       $('metakind').textContent = model.meta.plays > 0 ? model.meta.kindName : '\u2014';
       $('matches').textContent = model.results.reduce(function (n, r) { return n + r.matches; }, 0);
       renderLadder(model);
+      renderStage(model);
       renderChallenges(model);
       renderRecent(model);
     }).catch(function (err) {
       var msg = ShankpitNet.friendlyError(err);
-      ['ladder', 'challenges', 'recent'].forEach(function (id) { $(id).innerHTML = '<p class="msg">' + esc(msg) + '</p>'; });
+      ['ladder', 'stage', 'challenges', 'recent'].forEach(function (id) { $(id).innerHTML = '<p class="msg">' + esc(msg) + '</p>'; });
     });
 
     // IDUNA's own SHANKPIT ladder: the real accounts, next to the citizens who are not accounts.
