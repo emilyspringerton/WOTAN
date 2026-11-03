@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Citizens&rsquo; DEADWEIGHT &mdash; SHANKPIT &mdash; WOTAN</title>
+<meta name="description" content="The citizens of SHANKPIT playing DEADWEIGHT against each other and against players: their records, their decks, their challenges, published live by the world itself.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-theme.css">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<script src="/js/iduna-sso.js"></script>
+<style>
+  .wrap { padding-top: 2rem; }
+  h2.sec { font: 700 1.15rem/1.2 "Space Grotesk", sans-serif; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--fg-dim); margin: 2.2rem 0 .8rem; }
+  .panels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1.5rem 0 .5rem; }
+  .stat { background: var(--panel, #140f24); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
+  .stat .v { font: 700 1.9rem/1 "Space Grotesk", sans-serif; color: var(--fg); font-variant-numeric: tabular-nums; }
+  .stat .l { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--fg-dim); margin-top: .4rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th, td { padding: .5rem .6rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--fg-dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .rank { color: var(--fg-dim); width: 2.5rem; }
+  .rank.top1 { color: var(--gold-bright); }
+  .who { font-weight: 600; }
+  .you, .hero { color: var(--gold-bright); }
+  .path { font: 600 .7rem/1 "Space Grotesk", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--fg-dim); }
+  .mix { display: flex; gap: 2px; margin-top: .35rem; }
+  .mix i { display: block; height: 5px; border-radius: 2px; }
+  .mix .o { background: #d9534f; } .mix .p { background: #4d7fd9; } .mix .d { background: #4da86b; }
+  .mixkey { font-size: .7rem; color: var(--fg-dim); margin-top: .25rem; }
+  .msg { color: var(--fg-dim); padding: 1.2rem 0; }
+  .ticker li, .chals li { list-style: none; padding: .5rem 0; border-bottom: 1px solid var(--border); font-size: .9rem; }
+  .ticker, .chals { margin: 0; padding: 0; }
+  .chals .left { color: var(--fg-dim); font-size: .78rem; }
+  .note { margin-top: 2.5rem; border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.2rem; color: var(--fg-dim); font-size: .88rem; }
+  .note b { color: var(--fg); }
+  @media (max-width: 860px) { .panels { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header id="wotan-nav" data-skin="dw" data-section="citizens"></header>
+<div class="wrap wide">
+  <h1>Citizens&rsquo; DEADWEIGHT</h1>
+  <p class="tagline">Inside SHANKPIT the citizens have their own card game. They challenge each other, they
+    challenge you, and they build their own sixteen-card decks out of their own win rate and whatever the
+    population is currently playing. This page is the world&rsquo;s own feed of that &mdash; published by the
+    SHANKPIT process, no sign-in needed to read.</p>
+
+  <div class="panels">
+    <div class="stat"><div class="v" id="pop">&mdash;</div><div class="l">Citizens on the ladder</div></div>
+    <div class="stat"><div class="v" id="metakind">&mdash;</div><div class="l">What the meta is playing</div></div>
+    <div class="stat"><div class="v" id="matches">&mdash;</div><div class="l">Matches played</div></div>
+  </div>
+
+  <h2 class="sec">The ladder</h2>
+  <div id="ladder"><p class="msg">Loading the ladder&hellip;</p></div>
+
+  <div class="panels">
+    <div>
+      <h2 class="sec">Live challenges</h2>
+      <ul class="chals" id="challenges"><li class="msg">Loading&hellip;</li></ul>
+    </div>
+    <div>
+      <h2 class="sec">Latest results</h2>
+      <ul class="ticker" id="recent"><li class="msg">Loading&hellip;</li></ul>
+    </div>
+    <div>
+      <h2 class="sec">Players (IDUNA)</h2>
+      <ul class="ticker" id="players"><li class="msg">Loading&hellip;</li></ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <p><b>What this page is reading.</b> The ladder, the decks and the challenge book come from the SHANKPIT
+      process itself (<code>/api/v1/shankpit-net/deadweight</code>, served by <code>shankpit_netd</code>) &mdash;
+      one running world, live. The players list on the right is IDUNA&rsquo;s own SHANKPIT leaderboard, so it is
+      the real account ladder rather than this world&rsquo;s. Citizen pids are SHANKPIT slots, not IDUNA ids: a
+      citizen is not an account, which is exactly why it cannot play DEADWEIGHT anywhere but here.</p>
+  </div>
+</div>
+
+<script src="/js/shankpit-net.js"></script>
+<script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+    function renderLadder(model) {
+      if (model.empty) { $('ladder').innerHTML = '<p class="msg">No citizens have joined this world\'s ladder yet.</p>'; return; }
+      var html = '<table><thead><tr><th>#</th><th>Citizen</th><th>Path</th><th class="num">W&ndash;L</th>' +
+        '<th class="num">Win rate</th><th>Deck it built for itself</th></tr></thead><tbody>';
+      model.records.forEach(function (r, i) {
+        var mix = r.mix, total = mix.total || 1;
+        html += '<tr><td class="rank' + (i === 0 ? ' top1' : '') + '">' + (i + 1) + '</td>' +
+          '<td><span class="who' + (r.hero ? ' hero' : '') + '">' + esc(r.name) + '</span>' +
+          (r.player ? ' <span class="path">player</span>' : '') + '</td>' +
+          '<td><span class="path">' + esc(r.path) + '</span></td>' +
+          '<td class="num">' + r.wins + '&ndash;' + (r.games - r.wins) + '</td>' +
+          '<td class="num">' + (r.unknownRecord ? '&mdash;' : ShankpitNet.pct(r.winratePermille)) + '</td>' +
+          '<td><div class="mix">' +
+            '<i class="o" style="width:' + (100 * mix.offense / total) + '%"></i>' +
+            '<i class="p" style="width:' + (100 * mix.operations / total) + '%"></i>' +
+            '<i class="d" style="width:' + (100 * mix.defense / total) + '%"></i>' +
+          '</div><div class="mixkey">' + mix.offense + ' offense &middot; ' + mix.operations + ' operations &middot; ' + mix.defense + ' defense</div></td></tr>';
+      });
+      $('ladder').innerHTML = html + '</tbody></table>';
+    }
+
+    function renderChallenges(model) {
+      if (!model.challenges.length) { $('challenges').innerHTML = '<li class="msg">Nobody is waiting on an answer right now.</li>'; return; }
+      $('challenges').innerHTML = model.challenges.map(function (c) {
+        return '<li>' + esc(model.nameFor(c.fromPid)) + ' &rarr; ' + esc(model.nameFor(c.toPid)) +
+          '<div class="left">' + esc(c.kind.replace(/-/g, ' ')) + ' &middot; ' +
+          Math.ceil(c.expiresInMs / 1000) + 's left</div></li>';
+      }).join('');
+    }
+
+    function renderRecent(model) {
+      if (!model.recent.length) { $('recent').innerHTML = '<li class="msg">No match has finished in this world yet.</li>'; return; }
+      $('recent').innerHTML = model.recent.slice(0, 12).map(function (m) {
+        return '<li>' + esc(ShankpitNet.resultLine(m, model.nameFor)) +
+          '<div class="left">' + esc(m.kind.replace(/-/g, ' ')) + (m.ago ? ' &middot; ' + esc(m.ago) : '') + '</div></li>';
+      }).join('');
+    }
+
+    ShankpitNet.getSnapshot().then(function (model) {
+      $('pop').textContent = model.population.citizens + (model.population.players ? ' + ' + model.population.players + ' human' : '');
+      $('metakind').textContent = model.meta.plays > 0 ? model.meta.kindName : '\u2014';
+      $('matches').textContent = model.results.reduce(function (n, r) { return n + r.matches; }, 0);
+      renderLadder(model);
+      renderChallenges(model);
+      renderRecent(model);
+    }).catch(function (err) {
+      var msg = ShankpitNet.friendlyError(err);
+      ['ladder', 'challenges', 'recent'].forEach(function (id) { $(id).innerHTML = '<p class="msg">' + esc(msg) + '</p>'; });
+    });
+
+    // IDUNA's own SHANKPIT ladder: the real accounts, next to the citizens who are not accounts.
+    fetch('/api/v1/shankpit/leaderboard?limit=10')
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(function (data) {
+        var rows = data.leaderboard || [];
+        if (!rows.length) { $('players').innerHTML = '<li class="msg">No SHANKPIT sessions recorded yet.</li>'; return; }
+        $('players').innerHTML = rows.map(function (e) {
+          return '<li>' + esc(e.display_name) +
+            '<div class="left">' + e.kills + ' kills &middot; ' + e.deaths + ' deaths &middot; K/D ' + Number(e.kd_ratio).toFixed(2) + '</div></li>';
+        }).join('');
+      })
+      .catch(function () { $('players').innerHTML = '<li class="msg">Couldn\'t load IDUNA\'s leaderboard.</li>'; });
+  })();
+</script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>

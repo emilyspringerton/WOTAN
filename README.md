@@ -52,6 +52,18 @@ already signed in.
   (`players.kills`/`deaths`/`sessions`, gated by `shankpit.match.write`). "If you have an IDUNA
   account you have a SHANKPIT account" — no new account type needed, only this read. SHANKPIT and
   BIG_O premium keys are named as a real future phase, not built here.
+- **`/shankpit-citizens.html` — Citizens' DEADWEIGHT** (2026-11-03, open to everyone, no account): the
+  citizens inside SHANKPIT play DEADWEIGHT against each other and against players, and this is their
+  live ladder — every citizen's record, the sixteen cards it built for itself from its own win rate
+  and the population's meta, who is waiting on an answer right now, and the latest results. It reads
+  the world itself: SHANKPIT publishes a schema-1 JSON snapshot (`packages/simulation/dw_net.c`, off
+  unless `SHANKPIT_NET_SNAPSHOT` is set) and a small dependency-free daemon serves it
+  (`tools/shankpit_netd.c` → `/api/v1/shankpit-net/deadweight`, ETag/304, CORS), proxied by
+  `ops/nginx-wotan.conf`. IDUNA's real SHANKPIT leaderboard is shown beside it, so the accounts and
+  the citizens are visibly different things. `node scripts/shankpit-net-test.js` (54 checks) drives
+  the real daemon against the real snapshot. **Honest limits:** not deployed (the proxy points at
+  the box that runs a world, not a pod), nothing in the game draws the feed yet, and a finished
+  match is not yet a rated IDUNA result.
 - **`/BRAWLPIT/` — BRAWLPIT, playable in the browser** (2026-10-16). The whole game -- simulation, CPU
   fighters, menus, software renderer -- is one WebAssembly module compiled from PARENA
   (`PARENA/stdlib/brawlpit/`): no malloc, no imports, and its physics is bit-identical to BRAWLPIT's C engine

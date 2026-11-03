@@ -91,6 +91,7 @@
       ['decks', 'Draft Decks', '/decks.html'],
       ['matches', 'Matches', '/matches.html'],
       ['shankpit', 'SHANKPIT', '/shankpit.html'],
+      ['citizens', 'Citizens', '/shankpit-citizens.html'],
       ['friends', 'Friends', '/friends.html'],
       ['gfd', 'GFD', '/GFD/']
     ]
