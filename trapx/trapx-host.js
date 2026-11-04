@@ -8,7 +8,10 @@
 // plainly rather than hidden: shankpit-460's and Bedrock Racers' hosts are PARENA -> TypeScript because their
 // logic IS the game; here the game logic is the wasm-free rules module and this is a control panel. If the panel
 // ever grows rules of its own, it becomes a .prn like everything else.
-import * as C from './trapx-city.js';
+//
+// The city comes from trapx-engine.js: trapx.wasm (the PARENA-built module at /trapx/trapx.wasm) when it loads,
+// trapx-city.js when it does not. Both answer the same calls, so nothing below knows the difference.
+import C from './trapx-engine.js';
 import * as R from './trapx-rules.js';
 
 const $ = (id) => document.getElementById(id);
