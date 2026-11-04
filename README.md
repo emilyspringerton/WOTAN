@@ -94,6 +94,16 @@ already signed in.
   Chromium only (not Firefox/Safari/phones; no touch controls); the gamepad and the sound were not exercised by a person;
   the referee stops impossible hits, walls and speed hacks but not aimbots or wallhacks. **Stats and the bot league are the
   next pass** -- nothing is persisted yet.
+- **`/trapx/` — TRAPX VS0, the city sandbox** (2026-11-04). Channel 11 frame, two Detroit scenes (Apartment 200, School
+  201), Watchers / Heat / Trust / Enforcement, Field Offices with Flow / Pressure / Attention / K9 doctrine, a chained
+  receipt ledger, and a **MODS FIRST** event bus (named mods with masks and priorities) — all decided by
+  `PARENA/stdlib/trapx/trapx_rules.prn`, emitted to `trapx/trapx-rules.js` here by `scripts/build-trapx.sh` and to C in
+  SHANKPIT. shankpit-460 and Bedrock Racers are embedded as the page's two **surfaces**, sharing the IDUNA identity; they
+  are not merged binaries (each is a whole zero-import wasm module, so there is no ABI to merge). Tests:
+  `node scripts/trapx-rules-test.mjs` — **140 checks, the same 88 parity rows** `make test-trapx` asserts in SHANKPIT.
+  Not built yet: city persistence (no `/api/v1/games/trapx/...` route), and the page has not been opened in a browser.
+  `../docs/TRAPX_VS0.md` is the record.
+
 - **`/bedrockracers/` — Bedrock Racers, playable in the browser** (2026-10-18). A Rocket League-style Quidditch esport: four teams
   of three rocket cars in one stadium, one ball (the Quaffle) and four upside-down corner goals. Hold the magnet (`F` or the right
   mouse button) to pull the ball in and carry it, let go to throw it, hold it at a team-mate to pass, throw it up into a tower

@@ -26,7 +26,7 @@
   if (!mount) return;
 
   var skinAttr = mount.getAttribute('data-skin');
-  var SKINS = { dw: 1, rg: 1, d2: 1, em: 1, gfd: 1, bp: 1, sp: 1, br: 1, acct: 1 };
+  var SKINS = { dw: 1, rg: 1, d2: 1, em: 1, gfd: 1, bp: 1, sp: 1, br: 1, tp: 1, acct: 1 };
   var skin = SKINS[skinAttr] ? skinAttr : 'hs';
   var section = mount.getAttribute('data-section') || '';
 
@@ -79,6 +79,12 @@
     br: [
       ['play', 'Play', '/bedrockracers/'],
       ['account', 'Account', '/account/']
+    ],
+    // TRAPX VS0 (2026-11-04): the city sandbox, and the two committed wasm games it opens as surfaces.
+    tp: [
+      ['play', 'City', '/trapx/'],
+      ['street', 'Street', '/shankpit-460/'],
+      ['wheels', 'Wheels', '/bedrockracers/']
     ],
     // Account-level pages (not tied to one game): /account/ and /redeem/. Cream like the hs skin, no theme picker.
     acct: [
@@ -313,7 +319,8 @@
       ['gfd', 'GoblinFoxDragon', 'MUD \u00b7 Hat Store', '/GFD/'],
       ['bp', 'Brawlpit', 'Arena fighter \u00b7 Hat Store', '/BRAWLPIT/'],
       ['sp', 'shankpit-460', 'Arena shooter \u00b7 Free-for-all', '/shankpit-460/'],
-      ['br', 'Bedrock Racers', 'Rocket cars \u00b7 Quaffle', '/bedrockracers/']
+      ['br', 'Bedrock Racers', 'Rocket cars \u00b7 Quaffle', '/bedrockracers/'],
+      ['tp', 'TRAPX', 'City sandbox \u00b7 Detroit VS0', '/trapx/']
     ];
     mount.appendChild(gamesBar(GAMES));
 

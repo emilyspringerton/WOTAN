@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "type": "module",
+  "//": "trapx-rules.js is ESM (generated from PARENA). Without this, Node treats a .js file in this directory as CommonJS and the parity test could not import it; the browser loads it as a module either way.",
+  "name": "wotan-trapx",
+  "version": "0.0.0"
+}

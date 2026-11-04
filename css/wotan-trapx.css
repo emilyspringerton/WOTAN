@@ -1,0 +1,98 @@
+/* css/wotan-trapx.css -- TRAPX VS0 on WOTAN: the Channel 11 broadcast frame.
+ *
+ * Design rule from the northstar: "the art must never look like it wants your approval", and the identity layer is
+ * a CRT you tune into rather than a game you boot. So: hard edges, one accent, scanlines that never move, no
+ * rounded corners, no shadows, no gradients except the interference stripe. Nothing here is decoration for its own
+ * sake -- the scanlines are the broadcast, the ticker is the ledger. */
+
+body.tp {
+  --tp-ink: #0b0d0c;
+  --tp-paper: #d8d4c4;
+  --tp-dim: #6f7468;
+  --tp-signal: #9ae66e;
+  --tp-hot: #e2643c;
+  --tp-line: #2a2f2b;
+  background: var(--tp-ink);
+  color: var(--tp-paper);
+}
+
+.tp-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 18px 64px; }
+
+/* the frame: a thin hard border and a scanline overlay that sits above the panels, not under them */
+.tp-crt {
+  position: relative;
+  border: 1px solid var(--tp-line);
+  padding: 22px 20px 28px;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 3px),
+    var(--tp-ink);
+}
+.tp-crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 2px, transparent 2px 4px);
+  mix-blend-mode: multiply;
+}
+
+.tp-head { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-end; justify-content: space-between; }
+.tp-eyebrow { margin: 0 0 6px; font-family: var(--font-mono, monospace); font-size: 0.66rem; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--tp-dim); }
+.tp-h1 { margin: 0; font-family: "Cormorant Garamond", serif; font-weight: 600; font-size: clamp(2.4rem, 6vw, 4rem);
+  letter-spacing: 0.14em; color: var(--tp-paper); }
+.tp-sub { max-width: 46ch; margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--tp-paper); opacity: 0.82; }
+
+.tp-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 18px 0 14px; }
+.tp-grow { flex: 1; }
+.tp-pill { font-family: var(--font-mono, monospace); font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
+  border: 1px solid var(--tp-line); padding: 4px 8px; color: var(--tp-signal); }
+.tp-who, .tp-what, .tp-meta { font-family: var(--font-mono, monospace); font-size: 0.7rem; color: var(--tp-dim); }
+.tp-link { color: var(--tp-signal); font-family: var(--font-mono, monospace); font-size: 0.7rem; }
+
+.tp-btn { font-family: var(--font-mono, monospace); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+  background: transparent; color: var(--tp-paper); border: 1px solid var(--tp-line); padding: 8px 12px; cursor: pointer; }
+.tp-btn:hover, .tp-btn:focus-visible { border-color: var(--tp-signal); color: var(--tp-signal); outline: none; }
+.tp-btn[aria-pressed="true"] { border-color: var(--tp-signal); color: var(--tp-signal); }
+.tp-btn--go { border-color: var(--tp-signal); color: var(--tp-signal); }
+
+.tp-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .tp-grid { grid-template-columns: 1fr; } }
+
+.tp-panel { border: 1px solid var(--tp-line); padding: 14px 16px 18px; }
+.tp-h2 { margin: 0 0 10px; font-family: var(--font-mono, monospace); font-size: 0.68rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--tp-dim); }
+.tp-scene { margin: 0 0 12px; font-size: 1.15rem; letter-spacing: 0.04em; }
+
+/* the readouts: monospace bars, because a meter here is a signal reading, not a game HUD */
+.tp-read { display: grid; grid-template-columns: 7.5rem 1fr; gap: 4px 10px; margin: 0 0 16px;
+  font-family: var(--font-mono, monospace); font-size: 0.74rem; }
+.tp-read dt { color: var(--tp-dim); }
+.tp-read dd { margin: 0; color: var(--tp-paper); white-space: pre; }
+
+.tp-verbs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tp-status { margin: 12px 0 0; font-family: var(--font-mono, monospace); font-size: 0.72rem; color: var(--tp-signal);
+  min-height: 1.2em; }
+
+.tp-feed { list-style: none; margin: 0 0 18px; padding: 0; max-height: 15rem; overflow: auto;
+  font-family: var(--font-mono, monospace); font-size: 0.7rem; line-height: 1.7; color: var(--tp-dim); }
+.tp-feed li { white-space: pre; border-bottom: 1px dotted var(--tp-line); padding: 1px 0; }
+.tp-feed li.tp-receipt { color: var(--tp-paper); }
+
+.tp-mods { list-style: none; margin: 0 0 10px; padding: 0; font-family: var(--font-mono, monospace);
+  font-size: 0.68rem; line-height: 1.8; color: var(--tp-dim); }
+
+.tp-note { margin: 0; font-size: 0.78rem; line-height: 1.55; color: var(--tp-dim); }
+
+.tp-surface { margin-top: 18px; border: 1px solid var(--tp-line); padding: 14px 16px 18px; }
+.tp-stage { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border: 1px solid var(--tp-line); }
+.tp-frame { width: 100%; height: 100%; border: 0; display: block; }
+
+.tp-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 18px; }
+.tp-tip { border: 1px solid var(--tp-line); padding: 12px 14px; font-size: 0.8rem; line-height: 1.55; color: var(--tp-dim); }
+.tp-tip b { display: block; margin-bottom: 4px; color: var(--tp-paper); font-family: var(--font-mono, monospace);
+  font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.tp-tip code { color: var(--tp-signal); font-size: 0.74rem; }
+
+/* the hot line: enforcement level 4 -- not built, but the variable exists so the page can name it later */
+.tp-hot { color: var(--tp-hot); }

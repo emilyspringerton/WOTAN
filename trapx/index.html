@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0d0c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Spectral:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-iduna.css">
+<link rel="stylesheet" href="/css/wotan-trapx.css">
+<title>TRAPX VS0 &mdash; WOTAN</title>
+<meta name="description" content="TRAPX VS0: two Detroit scenes, three Field Offices, Watchers, Enforcement, K9 doctrine and a receipt ledger that remembers. The city runs on rules compiled from PARENA; walk it in shankpit-460, drive it in Bedrock Racers.">
+</head>
+<body class="iduna tp" data-page="play">
+<header id="wotan-nav" data-skin="tp" data-section="play"></header>
+
+<main class="tp-wrap" id="main">
+  <div class="tp-crt">
+    <div class="tp-head">
+      <div>
+        <p class="tp-eyebrow">WOTAN &middot; Channel 11 &middot; VS0 Detroit</p>
+        <h1 class="tp-h1">TRAPX</h1>
+      </div>
+      <p class="tp-sub">Two scenes, three Field Offices and a city that was already running. The apartment notices you in
+        nine seconds; the school takes longer. Claim an office and the street starts costing more.</p>
+    </div>
+
+    <div class="tp-bar" role="toolbar" aria-label="TRAPX controls">
+      <span class="tp-pill" id="tp-pill" role="status">Channel 11</span>
+      <span class="tp-who" id="tp-who">watching as a guest</span>
+      <a id="tp-signin" class="tp-link" data-signin href="#" hidden>sign in with IDUNA</a>
+      <span class="tp-grow"></span>
+      <button type="button" class="tp-btn tp-btn--go" id="tp-start">Take control</button>
+    </div>
+
+    <div class="tp-grid">
+      <section class="tp-panel" aria-label="The city">
+        <h2 class="tp-h2">The city</h2>
+        <p class="tp-scene" id="tp-scene">Detroit Apartment</p>
+        <dl class="tp-read">
+          <dt>Watchers</dt><dd id="tp-alert"></dd>
+          <dt>Heat</dt><dd id="tp-heat"></dd>
+          <dt>Trust</dt><dd id="tp-trust"></dd>
+          <dt>Enforcement</dt><dd id="tp-enforce"></dd>
+          <dt>Field Offices</dt><dd id="tp-fos"></dd>
+          <dt>Next claim</dt><dd id="tp-nextcost"></dd>
+          <dt>Integrity</dt><dd id="tp-integrity"></dd>
+          <dt>Attention</dt><dd id="tp-attention"></dd>
+          <dt>Pressure</dt><dd id="tp-pressure"></dd>
+          <dt>K9</dt><dd id="tp-k9"></dd>
+          <dt>Tick</dt><dd id="tp-tick">0</dd>
+          <dt>Flow</dt><dd id="tp-flow">100</dd>
+          <dt>Lay low</dt><dd id="tp-quiet">OFF</dd>
+        </dl>
+
+        <div class="tp-verbs">
+          <button type="button" class="tp-btn" id="tp-claim">Claim office</button>
+          <button type="button" class="tp-btn" id="tp-contest">Contest</button>
+          <button type="button" class="tp-btn" id="tp-k9">Deploy 2 K9</button>
+          <button type="button" class="tp-btn" id="tp-kill">Kill in public</button>
+          <button type="button" class="tp-btn" id="tp-portal">Take the portal</button>
+          <button type="button" class="tp-btn" id="tp-tick">Tick</button>
+          <button type="button" class="tp-btn" id="tp-quiet">Toggle lay-low</button>
+        </div>
+        <p class="tp-status" id="tp-status" aria-live="polite">The city is running. Nothing here is required.</p>
+      </section>
+
+      <section class="tp-panel" aria-label="Receipts and mods">
+        <h2 class="tp-h2">Receipts</h2>
+        <p class="tp-meta"><span id="tp-citizen">guest</span> &middot; <span id="tp-receipts">0</span> receipts &middot;
+          ledger <span id="tp-ledger">0</span></p>
+        <ol class="tp-feed" id="tp-feed"></ol>
+        <h2 class="tp-h2">Mods subscribed</h2>
+        <ul class="tp-mods" id="tp-mods"></ul>
+        <p class="tp-note">Every transition announces an event; a mod gets a mask and a priority. Adding one is a name,
+          not an edit to the city.</p>
+      </section>
+    </div>
+
+    <section class="tp-surface" aria-label="Surfaces">
+      <div class="tp-bar">
+        <button type="button" class="tp-btn" data-surface="street" aria-pressed="true">Street &middot; shankpit-460</button>
+        <button type="button" class="tp-btn" data-surface="wheels" aria-pressed="false">Wheels &middot; Bedrock Racers</button>
+        <span class="tp-grow"></span>
+        <span class="tp-what" id="tp-surface-what">shankpit-460: the FPS client, on the street</span>
+      </div>
+      <div class="tp-stage">
+        <iframe class="tp-frame" id="tp-frame" title="The surface" src="/shankpit-460/" loading="lazy"
+                allow="fullscreen; gamepad; autoplay"></iframe>
+      </div>
+      <p class="tp-note">Both surfaces are their own committed WebAssembly modules with zero imports &mdash; two whole
+        games, not one merged binary. What they share here is the shell and the IDUNA identity; the city underneath is
+        the same rules in C and in JavaScript.</p>
+    </section>
+
+    <div class="tp-tips">
+      <div class="tp-tip"><b>What is real</b> The Watcher/Enforcement/Heat numbers, the claim costs, the K9 curve, the
+        receipt digests and the swarm trigger are <code>PARENA/stdlib/trapx/trapx_rules.prn</code>, emitted to C for
+        SHANKPIT and to JavaScript here. Both sides assert the same 88-row fixture.</div>
+      <div class="tp-tip"><b>What is not</b> There is no authoritative city server: this city lives in the page and
+        resets on reload. The K9, the swarm and the receipts are simulated; nothing is persisted to IDUNA yet.</div>
+      <div class="tp-tip"><b>Why two scenes</b> VS0 is Detroit Apartment (200, two Field Offices, Jiangshi watcher
+        density) and Detroit School (201, one office, quieter). The portal keeps one memory across both.</div>
+      <div class="tp-tip"><b>The loop</b> Act in public and witnesses see it; the city answers with heat and trust;
+        enforcement climbs; the street costs more; the ledger records all of it. That is BIG_O underneath a GTA-shaped
+        sandbox.</div>
+    </div>
+  </div>
+</main>
+
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script type="module" src="trapx-host.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>
