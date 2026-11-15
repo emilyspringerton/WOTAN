@@ -92,8 +92,12 @@ already signed in.
   commit the outputs. Tests: `scripts/shankpit460-net-test.mjs` (two real engines against the real IDUNA binary) and
   `scripts/shankpit460-browser-test.mjs` (real headless Chromium, with screenshots). **Honest limits:** Node and headless
   Chromium only (not Firefox/Safari/phones; no touch controls); the gamepad and the sound were not exercised by a person;
-  the referee stops impossible hits, walls and speed hacks but not aimbots or wallhacks. **Stats and the bot league are the
-  next pass** -- nothing is persisted yet.
+  the referee stops impossible hits, walls and speed hacks but not aimbots or wallhacks. **Stats (2026-11-15):** IDUNA
+  records every match that goes live (guests and people who leave included) and rates it, and the **Ladder**
+  (`/shankpit-460/ladder.html`), **Matches** (`matches.html`, full scoreboards and rating changes) and **player**
+  (`u.html?id=`) pages read it; `scripts/shankpit460-net-test.mjs` now also checks the recorded match and the ladder, and
+  `scripts/arena-stats-browser-test.mjs` drives all three pages in Chromium. Not built yet: the bot league (bots that
+  queue online and are rated like people).
 - **`/trapx/` — TRAPX VS0, the city sandbox** (2026-11-04). Channel 11 frame, two Detroit scenes (Apartment 200, School
   201), Watchers / Heat / Trust / Enforcement, Field Offices with Flow / Pressure / Attention / K9 doctrine, a chained
   receipt ledger, and a **MODS FIRST** event bus (named mods with masks and priorities) — all decided by
@@ -116,7 +120,9 @@ already signed in.
   hash every 250 ticks, a person who drops becomes a bot at an exact tick, and a signed-in match is rated (4-team Elo) and
   recorded with a replay; an IDUNA that is down or old just leaves PLAY as a bot match. `scripts/bedrockracers-online-test.mjs`
   plays two Chromium pages against a real IDUNA binary; `scripts/bedrockracers-live-smoke.mjs [origin]` does the same against a
-  deployed site. **Honest limits:** no ladder, Matches or profile pages yet (IDUNA's stats routes are live and unread); only two
+  deployed site. **Stats pages (2026-11-15):** **Ladder** (`/bedrockracers/ladder.html`, with goal / assist / steal / win
+  leaders), **Matches** (`matches.html`: the four scores, the people, every car on request) and **player** (`u.html?id=`),
+  reading IDUNA's existing routes; `scripts/arena-stats-browser-test.mjs` drives them in Chromium. **Honest limits:** only two
   humans have been tested in a room; verified in Node and headless Chromium only (not Firefox/Safari/phones; no touch controls;
   the gamepad path was driven through a Gamepad API shim); no audio.
 - `/store.html` — the BRAWLPIT hat store. Login is a real redirect to IDUNA's own hosted SSO

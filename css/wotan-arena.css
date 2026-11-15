@@ -1,0 +1,97 @@
+/* WOTAN arena stats: the Ladder / Matches / player pages of the IDUNA-refereed browser games (shankpit-460 under
+   /shankpit-460/, Bedrock Racers under /bedrockracers/). Loaded after wotan-hs.css (the .wn-* topbar) and
+   wotan-iduna.css (the cream IDUNA style guide: --i-* tokens, .i-stat tiles, .i-panel, .i-link). Light only, like IDUNA.
+   Everything here is prefixed .as-. Scoreboard structure carries the esports feel: tabular numerals, tracked labels,
+   hairline rows, gold for the lead. */
+
+.as-wrap { max-width: 1100px; margin: 0 auto; padding: .6rem 1rem 4.5rem; }
+.as-wrap.narrow { max-width: 860px; }
+
+.as-hero { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem 2rem;
+  padding: 1.2rem 0 1.1rem; margin-bottom: 1.2rem; border-bottom: 1px solid color-mix(in srgb, var(--i-gold) 55%, var(--i-line) 45%); position: relative; }
+.as-hero::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 5.5rem; height: 3px; background: var(--i-gold); }
+.as-hero > div:first-child { flex: 1 1 22rem; min-width: 0; }
+.as-eyebrow { letter-spacing: .35em; text-transform: uppercase; font-size: .68rem; color: var(--i-muted); margin: 0 0 .3rem; }
+.as-h1 { font: 500 clamp(1.9rem, 4.6vw, 2.9rem)/1.05 var(--i-display); letter-spacing: .01em; margin: 0; overflow-wrap: anywhere; }
+.as-lede { color: var(--i-muted); margin: .5rem 0 0; font-size: .95rem; max-width: 60ch; }
+.as-lede a, .as-note a { color: var(--i-gold-deep); }
+.as-h2 { font: 600 1.35rem/1.2 var(--i-display); margin: 0; }
+.as-section { margin-top: 1.8rem; }
+.as-section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .4rem 1rem; margin-bottom: .7rem; }
+.as-note { color: var(--i-muted); font-size: .85rem; margin: .5rem 0 0; }
+
+.as-tiles { display: flex; flex-wrap: wrap; gap: .8rem; }
+.as-tiles .i-stat { min-width: 7.2rem; }
+.as-tiles .i-stat b { font-size: 1.9rem; }
+
+.as-panel { border: 1px solid color-mix(in srgb, var(--i-gold) 55%, var(--i-line) 45%); border-radius: 6px; background: var(--i-paper); }
+.as-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.as-table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.as-table th { text-align: left; font: 600 .62rem/1.2 var(--i-body); letter-spacing: .22em; text-transform: uppercase; color: var(--i-muted);
+  padding: .65rem .7rem; border-bottom: 1px solid var(--i-line); white-space: nowrap; }
+.as-table td { padding: .55rem .7rem; border-bottom: 1px solid color-mix(in srgb, var(--i-line) 60%, transparent); vertical-align: middle; }
+.as-table tr:last-child td { border-bottom: 0; }
+.as-table tbody tr:hover td { background: color-mix(in srgb, var(--i-gold) 7%, transparent); }
+.as-table .n { text-align: right; white-space: nowrap; }
+.as-table td.rank { width: 2.5rem; color: var(--i-faint); font-weight: 600; }
+.as-table tr.top td.rank { color: var(--i-gold-deep); }
+.as-table td.who { min-width: 9rem; overflow-wrap: anywhere; }
+.as-table a { color: var(--i-text); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--i-gold) 55%, transparent); }
+.as-table a:hover { color: var(--i-gold-deep); }
+.as-table a:focus-visible, .as-chip:focus-visible, .as-more:focus-visible { outline: 2px solid var(--i-gold-deep); outline-offset: 2px; border-radius: 2px; }
+.as-rating { font: 600 1.05rem/1 var(--i-display); }
+
+.as-tag { display: inline-block; margin-left: .4rem; font: 600 .56rem/1 var(--i-body); letter-spacing: .18em; text-transform: uppercase; padding: .2rem .4rem;
+  border-radius: 3px; border: 1px solid var(--i-line); color: var(--i-muted); vertical-align: .1em; }
+.as-tag.win { border-color: var(--i-ok); color: var(--i-ok); }
+.as-tag.loss { border-color: color-mix(in srgb, var(--i-bad) 60%, var(--i-line)); color: var(--i-bad); }
+.as-tag.left { border-style: dashed; }
+.as-delta { font-size: .8rem; white-space: nowrap; }
+.as-delta.up { color: var(--i-ok); }
+.as-delta.down { color: var(--i-bad); }
+
+.as-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 .8rem; }
+.as-chip { appearance: none; font: 500 .82rem/1 var(--i-body); color: var(--i-text); cursor: pointer; padding: .45rem .8rem; border-radius: 999px;
+  border: 1px solid var(--i-line); background: transparent; }
+.as-chip[aria-pressed="true"] { border-color: var(--i-gold); background: color-mix(in srgb, var(--i-gold) 18%, transparent); color: var(--i-gold-deep); }
+
+.as-leaders { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.as-leader { padding: .8rem .9rem .7rem; }
+.as-leader h3 { margin: 0 0 .5rem; font: 600 .64rem/1.2 var(--i-body); letter-spacing: .24em; text-transform: uppercase; color: var(--i-muted); }
+.as-leader ol { list-style: none; margin: 0; padding: 0; display: grid; gap: .3rem; }
+.as-leader li { display: flex; justify-content: space-between; gap: .6rem; font-size: .9rem; min-width: 0; }
+.as-leader li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.as-leader li b { font-variant-numeric: tabular-nums; }
+.as-leader li:first-child b { color: var(--i-gold-deep); }
+.as-leader a { color: var(--i-text); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--i-gold) 55%, transparent); }
+.as-leader a:hover { color: var(--i-gold-deep); }
+.as-leader a:focus-visible { outline: 2px solid var(--i-gold-deep); outline-offset: 2px; border-radius: 2px; }
+
+.as-match { margin-bottom: .8rem; }
+.as-match-head { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem 1rem; padding: .7rem .9rem; border-bottom: 1px solid var(--i-line); }
+.as-match-head b { font: 600 1.05rem/1.2 var(--i-display); }
+.as-match-meta { color: var(--i-muted); font-size: .82rem; }
+.as-match-head .sp { flex: 1 1 1rem; }
+.as-teams { display: flex; flex-wrap: wrap; gap: .5rem; padding: .6rem .9rem 0; }
+.as-team { display: inline-flex; align-items: center; gap: .4rem; font-size: .82rem; padding: .25rem .55rem; border-radius: 4px; border: 1px solid var(--i-line); }
+.as-team i { width: .7rem; height: .7rem; border-radius: 2px; display: inline-block; }
+.as-team.won { border-color: var(--i-gold); background: color-mix(in srgb, var(--i-gold) 12%, transparent); }
+.as-team b { font-variant-numeric: tabular-nums; }
+.as-more { appearance: none; border: 0; background: none; color: var(--i-gold-deep); font: 500 .85rem/1 var(--i-body); cursor: pointer; padding: .2rem 0; }
+
+.as-empty { text-align: center; padding: 2.2rem 1rem; color: var(--i-muted); }
+.as-empty b { display: block; color: var(--i-text); font: 600 1.3rem/1.2 var(--i-display); margin-bottom: .4rem; }
+.as-empty a { color: var(--i-gold-deep); }
+.as-skel { height: 180px; border-radius: 6px; border: 1px solid var(--i-line);
+  background: linear-gradient(100deg, var(--i-panel) 30%, var(--i-paper) 50%, var(--i-panel) 70%); background-size: 200% 100%; animation: as-shimmer 1.3s infinite linear; }
+@keyframes as-shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .as-skel { animation: none; } }
+
+@media (max-width: 640px) {
+  .as-table { font-size: .85rem; }
+  .as-table th { letter-spacing: .1em; }
+  .as-table th, .as-table td { padding: .5rem .4rem; }
+  .as-table .wide { display: none; }
+  .as-table td.rank { width: 1.6rem; }
+  .as-table td.who { min-width: 6.5rem; }
+}

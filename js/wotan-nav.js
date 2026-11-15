@@ -74,10 +74,14 @@
     ],
     sp: [
       ['play', 'Play', '/shankpit-460/'],
+      ['board', 'Ladder', '/shankpit-460/ladder.html'],
+      ['matches', 'Matches', '/shankpit-460/matches.html'],
       ['account', 'Account', '/account/']
     ],
     br: [
       ['play', 'Play', '/bedrockracers/'],
+      ['board', 'Ladder', '/bedrockracers/ladder.html'],
+      ['matches', 'Matches', '/bedrockracers/matches.html'],
       ['account', 'Account', '/account/']
     ],
     // TRAPX VS0 (2026-11-04): the city sandbox, and the two committed wasm games it opens as surfaces.

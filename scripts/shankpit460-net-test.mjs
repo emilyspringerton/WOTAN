@@ -163,6 +163,24 @@ ok(A.gi(G.endReason) === 1, 'the end reason is the kill limit');
 ok(A.pi(A.me, 'kills') === 3 && B.pi(B.me, 'deaths') === 3, `final score ${A.pi(A.me, 'kills')} kills to A, ${B.pi(B.me, 'deaths')} deaths to B`);
 ok(A.gi(G.endN) === 2, 'the standings list both players');
 
+// ---- the stats: IDUNA recorded the match, and A (signed in) is on the ladder ----
+let feed = [];
+for (let i = 0; i < 40 && !feed.length; i++) {
+  feed = (await (await fetch(`${wotan.base}/api/v1/shankpit460/matches`)).json()).matches || [];
+  if (!feed.length) await sleep(250);
+}
+const rec = feed[0] || { roster: [] };
+ok(feed.length === 1 && rec.reason === 'kills' && rec.counted && rec.players === 2 && rec.signed_in === 1,
+   `the match was recorded (${JSON.stringify({ n: feed.length, reason: rec.reason, counted: rec.counted, players: rec.players, signed_in: rec.signed_in })})`);
+const [first, second] = rec.roster;
+ok(first && first.kind === 'human' && first.result === 'win' && first.kills === 3 && first.place === 1 && first.rating_after > first.rating_before,
+   'A is first on the recorded scoreboard: 3 kills, a win, rating up');
+ok(second && second.kind === 'guest' && !second.player_id && second.deaths === 3 && second.result === 'loss', 'B is on it as a guest, with no account');
+const ladder = await (await fetch(`${wotan.base}/api/v1/games/shankpit460/leaderboard?limit=10`)).json();
+ok(ladder.length === 1 && ladder[0].wins === 1 && ladder[0].matches === 1 && ladder[0].rating > 1500, `A is on the ladder (${JSON.stringify(ladder[0] || null)})`);
+const prof = ladder[0] ? await (await fetch(`${wotan.base}/api/v1/shankpit460/players/${encodeURIComponent(ladder[0].player_id)}`)).json() : {};
+ok(prof.rank === 1 && prof.totals && prof.totals.kills === 3 && (prof.recent || []).length === 1, 'A\'s player page: rank 1, 3 kills, one recent match');
+
 // ---- REQUEUE: a new lobby ----
 await sleep(500);
 A.click(320, 273); B.click(320, 273);   // the REQUEUE button

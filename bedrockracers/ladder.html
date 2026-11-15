@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4f1ea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Spectral:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/wotan-hs.css">
+<link rel="stylesheet" href="/css/wotan-iduna.css">
+<link rel="stylesheet" href="/css/wotan-arena.css">
+<title>Ladder &mdash; Bedrock Racers &mdash; WOTAN</title>
+<meta name="description" content="The Bedrock Racers ladder on WOTAN: every rated player, by rating, and the leaders in goals, assists, steals and wins.">
+</head>
+<body class="iduna br" data-game="br" data-page="board">
+<header id="wotan-nav" data-skin="br" data-section="board"></header>
+<main class="as-wrap" id="main">
+  <section class="as-hero">
+    <div>
+      <p class="as-eyebrow">Bedrock Racers &middot; Rocket cars</p>
+      <h1 class="as-h1">Ladder</h1>
+      <p class="as-lede">Everyone with an account who has finished an online match, by rating. Four teams of three; a team with nobody rated plays at the starting rating, bots included. <a href="/bedrockracers/">Play now</a>.</p>
+    </div>
+    <div class="as-tiles"><div class="i-stat"><b id="s-players">&ndash;</b><span>Ranked</span></div><div class="i-stat"><b id="s-top">&ndash;</b><span>Top rating</span></div></div>
+  </section>
+  <div class="as-panel" id="board" aria-live="polite"></div>
+  <section class="as-section">
+    <div class="as-section-head"><h2 class="as-h2">Leaders</h2><a class="i-link" href="/bedrockracers/matches.html">Recent matches</a></div>
+    <div class="as-leaders" id="leaders"></div>
+  </section>
+  <p class="as-note">How the rating works: every team is scored against each of the other three by goals (ahead, level or behind), using the mean rating of the people on it, so one match moves a rating about as far as a one-on-one would. Everyone starts at 1500. Leaving before the end counts as a loss.</p>
+</main>
+<script src="/js/iduna-sso.js"></script>
+<script src="/js/wotan-nav.js"></script>
+<script src="/js/arena-stats.js"></script>
+<script src="/js/cookie-consent.js"></script>
+</body>
+</html>
