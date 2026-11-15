@@ -1,0 +1,383 @@
+/* Valhöll — WOTAN ESPORTS × IÐUNN design system (2026-11-13).
+ *
+ * One token file (VHL.IFC-1). Every value below is replicated from the plates in docs/valholl/
+ * (III Palette, IV Type, VI Iðunn's Seal, VII Broadcast, VIII Kit, IX Motion & Voice). Plates I, II and V were not
+ * provided; nothing here is invented to stand in for them. "SKD" in the plates is the inherited system the plates
+ * name as Skíðblaðnir (VHL.INV-5); no SKD spec exists in IDUNA, WOTAN or EMILY, so SKD section numbers are cited
+ * only as the plates cite them. Inherited token names never change (VHL.IFC-1).
+ *
+ * Fonts (link them in the page, before this file):
+ *   https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=League+Gothic
+ *   &family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Noto+Sans+Runic
+ *   &family=Playfair+Display+SC:wght@400;700;900&family=Playfair+Display:ital,wght@1,400;1,700&display=swap
+ *
+ * Scope: everything is under .vhl (put it on <body>), so pages that still load wotan-theme.css / wotan-hs.css for
+ * the shared nav keep working. Night (torchlight) is a scope too: .vhl-night, for broadcast, HUD and night-watch
+ * surfaces. Product surfaces are day, on Vellum (plate VIII).
+ */
+
+/* ── Pinned values (plate III). Raw palette; components use the semantic tokens further down. ── */
+:root {
+  /* Day · Vellum (inherited, SKD §2, values pinned here) */
+  --vhl-parchment-100: #F3E9D2; /* Vellum — primary ground */
+  --vhl-parchment-300: #E7D7B4; /* Foxed Page — cards, raised regions */
+  --vhl-parchment-600: #8A7350; /* Sea-Stained — borders, worn edges */
+  --vhl-ink-900: #1E1915;       /* Squid Ink — body text, engravings */
+  --vhl-ink-700: #4B4036;       /* Faded Ink — secondary text */
+  --vhl-sea-700: #1C4A5A;       /* Deep Water — links, primary actions */
+  --vhl-sea-400: #6E9BA2;       /* Shoal — hover, selection */
+  --vhl-blood-600: #9B3421;     /* Red Ochre — errors, danger, hazards */
+  --vhl-brass-500: #8C6B27;     /* Tarnished Brass — instruments, focus rings */
+
+  /* Night · Torchlight (new; night text is parchment-100) */
+  --vhl-soot-950: #15110D;      /* Hearth Soot — night ground, broadcast */
+  --vhl-soot-900: #211A14;      /* Bench Oak — plates, raised regions */
+  --vhl-soot-700: #3B3027;      /* Rafter — rules, frames; decor only */
+  --vhl-ash-300: #BFB197;       /* Banked Ash — secondary text */
+  --vhl-brass-300: #D3AC5E;     /* Torch Brass — frames, instruments, focus */
+  --vhl-ember-400: #E2643F;     /* Ember — on-air tally, danger at night */
+  --vhl-sea-300: #86B8C1;       /* Shoal Light — links at night */
+
+  /* Sides · the first war (VHL.POL-4: the only side colour) */
+  --vhl-aesir-700: #213F8F;     /* Grímnir's Cloak — Æsir plate on paper */
+  --vhl-aesir-500: #2C51AD;     /* Cloak at Night — Æsir plate on soot */
+  --vhl-aesir-300: #92ACEB;     /* Cloak Light — Æsir text on soot */
+  --vhl-vanir-400: #E6A03A;     /* Freyja's Amber — Vanir plate, both modes */
+  --vhl-vanir-700: #7F4C0E;     /* Amber Dark — Vanir text on paper */
+
+  /* The seal (restricted, VHL.INV-1–3). Oath affordances only: rim and fill, never text. */
+  --vhl-rose-gold: #B76E79;     /* Iðunn's Seal — 3.15:1 on Vellum, non-text only */
+  --vhl-rose-gold-light: #E8B9B3;
+  --vhl-rose-gold-dark: #7F4552;
+  --vhl-seal-wax: #5C2434;      /* Pressed Wax — the sealed state, inside the rim */
+  --vhl-seal-wax-light: #7A3346;
+  --vhl-seal-wax-dark: #45192A;
+  --vhl-seal-rim: conic-gradient(from 210deg, #E8B9B3, #B76E79, #7F4552, #B76E79, #E8B9B3);
+  --vhl-seal-wax-fill: radial-gradient(circle at 36% 30%, #7A3346 0%, #5C2434 55%, #45192A 100%);
+  --vhl-seal-well: #EADBBE;     /* the empty well the wax fills */
+
+  /* Paper texture (every plate's ground) */
+  --vhl-vellum-ground:
+    radial-gradient(130% 110% at 22% 14%, rgba(255,250,236,0.55) 0%, rgba(243,233,210,0) 48%, rgba(110,80,40,0.20) 100%),
+    #F3E9D2;
+  --vhl-hatch: repeating-linear-gradient(-45deg, rgba(30,25,21,0.10) 0 1px, rgba(30,25,21,0) 1px 6px);
+
+  /* Broadcast (plate VII, 1080p): torchlight ground, four fixed slots (VHL.IFC-3), no grit inside plates (MET-2) */
+  --vhl-bc-plate: rgba(33,26,20,0.94);        /* kill-feed rows */
+  --vhl-bc-plate-border: rgba(211,172,94,0.5);
+  --vhl-bc-scorebug-border: 2px solid #D3AC5E;
+  --vhl-bc-scorebug-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  --vhl-bc-title-safe: 1.5px dashed rgba(211,172,94,0.55); /* 90% title-safe, VHL.MET-3 */
+
+  /* ── Type (plate IV): five hands, each with one job ── */
+  --vhl-font-display: 'Playfair Display SC', Georgia, serif;          /* 400 700 900 — titles, names, regions */
+  --vhl-font-wood: 'League Gothic', 'Arial Narrow', Impact, sans-serif; /* wood type — scores, tags; UPPERCASE only */
+  --vhl-font-body: 'Libre Caslon Text', Georgia, serif;               /* 400 400i 700 — prose */
+  --vhl-font-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; /* 400 500 600 — every number that changes */
+  --vhl-font-marginalia: 'Playfair Display', Georgia, serif;          /* italic only — the coach's hand */
+  --vhl-font-runes: 'Noto Sans Runic', 'Segoe UI Historic', sans-serif; /* occult layer only, always with plain text */
+
+  /* Product scale (px) */
+  --vhl-size-display-xl: 72px;
+  --vhl-size-display-l: 48px;
+  --vhl-size-title: 32px;
+  --vhl-size-body: 18px;
+  --vhl-size-body-s: 16px;
+  --vhl-size-data: 14px;
+  --vhl-size-marginalia: 16px;
+  --vhl-size-chip: 12px;
+  /* Broadcast scale, 1080p (px). Floor 24 on air (VHL.MET-3); wood type never under 24 on air. */
+  --vhl-bc-score: 72px;
+  --vhl-bc-tag: 44px;
+  --vhl-bc-clock: 44px;
+  --vhl-bc-lower-third-name: 44px;
+  --vhl-bc-kill-feed: 28px;
+  --vhl-bc-role: 24px;
+  --vhl-bc-floor: 24px;
+
+  /* ── Motion (plate IX), milliseconds ── */
+  --vhl-ease-unroll: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --vhl-ease-flip: cubic-bezier(0.3, 1.3, 0.5, 1);   /* a hung plate swings and settles */
+  --vhl-ease-stamp: cubic-bezier(0.2, 0.9, 0.3, 1);
+  --vhl-dur-unroll: 220ms;          /* panel unroll, BEH-6, ease-out */
+  --vhl-dur-flip-legible: 240ms;    /* score plate flip legible by, BEH-3 / MET-4 */
+  --vhl-dur-flip-settled: 400ms;    /* score plate settled by */
+  --vhl-dur-kill-feed: 120ms;       /* kill-feed row slides in, BEH-3 */
+  --vhl-dur-spear: 600ms;           /* the spear throw, BEH-4, once per match */
+  --vhl-dur-flourish-max: 1200ms;   /* round-won stamp, BEH-5: at most one per round */
+  --vhl-dur-seal-hold: 1200ms;      /* seal hold, BEH-1: about 1.2 s, held by a person */
+  --vhl-dur-seal-stamp: 220ms;      /* plate VI stamp: scale 1.12 -> 0.97 -> 1 */
+
+  /* Focus (plate VIII): Tarnished Brass ring, 2 px, offset 3 (4.10:1 on Vellum) */
+  --vhl-focus-width: 2px;
+  --vhl-focus-offset: 3px;
+  --vhl-hit: 48px;                  /* min hit area for every action */
+}
+
+/* Reduced motion (VHL.POL-6): beasts stop, every flourish becomes a cut, plates swap instantly. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --vhl-dur-unroll: 0ms; --vhl-dur-flip-legible: 0ms; --vhl-dur-flip-settled: 0ms; --vhl-dur-kill-feed: 0ms;
+    --vhl-dur-spear: 0ms; --vhl-dur-flourish-max: 0ms; --vhl-dur-seal-stamp: 0ms;
+  }
+}
+
+/* ── Semantic tokens: day (Vellum) ── */
+.vhl {
+  --vhl-ground: var(--vhl-parchment-100);
+  --vhl-raised: var(--vhl-parchment-300);
+  --vhl-raised-soft: rgba(231,215,180,0.55);
+  --vhl-text: var(--vhl-ink-900);
+  --vhl-text-2: var(--vhl-ink-700);
+  --vhl-rule: var(--vhl-ink-900);
+  --vhl-border: var(--vhl-parchment-600);
+  --vhl-link: var(--vhl-sea-700);
+  --vhl-link-hover: var(--vhl-ink-900);
+  --vhl-action: var(--vhl-sea-700);
+  --vhl-on-action: var(--vhl-parchment-100);
+  --vhl-danger: var(--vhl-blood-600);
+  --vhl-focus: var(--vhl-brass-500);
+  --vhl-instrument: var(--vhl-brass-500);
+  --vhl-aesir-plate: var(--vhl-aesir-700);
+  --vhl-aesir-text: var(--vhl-aesir-700);
+  --vhl-vanir-plate: var(--vhl-vanir-400);
+  --vhl-vanir-text: var(--vhl-vanir-700);
+  --vhl-field-bg: rgba(243,233,210,0.7);
+  color: var(--vhl-text);
+  font-family: var(--vhl-font-body);
+}
+
+/* ── Semantic tokens: night (Torchlight) — broadcast, HUD, the night watch ── */
+.vhl .vhl-night, .vhl.vhl-night {
+  --vhl-ground: var(--vhl-soot-950);
+  --vhl-raised: var(--vhl-soot-900);
+  --vhl-raised-soft: var(--vhl-soot-900);
+  --vhl-text: var(--vhl-parchment-100);
+  --vhl-text-2: var(--vhl-ash-300);
+  --vhl-rule: var(--vhl-brass-300);
+  --vhl-border: var(--vhl-soot-700);   /* decor only: rules and frames carry no meaning at night */
+  --vhl-link: var(--vhl-sea-300);
+  --vhl-link-hover: var(--vhl-parchment-100);
+  --vhl-action: var(--vhl-brass-300);
+  --vhl-on-action: var(--vhl-soot-950);
+  --vhl-danger: var(--vhl-ember-400);
+  --vhl-focus: var(--vhl-brass-300);
+  --vhl-instrument: var(--vhl-brass-300);
+  --vhl-aesir-plate: var(--vhl-aesir-500);
+  --vhl-aesir-text: var(--vhl-aesir-300);
+  --vhl-vanir-plate: var(--vhl-vanir-400);
+  --vhl-vanir-text: var(--vhl-vanir-400);
+  --vhl-field-bg: rgba(33,26,20,0.7);
+  background: var(--vhl-ground);
+  color: var(--vhl-text);
+}
+
+/* ── Base ── */
+body.vhl {
+  margin: 0;
+  background: var(--vhl-vellum-ground);
+  background-attachment: fixed;
+  font-size: var(--vhl-size-body-s);
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+body.vhl.vhl-night { background: var(--vhl-soot-950); }
+.vhl *, .vhl *::before, .vhl *::after { box-sizing: border-box; }
+.vhl a { color: var(--vhl-link); }
+.vhl a:hover { color: var(--vhl-link-hover); }
+.vhl :focus-visible { outline: var(--vhl-focus-width) solid var(--vhl-focus); outline-offset: var(--vhl-focus-offset); }
+.vhl input:focus-visible, .vhl textarea:focus-visible { outline-offset: 2px; }
+.vhl ::selection { background: var(--vhl-sea-400); color: var(--vhl-ink-900); }
+
+.vhl-sr { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Page frame: the plates' double rule, on wide screens only (it would eat a phone's gutter). */
+.vhl-page { position: relative; max-width: 1200px; margin: 0 auto; padding: 48px 64px 56px; }
+@media (min-width: 900px) {
+  .vhl-page::before, .vhl-page::after { content: ""; position: absolute; pointer-events: none; }
+  .vhl-page::before { inset: 16px; border: 1.5px solid var(--vhl-rule); }
+  .vhl-page::after { inset: 23px; border: 0.75px solid var(--vhl-rule); }
+}
+@media (max-width: 899px) { .vhl-page { padding: 24px 16px 40px; } }
+
+/* ── Type roles ── */
+.vhl-eyebrow { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 24px; margin: 0;
+  font: 400 13px/1.4 var(--vhl-font-mono); letter-spacing: 0.14em; color: var(--vhl-text-2); text-transform: uppercase; }
+.vhl-label { margin: 0; font: 400 12px/1.4 var(--vhl-font-mono); letter-spacing: 0.12em; color: var(--vhl-text-2); text-transform: uppercase; }
+.vhl-display-xl, .vhl-h1 { margin: 0; font-family: var(--vhl-font-display); font-weight: 900; line-height: 1; letter-spacing: 0.04em; }
+.vhl-display-xl { font-size: var(--vhl-size-display-xl); }
+.vhl-h1 { font-size: 64px; }
+.vhl-display-l { margin: 0; font: 700 var(--vhl-size-display-l)/1.05 var(--vhl-font-display); letter-spacing: 0.06em; }
+.vhl-title { margin: 0; font: 700 var(--vhl-size-title)/1.1 var(--vhl-font-display); letter-spacing: 0.04em; }
+.vhl-h2 { margin: 0; font: 700 24px/1.2 var(--vhl-font-display); }
+.vhl-h3 { margin: 0; font: 700 20px/1.25 var(--vhl-font-display); letter-spacing: 0.04em; }
+.vhl-body { font-size: var(--vhl-size-body); line-height: 1.6; }
+.vhl-body-s { font-size: var(--vhl-size-body-s); line-height: 1.55; }
+.vhl-data { font-family: var(--vhl-font-mono); font-size: var(--vhl-size-data); font-variant-numeric: tabular-nums; }
+.vhl-marginalia { margin: 0; font: italic 400 var(--vhl-size-marginalia)/1.45 var(--vhl-font-marginalia); color: var(--vhl-text-2); }
+.vhl-lede { margin: 0; font: italic 400 21px/1.4 var(--vhl-font-marginalia); color: var(--vhl-text-2); }
+.vhl-wood { font-family: var(--vhl-font-wood); font-weight: 400; text-transform: uppercase; letter-spacing: 0.03em; line-height: 0.95; }
+/* A rune is decoration over a plain-text equivalent (VHL.INV-6, INV-7): always aria-hidden, the words carry it. */
+.vhl-rune { font-family: var(--vhl-font-runes); line-height: 1; }
+.vhl-rune--whisper { opacity: 0.08; }
+.vhl-chip { display: inline-flex; align-items: center; min-height: 24px; padding: 2px 10px; border: 0.75px solid var(--vhl-border);
+  font: 400 var(--vhl-size-chip)/1.2 var(--vhl-font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--vhl-text-2); }
+@media (max-width: 600px) {
+  .vhl-h1 { font-size: 44px; }
+  .vhl-display-xl { font-size: 52px; }
+  .vhl-display-l { font-size: 36px; }
+  .vhl-title { font-size: 26px; }
+}
+
+/* ── Plates (raised regions): ink outer rule, 4 px gap, worn inner edge ── */
+.vhl-plate { border: 1.25px solid var(--vhl-rule); padding: 4px; background: var(--vhl-raised); }
+.vhl-plate--soft { background: var(--vhl-raised-soft); }
+.vhl-plate > .vhl-plate__in { border: 0.75px solid var(--vhl-border); padding: 26px 30px 24px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+@media (max-width: 600px) { .vhl-plate > .vhl-plate__in { padding: 18px 16px 18px; } }
+.vhl-rule { border: 0; border-top: 0.75px solid var(--vhl-border); margin: 0; }
+.vhl-rule--double { width: 220px; height: 0; border: 0; border-top: 1.5px solid var(--vhl-rule); border-bottom: 0.75px solid var(--vhl-rule); padding-top: 3px; margin: 0 auto; }
+
+/* ── Actions (plate VIII): min hit 48 px ── */
+.vhl-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: var(--vhl-hit); padding: 0 22px; margin: 0;
+  background: var(--vhl-action); color: var(--vhl-on-action);
+  border: 1.5px solid var(--vhl-action); border-radius: 0;
+  box-shadow: inset 0 0 0 3px var(--vhl-action), inset 0 0 0 4px rgba(243,233,210,0.45);
+  font: 700 17px/1.2 var(--vhl-font-display); letter-spacing: 0.06em; text-decoration: none; cursor: pointer;
+}
+.vhl a.vhl-btn, .vhl a.vhl-btn:hover { color: var(--vhl-on-action); }
+.vhl-btn:hover { background: var(--vhl-sea-400); border-color: var(--vhl-sea-400); color: var(--vhl-ink-900);
+  box-shadow: inset 0 0 0 3px var(--vhl-sea-400), inset 0 0 0 4px rgba(30,25,21,0.3); }
+.vhl a.vhl-btn:hover { color: var(--vhl-ink-900); }
+.vhl-btn--ghost { background: transparent; color: var(--vhl-text); border-color: var(--vhl-rule);
+  box-shadow: inset 0 0 0 3px rgba(243,233,210,0), inset 0 0 0 4px rgba(30,25,21,0.3); }
+.vhl a.vhl-btn--ghost { color: var(--vhl-text); }
+.vhl-btn--danger { background: var(--vhl-danger); border-color: var(--vhl-danger);
+  box-shadow: inset 0 0 0 3px var(--vhl-danger), inset 0 0 0 4px rgba(243,233,210,0.45); }
+/* Bench-row button: 44 px drawn, still a 48 px target. */
+.vhl-btn--small { position: relative; min-height: 44px; padding: 0 16px; font-size: 15px; box-shadow: none; }
+.vhl-btn--small::before { content: ""; position: absolute; left: 0; right: 0; top: -2px; bottom: -2px; }
+.vhl-btn[disabled], .vhl-btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+.vhl-link { display: inline-flex; align-items: center; min-height: var(--vhl-hit); padding: 0 6px; font-size: 17px; color: var(--vhl-link); }
+.vhl-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+
+/* ── Nav with the spearhead marker (plate VIII): where you are, as SKD's fleur-de-lis does on the chart ── */
+.vhl-nav { display: flex; align-items: flex-end; flex-wrap: wrap; border-bottom: 0.75px solid var(--vhl-border); }
+.vhl-nav a { position: relative; min-height: var(--vhl-hit); display: inline-flex; align-items: center; padding: 22px 16px 0;
+  font: 400 18px/1.2 var(--vhl-font-display); letter-spacing: 0.06em; color: var(--vhl-text-2); text-decoration: none; }
+.vhl-nav a:hover { color: var(--vhl-text); }
+.vhl-nav a[aria-current="page"] { font-weight: 700; color: var(--vhl-text); border-bottom: 2.5px solid var(--vhl-rule); margin-bottom: -1px; }
+.vhl-nav a[aria-current="page"]::before {
+  content: ""; position: absolute; left: 50%; top: 0; width: 14px; height: 18px; margin-left: -7px; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 26'%3E%3Cpath d='M10,1 C12,6 15,10 15,14 C15,18 12,21 11.5,25 L8.5,25 C8,21 5,18 5,14 C5,10 8,6 10,1 Z'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 26'%3E%3Cpath d='M10,1 C12,6 15,10 15,14 C15,18 12,21 11.5,25 L8.5,25 C8,21 5,18 5,14 C5,10 8,6 10,1 Z'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+/* ── Fields (plate VIII): Sea-Stained borders (3.18:1 on Foxed) ── */
+.vhl-field { display: flex; flex-direction: column; gap: 6px; }
+.vhl-field label { font: 700 16px/1.3 var(--vhl-font-display); letter-spacing: 0.04em; }
+.vhl-input { height: var(--vhl-hit); width: 100%; padding: 0 14px; background: var(--vhl-field-bg); border: 1.5px solid var(--vhl-border);
+  border-radius: 0; font: 400 17px/1.2 var(--vhl-font-body); color: var(--vhl-text); }
+.vhl-input--tag { font: 400 26px/1 var(--vhl-font-wood); letter-spacing: 0.08em; text-transform: uppercase; }
+.vhl-help { margin: 0; font: 400 12px/1.4 var(--vhl-font-mono); letter-spacing: 0.06em; color: var(--vhl-text-2); }
+
+/* ── Side chips (VHL.POL-4: sides are the only side colour; they part on lightness alone, MET-1) ── */
+.vhl-side { display: inline-block; padding: 2px 10px; font: 400 20px/1.1 var(--vhl-font-wood); letter-spacing: 0.08em; text-transform: uppercase; }
+.vhl-side--aesir { background: var(--vhl-aesir-plate); color: var(--vhl-parchment-100); }
+.vhl-side--vanir { background: var(--vhl-vanir-plate); color: var(--vhl-soot-950); }
+
+/* ── Player card (plate VIII) ── */
+.vhl-player { width: 250px; max-width: 100%; flex: none; border: 1.25px solid var(--vhl-rule); padding: 4px; background: var(--vhl-raised); }
+.vhl-player__in { border: 0.75px solid var(--vhl-border); padding: 14px 16px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.vhl-player__top { align-self: stretch; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.vhl-player__seed { font: 400 12px/1 var(--vhl-font-mono); color: var(--vhl-text-2); }
+.vhl-player__portrait { width: 150px; height: 186px; border-radius: 50%; border: 1.5px solid var(--vhl-rule);
+  box-shadow: 0 0 0 4px var(--vhl-raised), 0 0 0 5px var(--vhl-border); background: var(--vhl-hatch); object-fit: cover; }
+.vhl-player__name { margin: 4px 0 0; font: 700 20px/1.2 var(--vhl-font-display); letter-spacing: 0.04em; text-align: center; overflow-wrap: anywhere; }
+.vhl-player__role { margin: 0; font: 400 12px/1.2 var(--vhl-font-mono); letter-spacing: 0.12em; color: var(--vhl-text-2); text-transform: uppercase; }
+.vhl-player__stats { margin: 0; align-self: stretch; text-align: center; padding-top: 8px; border-top: 0.75px solid var(--vhl-border);
+  font: 400 12.5px/1.3 var(--vhl-font-mono); color: var(--vhl-text-2); font-variant-numeric: tabular-nums; }
+
+/* ── Voice lines (plates VIII + IX): empty, wait, confirmation. One flavoured line per screen. ── */
+.vhl-voice { display: flex; gap: 14px; padding: 14px 16px; border: 0.75px solid var(--vhl-border); min-width: 0; }
+.vhl-voice__mark { width: 52px; height: 52px; flex: none; border: 0.75px solid var(--vhl-border); background: var(--vhl-hatch); }
+.vhl-voice__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.vhl-voice__line { margin: 0; font: italic 400 18px/1.35 var(--vhl-font-marginalia); }
+.vhl-voice__plain { margin: 0; font-size: 14.5px; line-height: 1.4; color: var(--vhl-text-2); }
+.vhl-voice__timer { margin: 0; font: 400 13px/1.4 var(--vhl-font-mono); color: var(--vhl-text-2); font-variant-numeric: tabular-nums; }
+
+/* ── Warnings and errors (plate VIII): flavour first, then always a plain reason (SKD §8) ── */
+.vhl-warning { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1.25px solid var(--vhl-danger); }
+.vhl-warning p { margin: 0; font-size: 16px; line-height: 1.4; }
+.vhl-warning .vhl-rune { margin-left: auto; font-size: 40px; color: var(--vhl-danger); opacity: 0.08; }
+.vhl-hazard { width: 22px; height: 22px; flex: none; color: var(--vhl-danger);
+  background: radial-gradient(circle, currentColor 0 1.6px, transparent 1.7px) 0 0 / 4px 4px; }
+.vhl-alert { display: flex; align-items: flex-start; gap: 16px; padding: 16px 18px; border: 1.25px solid var(--vhl-danger); background: rgba(155,52,33,0.05); }
+.vhl-alert__mark { width: 56px; height: 56px; flex: none; border: 0.75px solid var(--vhl-border); background: var(--vhl-hatch); }
+.vhl-alert__body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.vhl-alert p { margin: 0; font-size: 16px; line-height: 1.45; }
+.vhl-alert__flavour { font: italic 400 18px/1.35 var(--vhl-font-marginalia); }
+@media (max-width: 480px) { .vhl-voice__mark, .vhl-alert__mark { display: none; } }
+
+/* ── Match card, the bill (plate VIII) ── */
+.vhl-bill { border: 1.25px solid var(--vhl-rule); padding: 4px; background: var(--vhl-raised); }
+.vhl-bill__in { border: 0.75px solid var(--vhl-border); padding: 26px 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.vhl-bill__round { margin: 0; font: 400 26px/1.1 var(--vhl-font-wood); letter-spacing: 0.16em; text-transform: uppercase; }
+.vhl-bill__team { margin: 6px 0 0; font: 400 84px/0.95 var(--vhl-font-wood); letter-spacing: 0.04em; text-transform: uppercase; overflow-wrap: anywhere; }
+.vhl-bill__team--aesir { color: var(--vhl-aesir-text); }
+.vhl-bill__team--vanir { color: var(--vhl-vanir-text); margin-top: 0; }
+.vhl-bill__versus { margin: 2px 0; font: italic 400 30px/1.2 var(--vhl-font-marginalia); }
+.vhl-bill__meta { margin: 8px 0 0; font-size: 18px; line-height: 1.4; }
+/* The sides' one-ink forms: lines for Æsir, dots for Vanir. */
+.vhl-strip { width: 150px; height: 11px; }
+.vhl-strip--aesir { background: repeating-linear-gradient(0deg, var(--vhl-rule) 0 1.2px, transparent 1.2px 4px); }
+.vhl-strip--vanir { background: radial-gradient(circle, var(--vhl-rule) 0 1.2px, transparent 1.6px) 0 0 / 6px 5.5px; }
+@media (max-width: 600px) { .vhl-bill__team { font-size: 60px; } .vhl-bill__in { padding: 20px 16px; } }
+
+/* ── Bracket (plate VIII): rhumb lines join the rounds; the fallen stay in Faded Ink, never struck through ── */
+.vhl-bracket { display: grid; grid-template-columns: minmax(0, 230px) 68px minmax(0, 230px) 80px; grid-template-rows: 84px 116px 84px; align-items: stretch; max-width: 612px; }
+.vhl-match { border: 1.25px solid var(--vhl-rule); background: var(--vhl-raised-soft); display: flex; flex-direction: column; min-width: 0; }
+.vhl-match--a { grid-column: 1; grid-row: 1; }
+.vhl-match--b { grid-column: 1; grid-row: 3; }
+.vhl-match--final { grid-column: 3; grid-row: 2; align-self: center; height: 84px; box-shadow: 0 0 0 3px var(--vhl-ground), 0 0 0 4px var(--vhl-rule); }
+.vhl-match__row { flex: 1 1 50%; display: flex; align-items: center; gap: 10px; padding: 0 12px; min-width: 0; color: var(--vhl-text-2); }
+.vhl-match__row + .vhl-match__row { border-top: 0.75px solid var(--vhl-border); }
+.vhl-match__seed { font: 400 12px/1 var(--vhl-font-mono); color: var(--vhl-text-2); }
+.vhl-match__team { flex: 1 1 auto; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vhl-match__score { font: 400 16px/1 var(--vhl-font-mono); font-variant-numeric: tabular-nums; }
+.vhl-match__row--won { color: var(--vhl-text); }
+.vhl-match__row--won .vhl-match__team { font-weight: 700; }
+.vhl-match__row--won .vhl-match__score { font-weight: 600; }
+.vhl-rhumb { grid-column: 2; grid-row: 1 / 4; position: relative; }
+.vhl-rhumb::before { content: ""; position: absolute; left: 0; width: 34px; top: 42px; bottom: 42px; border: 1px solid var(--vhl-rule); border-left: 0; }
+.vhl-rhumb::after { content: ""; position: absolute; left: 34px; right: 0; top: 50%; border-top: 1px solid var(--vhl-rule); }
+.vhl-ring { grid-column: 4; grid-row: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  font: 400 11.5px/1 var(--vhl-font-mono); letter-spacing: 0.08em; color: var(--vhl-text-2); position: relative; padding-left: 18px; }
+.vhl-ring::before { content: ""; position: absolute; left: 0; width: 18px; top: 50%; border-top: 1px solid var(--vhl-rule); }
+
+/* ── Iðunn's Seal (plate VI) — js/valholl-seal.js. Rose gold: rim and fill only, never text. One per screen. ── */
+.vhl-seal { display: flex; align-items: center; gap: 24px; min-height: 132px; flex-wrap: wrap; }
+.vhl-seal__btn { display: flex; align-items: center; gap: 22px; padding: 8px 20px 8px 8px; margin: 0; background: transparent;
+  border: 1px solid transparent; color: var(--vhl-ink-900); font: inherit; text-align: left; cursor: pointer;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.vhl-seal__btn:disabled { cursor: default; }
+.vhl-seal__rim { width: 112px; height: 112px; flex: none; padding: 5px; border-radius: 50%; background: var(--vhl-seal-rim);
+  box-shadow: 0 2px 6px rgba(30,25,21,0.25); }
+.vhl-seal__well { display: block; position: relative; width: 102px; height: 102px; border-radius: 50%; overflow: hidden;
+  background: var(--vhl-seal-well); box-shadow: inset 0 2px 5px rgba(30,25,21,0.25); }
+.vhl-seal__wax { position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(var(--vhl-seal-wax) calc(var(--vhl-seal-p, 0) * 360deg), rgba(92,36,52,0.10) calc(var(--vhl-seal-p, 0) * 360deg)); }
+.vhl-seal__face { display: none; width: 102px; height: 102px; border-radius: 50%; background: var(--vhl-seal-wax-fill); }
+.vhl-seal__words { display: flex; flex-direction: column; gap: 4px; }
+.vhl-seal__name { font: 700 24px/1.2 var(--vhl-font-display); color: var(--vhl-ink-900); }
+.vhl-seal__hint { font: 400 12.5px/1.3 var(--vhl-font-mono); letter-spacing: 0.08em; color: var(--vhl-ink-700); text-transform: uppercase; }
+.vhl-seal .vhl-rune { margin-left: auto; font-size: 72px; color: var(--vhl-ink-900); opacity: 0.08; }
+.vhl-seal__status { margin: 0; font: 400 13px/1.5 var(--vhl-font-mono); letter-spacing: 0.06em; color: var(--vhl-ink-700); }
+.vhl-seal[data-state="sealed"] .vhl-seal__rim { box-shadow: 0 3px 8px rgba(30,25,21,0.35); }
+.vhl-seal[data-state="sealed"] .vhl-seal__well { display: none; }
+.vhl-seal[data-state="sealed"] .vhl-seal__face { display: block; }
+.vhl-seal[data-stamp="1"] .vhl-seal__rim { animation: vhl-stamp var(--vhl-dur-seal-stamp) var(--vhl-ease-stamp) 1; }
+@keyframes vhl-stamp { 0% { transform: scale(1.12); } 60% { transform: scale(0.97); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .vhl-seal[data-stamp="1"] .vhl-seal__rim { animation: none; } }
+@media (max-width: 480px) { .vhl-seal .vhl-rune { display: none; } }
