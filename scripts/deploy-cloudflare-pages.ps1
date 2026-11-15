@@ -13,12 +13,16 @@
 #   powershell -ExecutionPolicy Bypass -File scripts\deploy-cloudflare-pages.ps1 -TokenFile ..\EMILY\var\cloudflare.md
 #   powershell -ExecutionPolicy Bypass -File scripts\deploy-cloudflare-pages.ps1            # token in $env:CLOUDFLARE_API_TOKEN
 #   ... -Project wotan -Domain arcade.okemily.com -Zone okemily.com                           # also attach a domain
+#   ... -Site ..\OKEMILY -Project okemily -Domain okemily.com -Zone okemily.com                 # okemily.com, the same way
+# A domain whose DNS record already points elsewhere (okemily.com points at the GKE gateway) is not overwritten: the script
+# reports it, and you change that record in the Cloudflare dashboard when you are sure.
 # Needs Node.js (for npx wrangler): winget install OpenJS.NodeJS.LTS
 # Not run yet: written in a cloud session with no Cloudflare access and no PowerShell. Read it before you run it.
 param(
     [string]$TokenFile = "",
     [string]$TokenVar = "CLOUDFLARE_API_TOKEN",
     [string]$Project = "wotan",
+    [string]$Site = "",
     [string]$Domain = "",
     [string]$Zone = "",
     [string]$Wrangler = "wrangler@4",
@@ -91,7 +95,8 @@ if (-not $NoMint) {
 
 # ---- 4. stage the site and deploy -------------------------------------------------------------------------------
 if (-not (Get-Command npx -ErrorAction SilentlyContinue)) { Fail "npx not found: install Node.js (winget install OpenJS.NodeJS.LTS), open a new PowerShell, run again" }
-$repo = Split-Path -Parent $PSScriptRoot
+$repo = $(if ($Site) { (Resolve-Path $Site).Path } else { Split-Path -Parent $PSScriptRoot })
+if (-not (Test-Path (Join-Path $repo "index.html"))) { Fail "no index.html in $repo: is -Site a website folder?" }
 $stage = Join-Path $env:TEMP "wotan-pages-$(Get-Date -Format yyyyMMddHHmmss)"
 robocopy $repo $stage /E /NFL /NDL /NJH /NJS /XD .git .github ops scripts node_modules /XF *.md *.ps1 *.sh | Out-Null
 if ($LASTEXITCODE -ge 8) { Fail "copying the site failed (robocopy $LASTEXITCODE)" }
