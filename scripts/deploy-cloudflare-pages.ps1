@@ -96,7 +96,7 @@ if (-not $NoMint) {
 # ---- 4. stage the site and deploy -------------------------------------------------------------------------------
 if (-not (Get-Command npx -ErrorAction SilentlyContinue)) { Fail "npx not found: install Node.js (winget install OpenJS.NodeJS.LTS), open a new PowerShell, run again" }
 $repo = $(if ($Site) { (Resolve-Path $Site).Path } else { Split-Path -Parent $PSScriptRoot })
-if (-not (Test-Path (Join-Path $repo "index.html"))) { Fail "no index.html in $repo: is -Site a website folder?" }
+if (-not (Test-Path (Join-Path $repo "index.html"))) { Fail "no index.html in ${repo}: is -Site a website folder?" }
 $stage = Join-Path $env:TEMP "wotan-pages-$(Get-Date -Format yyyyMMddHHmmss)"
 robocopy $repo $stage /E /NFL /NDL /NJH /NJS /XD .git .github ops scripts node_modules /XF *.md *.ps1 *.sh | Out-Null
 if ($LASTEXITCODE -ge 8) { Fail "copying the site failed (robocopy $LASTEXITCODE)" }
@@ -104,9 +104,13 @@ Write-Host "Staged the site at $stage"
 
 $env:CLOUDFLARE_API_TOKEN = $deployToken
 $env:CLOUDFLARE_ACCOUNT_ID = $acct.id
-npx --yes $Wrangler pages project create $Project --production-branch main 2>$null | Out-Null   # fine if it exists
+# Windows PowerShell 5.1 turns a native program's stderr into errors, which "Stop" would make fatal: relax it for npx.
+$ErrorActionPreference = "Continue"
+npx --yes $Wrangler pages project create $Project --production-branch main *> $null   # fine if it already exists
 npx --yes $Wrangler pages deploy $stage --project-name $Project --branch main --commit-dirty=true
-if ($LASTEXITCODE -ne 0) { Fail "wrangler could not deploy (see above)" }
+$deployed = $LASTEXITCODE
+$ErrorActionPreference = "Stop"
+if ($deployed -ne 0) { Fail "wrangler could not deploy (see above)" }
 
 if ($Domain) {
     try {
