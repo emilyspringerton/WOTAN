@@ -49,7 +49,16 @@ function buildSsoURL(extraParams) {
   const redirect = location.origin + location.pathname;
   const params = new URLSearchParams({ redirect_uri: redirect });
   if (extraParams) { for (const k in extraParams) params.set(k, extraParams[k]); }
-  return 'https://iam.okemily.com/?' + params.toString();
+  return idunaLoginBase() + params.toString();
+}
+
+// Where "Sign in with IDUNA" goes. On okemily.com that is the hosted login at iam.okemily.com. Anywhere else (IDUNA's
+// run-anywhere bundle, EmilyOS, a dev box) the site is served by an IDUNA that answers /api/ on the page's own origin
+// (IDUNA wotan_site.go), so the same login page is at /api/v1/auth/sso/login there.
+function idunaLoginBase() {
+  return /(^|\.)okemily\.com$/.test(location.hostname)
+    ? 'https://iam.okemily.com/?'
+    : location.origin + '/api/v1/auth/sso/login?';
 }
 
 // Reads the token IDUNA's SSO page hands back via URL fragment
