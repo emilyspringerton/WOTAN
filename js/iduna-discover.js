@@ -103,7 +103,7 @@ export function shouldTrySameOrigin(pageKind) {
 }
 
 export function probeTimeoutMs(cand, configured) {
-    return ((configured > 0) ? ((configured < 100) ? 100 : ((configured > 30000) ? 30000 : configured)) : ((cand === 1) ? 1000 : ((cand === 0) ? 1500 : 4000)));
+    return ((configured > 0) ? ((configured < 100) ? 100 : ((configured > 30000) ? 30000 : configured)) : ((cand === 1) ? 1000 : ((cand === 0) ? 5000 : 4000)));
 }
 
 export function cacheFresh(ageMs, ttlMs, verified) {

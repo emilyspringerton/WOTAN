@@ -146,11 +146,20 @@ function idunaLoginBase() {
   return location.origin + '/api/v1/auth/sso/login?';
 }
 
-// A "Sign in" link written before the choice was known still points at the old login base: re-point it when clicked,
-// keeping its own query (redirect_uri and any extra parameters).
+// A "Sign in" link written before the choice was known (pages and game hosts build theirs with buildSsoURL() at load)
+// still points at the old login page: re-point it when clicked, keeping its own query (redirect_uri and any extra
+// parameters). A link counts when it is marked data-signin or goes to an IDUNA login page.
+function idunaIsLoginLink(a) {
+  if (a.hasAttribute('data-signin')) return true;
+  const q = a.href.indexOf('?');
+  if (q < 0) return false;
+  const page = a.href.slice(0, q);
+  return /\/api\/v1\/auth\/sso\/login$/.test(page) ||
+    page === (idunaConfig().cloudUrl || 'https://iam.okemily.com').replace(/\/+$/, '') + '/';
+}
 document.addEventListener('click', function (e) {
-  const a = e.target && e.target.closest ? e.target.closest('a[data-signin]') : null;
-  if (!a || !idunaChoice) return;
+  const a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+  if (!a || !idunaChoice || !idunaIsLoginLink(a)) return;
   const q = a.href.indexOf('?');
   if (q > 0) a.href = idunaLoginBase() + a.href.slice(q + 1);
 }, true);
