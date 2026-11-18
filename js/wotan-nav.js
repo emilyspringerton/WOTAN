@@ -139,7 +139,9 @@
   function fetchMe() {
     var s = session();
     if (!s) return Promise.resolve(null);
-    return fetch('/api/v1/hs/me', { headers: { 'Authorization': 'Bearer ' + s.token, 'Accept': 'application/json' } })
+    // the chosen IDUNA (iduna-sso.js idunaApi: a local IDUNA first, else this site's own /api/ or the cloud)
+    var get = typeof idunaApi === 'function' ? idunaApi : function (p, i) { return fetch(p, i); };
+    return get('/api/v1/hs/me', { headers: { 'Authorization': 'Bearer ' + s.token, 'Accept': 'application/json' } })
       .then(function (r) {
         if (r.status === 401) return { __unauth: true, handle: null }; // expired token: offer sign-in again
         return r.ok ? r.json() : null;
@@ -376,10 +378,22 @@
     menuOpen = false;
   }
 
+  // No IDUNA answered (iduna-sso.js): say so next to Sign in, with every candidate's answer in the tooltip, rather than
+  // letting a sign-in or a profile load fail with no reason given.
+  function idunaNotice() {
+    var c = null;
+    try { c = typeof idunaChoiceNow === 'function' ? idunaChoiceNow() : null; } catch (e) { c = null; }
+    if (!c || c.verified || !c.error) return null;
+    return el('span', { 'class': 'wn-iduna-off', role: 'status', title: c.error, 'data-iduna-error': c.error,
+                        text: 'IDUNA unreachable' });
+  }
+
   function render(me) {
     accountBox.textContent = '';
     menuOpen = false;
     var s = session();
+    var notice = idunaNotice();
+    if (notice) accountBox.appendChild(notice);
     if (!s || (me && me.__unauth)) {
       accountBox.appendChild(el('a', { 'class': 'wn-signin', href: ssoURL(), 'data-signin': '', text: 'Sign in' }));
       return;
@@ -475,4 +489,7 @@
     render(me);
     fire(me);
   });
+
+  // The IDUNA choice landed (or changed): redraw Sign in with the right login page, and the notice if none answered.
+  window.addEventListener('iduna:ready', function () { getMe().then(render); });
 })();

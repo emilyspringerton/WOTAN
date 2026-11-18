@@ -34,7 +34,9 @@
     var headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
     if (token) headers['Authorization'] = 'Bearer ' + token;
     var res;
-    try { res = await fetch(G + path, { method: 'POST', headers: headers, body: JSON.stringify(body || {}) }); }
+    // the chosen IDUNA (iduna-sso.js: a local IDUNA first, else this site's own /api/ or the cloud)
+    var get = typeof idunaApi === 'function' ? idunaApi : function (p, i) { return fetch(p, i); };
+    try { res = await get(G + path, { method: 'POST', headers: headers, body: JSON.stringify(body || {}) }); }
     catch (e) { throw new Error('Could not reach the server. Check your connection and try again.'); }
     var data = null;
     try { data = await res.json(); } catch (e) { data = null; }

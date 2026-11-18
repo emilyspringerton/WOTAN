@@ -78,7 +78,10 @@
   // The uplink signs in with IAM itself (loopback OAuth, same pattern as the EDGE.GAME client), so the
   // command carries no secret and is the same for everyone.
   function showCommand() {
-    var base = location.origin;
+    // the IDUNA this page found (iduna-sso.js: a local one first); this site's own origin until it answers
+    var c = null;
+    try { c = typeof idunaChoiceNow === 'function' ? idunaChoiceNow() : null; } catch (e) { c = null; }
+    var base = (c && c.verified && c.base) ? c.base : location.origin;
     $('cmd').value = 'powershell -NoProfile -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-RestMethod \'' +
       base + '/api/v1/hs/live/uplink.ps1\'))) -Base \'' + base + '\'"';
     $('icmd').value = 'powershell -NoProfile -ExecutionPolicy Bypass -Command "& ([scriptblock]::Create((Invoke-RestMethod \'' +
@@ -101,6 +104,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     showCommand();
+    window.addEventListener('iduna:ready', showCommand); // the chosen IDUNA's address, once known
     [['copy', 'cmd', 'copied'], ['icopy', 'icmd', 'icopied']].forEach(function (ids) {
       $(ids[0]).addEventListener('click', async function () {
         // Downloading the tracker needs a linked Battle.net account (IDENTITY_NORTHSTAR section 5). UX gate only:
