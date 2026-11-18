@@ -106,8 +106,8 @@ export function probeTimeoutMs(cand, configured) {
     return ((configured > 0) ? ((configured < 100) ? 100 : ((configured > 30000) ? 30000 : configured)) : ((cand === 1) ? 1000 : ((cand === 0) ? 5000 : 4000)));
 }
 
-export function cacheFresh(ageMs, ttlMs, verified) {
-    return ((ageMs < 0) ? 0 : ((verified === 1) ? ((ageMs < ttlMs) ? 1 : 0) : ((ageMs < ((ttlMs < 15000) ? ttlMs : 15000)) ? 1 : 0)));
+export function cacheFresh(ageMs, ttlMs, verified, cand) {
+    return ((ageMs < 0) ? 0 : ((verified === 1) ? ((cand === 1) ? ((ageMs < ((ttlMs < 60000) ? ttlMs : 60000)) ? 1 : 0) : ((ageMs < ttlMs) ? 1 : 0)) : ((ageMs < ((ttlMs < 15000) ? ttlMs : 15000)) ? 1 : 0)));
 }
 
 export function fallbackSource() {
@@ -183,8 +183,12 @@ export function idunaForget() {
     stResult = null;
 }
 
+export function candOfSource(s) {
+    return ((s === "same-origin") ? candSameOrigin() : ((s === "local") ? candLocal() : candCloud()));
+}
+
 export function cachedOk(c) {
-    return ((c == null) ? false : ((!((c.key === stKey))) ? false : (cacheFresh((nowMs() - c.at), optNumber(stOpts, "ttlMs", 600000.0), (c.verified ? 1 : 0)) === 1)));
+    return ((c == null) ? false : ((!((c.key === stKey))) ? false : (cacheFresh((nowMs() - c.at), optNumber(stOpts, "ttlMs", 600000.0), (c.verified ? 1 : 0), candOfSource(c.source)) === 1)));
 }
 
 export function idunaDiscover(opts) {
