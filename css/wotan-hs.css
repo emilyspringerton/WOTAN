@@ -109,6 +109,11 @@
   transition: background-color .15s;
 }
 .wn-signin:hover, .wn-user:hover, .wn-user[aria-expanded="true"] { background: color-mix(in srgb, var(--wn-accent) 42%, transparent); }
+/* iduna-sso.js found no IDUNA: the reason is in the title (wotan-nav.js idunaNotice) */
+.wn-iduna-off {
+  font: 600 .72rem/1 var(--wn-body); letter-spacing: .04em; cursor: help; margin-right: .5rem;
+  border: 1px dashed currentColor; border-radius: var(--wn-radius); padding: .35rem .6rem; opacity: .85;
+}
 .wn-user { max-width: 12.5rem; }
 .wn-user span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; padding-bottom: .1em; }
 .wn-user::after { content: ""; flex: none; width: .42rem; height: .42rem; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); }
