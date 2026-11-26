@@ -87,7 +87,8 @@ func TestUserDataEmbedsOnlyEncodedSecrets(t *testing.T) {
 	}
 	for _, want := range []string{"server_name wotan.example.com;", "proxy_pass https://iam.example.com;",
 		"location /DEADWEIGHT/ws { return 503; }", "location /GFD/ws { return 503; }", "proxy_set_header Host iam.example.com;",
-		"proxy_ssl_verify on;", "OnUnitActiveSec=10min", "WOTAN_GIT_REF=main", base64.StdEncoding.EncodeToString([]byte("-----BEGIN CERTIFICATE-----\nCERT\n"))} {
+		"proxy_ssl_verify on;", "proxy_set_header Upgrade $http_upgrade;", "proxy_set_header Connection $connection_upgrade;",
+		"OnUnitActiveSec=10min", "WOTAN_GIT_REF=main", base64.StdEncoding.EncodeToString([]byte("-----BEGIN CERTIFICATE-----\nCERT\n"))} {
 		if !strings.Contains(ud, want) {
 			t.Errorf("user-data missing %q", want)
 		}

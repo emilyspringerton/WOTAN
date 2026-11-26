@@ -50,6 +50,11 @@ chmod 755 /usr/local/bin/wotan-deploy
 /usr/local/bin/wotan-deploy
 
 cat > /etc/nginx/sites-available/wotan <<'EOF'
+# WebSocket upgrades through /api/ (shankpit-460 and Bedrock Racers matchmaking): pass Upgrade on, plain requests keep-alive.
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      '';
+}
 server {
     listen 80;
     listen [::]:80;
@@ -83,6 +88,13 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto https;
+        # Matchmaking WebSockets live under /api/ (IDUNA /api/v1/shankpit460/play, the racer lobby); without these the
+        # upgrade is dropped and the browser gets 400. A match lasts up to 6 minutes, so idle reads get an hour.
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
     }
 {{- end}}
 }
