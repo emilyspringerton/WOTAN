@@ -1,0 +1,23 @@
+# shankpit-460 native game server on the WOTAN game box (play.okemily.com, UDP 6969). Built from the shankpit-460 repo
+# (static: gcc ... apps/server/src/main.c -static -lm), installed by ops/games/deploy-shankpit460.sh.
+[Unit]
+Description=shankpit-460 game server (UDP :6969)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=wotan-games
+WorkingDirectory=/srv/games/shankpit-460
+EnvironmentFile=/etc/games/shankpit460.env
+ExecStart=/srv/games/shankpit-460/bin/shank_server
+Restart=always
+RestartSec=5s
+MemoryMax=512M
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/srv/games/shankpit-460/var
+
+[Install]
+WantedBy=multi-user.target
