@@ -1,0 +1,22 @@
+# D2 (DEADWEIGHT_2) match server on the WOTAN game box (play.okemily.com, TCP 7800). Server-authoritative 1v1 with its own FIFO
+# queue. --no-auth as it ran in GKE: IDUNA's d2play gateway introduces browser players by name and records their matches
+# (IDUNA env D2_SERVER_ADDR=144.202.54.81:7800). Built from DEADWEIGHT_2 (the ops/docker/dw2.Dockerfile gcc line).
+[Unit]
+Description=D2 match server (TCP :7800)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=wotan-games
+WorkingDirectory=/srv/games/d2
+ExecStart=/srv/games/d2/bin/dw2_server --port 7800 --bind 0.0.0.0 --no-auth
+Restart=always
+RestartSec=5s
+MemoryMax=256M
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

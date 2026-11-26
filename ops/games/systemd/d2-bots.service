@@ -1,0 +1,20 @@
+# D2's elastic bot pool (as the GKE pod ran it): 4..24 bots, 2 spare idle in the queue.
+[Unit]
+Description=D2 bot pool
+After=d2-server.service
+Requires=d2-server.service
+
+[Service]
+User=wotan-games
+WorkingDirectory=/srv/games/d2
+ExecStart=/srv/games/d2/bin/dw2_bot --host 127.0.0.1 --port 7800 --count 4 --min 4 --max 24 --spare 2
+Restart=always
+RestartSec=5s
+MemoryMax=128M
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

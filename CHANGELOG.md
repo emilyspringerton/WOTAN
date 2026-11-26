@@ -1,3 +1,9 @@
+## 2026-11-26
+
+- feat(ops/games): D2 is live on the game box (TCP 7800, server + elastic bot pool), and IDUNA's d2 gateway points at it. The
+  D2 live smoke passes 14/15; the stored-match ship detail fails. Bedrock Racers verified live on the Vultr hosting (live smoke
+  11/11). (sess-20261126-1643-452c2f1a)
+
 # Changelog
 
 ## 2026-11-26

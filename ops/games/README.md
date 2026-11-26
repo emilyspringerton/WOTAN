@@ -6,7 +6,7 @@ box ... all of the game servers and match making and ai models for multiplayer .
 **Live since 2026-11-26:** `ord`, `vhp-4c-8gb-amd` ($48/month, 4 vCPU / 8 GB), instance
 `bf519d2f-8a03-43a9-ae7f-1bd7ce34225d`, reserved IPv4 **144.202.54.81** (`4503e8d5-c911-41fc-978a-d7ccb0868f06`, kept if the
 instance is rebuilt). `play.okemily.com` is **DNS only** (grey cloud): game traffic is UDP and Cloudflare's proxy carries
-only HTTP. Firewall (ufw): 22/tcp, 6969/udp + 6968/udp (OG SHANKPIT), 4600/udp (shankpit-460), 2323/tcp + 2222/tcp + 6970/udp (GFD), 8443/tcp from 64.177.15.59 only.
+only HTTP. Firewall (ufw): 22/tcp, 6969/udp + 6968/udp (OG SHANKPIT), 4600/udp (shankpit-460), 2323/tcp + 2222/tcp + 6970/udp (GFD), 7800/tcp (D2), 8443/tcp from 64.177.15.59 only.
 
 Web matchmaking does **not** run here: the browser games (shankpit-460, Bedrock Racers, ...) match on IDUNA
 (`/api/v1/shankpit460/play`) through wotan.okemily.com's `/api/` proxy. This box is for native servers.
@@ -141,3 +141,13 @@ a test secret that this box does not accept (a public secret would let anyone po
 - DEADWEIGHT, D2, REDGARDEN and the bot models: next, one at a time.
 - WOTAN's origin also answers when reached by IP (not only via Cloudflare), so a direct client could forge CF-Connecting-IP; locking 443 to Cloudflare's ranges would close that.
 - No backups: GFD's `var/` is now state worth keeping.
+
+## D2 (DEADWEIGHT_2), 2026-11-26
+
+- `systemd/d2-server.service` runs `dw2_server --port 7800 --bind 0.0.0.0 --no-auth`; `systemd/d2-bots.service` runs the elastic bot
+  pool (`dw2_bot --count 4 --min 4 --max 24 --spare 2`). These are the GKE pod's own flags. The binaries are built from DEADWEIGHT_2
+  (the gcc lines in `ops/docker/dw2.Dockerfile`) and installed to `/srv/games/d2/bin`. ufw: `7800/tcp`.
+- IDUNA: `D2_SERVER_ADDR=144.202.54.81:7800` in `/etc/iduna/iduna.env`. The default was the dead GKE service name.
+- Verified: an outside `dw2_bot` connected; `scripts/d2-live-smoke.mjs https://wotan.okemily.com` passed 14/15 (a full match against
+  a bot, recorded and rated, ladder). It fails one check: the stored match is missing its ship parts and round breaks (IDUNA's
+  recorder; play is unaffected). That is on the backlog.
