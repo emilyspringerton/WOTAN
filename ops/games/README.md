@@ -19,6 +19,10 @@ Web matchmaking does **not** run here: the browser games (shankpit-460, Bedrock 
 | `shankpit460-bots` | 9 `emily-bot` fill players (`apps2/emily-bot`), so a human lands in a 10-player match | — |
 | `gfd-mud` | GoblinFoxDragon MUD (`apps2/mud`): telnet, ssh, the browser WebSocket, world-events API | 2323/tcp, 2222/tcp public; 8480, 7171 local |
 | `gfd-server-go` | GoblinFoxDragon world backend (`apps2/server-go`) | 6970/udp public; 7070, 7071 local |
+| `redgarden-stable-mm` + `-bots` | REDGARDEN stable 10v10 matchmaker + 19-bot pool (GFD Battlegrounds, WOTAN web) | 8778/udp, games 8300-8319/udp |
+| `redgarden-rnd-mm` + `-bots` | REDGARDEN R&D 10v10 matchmaker + 19-bot pool (WOTAN web, native `--queue`) | 7778/udp, games 7300-7319/udp |
+| `redgarden-rnd-players-mm` | REDGARDEN 1v1, humans only | 7779/udp, games 7600-7609/udp |
+| `redgarden-rnd-3v3-mm` + `-bots` | REDGARDEN 3v3 + 5-bot pool (not used by the web gateway: the arena splits teams at slot 10) | 7780/udp, games 7400-7409/udp |
 | nginx | `nginx/games-ws.conf`: TLS door for browser game sockets, `/GFD/ws` -> 127.0.0.1:8480 | 8443/tcp, **WOTAN box only** |
 
 Both run as `wotan-games` under `/srv/games/<game>`, sandboxed (`ProtectSystem=strict`). Secrets live in
@@ -75,6 +79,34 @@ IDUNA. Verified 2026-11-26 (GoblinFoxDragon 5dcfe7d): a real IDUNA token through
 prompt; the agent's character lookup answers (404 = no character yet, not 401/403); telnet banner and ssh host key
 answer on play.okemily.com; 8443 is unreachable from outside. A smoke identity `gfd-smoke-20261126@example.com` exists on
 IDUNA (credentials `~/secrets/gfd-smoke-identity.json`); no character was claimed for it.
+
+## REDGARDEN
+
+Same layout as the old `EMILY/gitops/specs/redgarden-{stable,rnd}.pod` (same ports and args), built static from the
+REDGARDEN repo (the matchmaker, arena server and arena bot lines of `scripts/build.sh` plus `-static`). One working
+directory per pool (`/srv/games/redgarden/{stable,rnd,rnd3v3}`, each with `build -> ../bin` and `scripts/run_bot_pool.sh`)
+so pools with the same bot indices don't share log files. The matchmaker spawns `red_garden_arena_server` per match;
+match logs land in `<dir>/var/matches/`. `REDGARDEN_TICKET_SECRET` (`/etc/games/redgarden.env`, copy
+`~/secrets/redgarden-ticket-secret`) is shared with IDUNA, which also has
+`REDGARDEN_POOLS=rnd-10v10|10v10|rnd.rg.okemily.com:7778|20;stable-10v10|10v10|rg.okemily.com:8778|20` for its web gateway.
+DNS `rg`, `rnd.rg`, `gfd.rg`, `shankpit.rg` and `*.rg` now point here, DNS only (old records in `~/secrets/rg-dns-rollback.json`).
+
+```bash
+cd REDGARDEN   # the three server binaries, static
+gcc -std=c99 -D_DEFAULT_SOURCE -O2 -Wall -Wextra -Ipackages -static ...   # copy the matchmaker / arena_server / arena_bot lines of scripts/build.sh
+scp build/red_garden_{matchmaker,arena_server,arena_bot} root@play.okemily.com:/srv/games/redgarden/bin/
+ssh root@play.okemily.com 'systemctl restart redgarden-stable-mm redgarden-stable-bots redgarden-rnd-mm redgarden-rnd-bots redgarden-rnd-players-mm redgarden-rnd-3v3-mm redgarden-rnd-3v3-bots'
+```
+
+Verified 2026-11-26 (REDGARDEN 1f2f02c): a REDGARDEN guest through `wss://wotan.okemily.com/api/v1/redgarden/play`
+was seated in a 20-player 10v10 with the 19 bots and got snapshots at ~20 Hz; two arena bots from the ops box played a
+whole 1v1 on `144.202.54.81:7779` and requeued; all pools refill (19/20, 19/20, 5/6). GFD's `battlegrounds` command
+now names this box (`REDGARDEN_MATCHMAKER_HOST=144.202.54.81` in `/etc/games/gfd.env`).
+
+**Native clients take an IP, not a name:** `apps/arena` and `apps/arena_bot` use `inet_addr`, so `--queue
+rnd.rg.okemily.com` (what CI's PLAY.bat says) never resolves. Use `RedGarden.exe --queue 144.202.54.81 --account`
+(`--matchmaker-port 8778` for stable). `--account` gets a real ticket from IDUNA; the CI PLAY.bat instead self-mints with
+a test secret that this box does not accept (a public secret would let anyone pose as any player).
 
 ## Not done
 

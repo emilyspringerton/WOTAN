@@ -1,0 +1,22 @@
+# REDGARDEN on the WOTAN game box (rnd): R&D bot pool (19 bots -> :7778). Mirrors EMILY/gitops/specs/redgarden-*.pod (same ports, same args).
+[Unit]
+Description=REDGARDEN R&D bot pool (19 bots -> :7778)
+After=network-online.target
+Wants=network-online.target
+After=redgarden-rnd-mm.service
+[Service]
+User=wotan-games
+WorkingDirectory=/srv/games/redgarden/rnd
+EnvironmentFile=/etc/games/redgarden.env
+ExecStart=/srv/games/redgarden/rnd/scripts/run_bot_pool.sh 19 7778
+Restart=always
+RestartSec=5s
+MemoryMax=512M
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/srv/games/redgarden/rnd/var
+
+[Install]
+WantedBy=multi-user.target

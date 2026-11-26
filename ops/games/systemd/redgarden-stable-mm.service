@@ -1,0 +1,22 @@
+# REDGARDEN on the WOTAN game box (stable): stable 10v10 matchmaker :8778 (GFD Battlegrounds, WOTAN web). Mirrors EMILY/gitops/specs/redgarden-*.pod (same ports, same args).
+[Unit]
+Description=REDGARDEN stable 10v10 matchmaker :8778 (GFD Battlegrounds, WOTAN web)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=wotan-games
+WorkingDirectory=/srv/games/redgarden/stable
+EnvironmentFile=/etc/games/redgarden.env
+ExecStart=/srv/games/redgarden/bin/red_garden_matchmaker --listen-port 8778 --lobby-size 20 --server-bin /srv/games/redgarden/bin/red_garden_arena_server --first-game-port 8300 --game-port-range 20
+Restart=always
+RestartSec=5s
+MemoryMax=1G
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/srv/games/redgarden/stable/var
+
+[Install]
+WantedBy=multi-user.target
