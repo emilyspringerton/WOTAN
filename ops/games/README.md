@@ -6,7 +6,7 @@ box ... all of the game servers and match making and ai models for multiplayer .
 **Live since 2026-11-26:** `ord`, `vhp-4c-8gb-amd` ($48/month, 4 vCPU / 8 GB), instance
 `bf519d2f-8a03-43a9-ae7f-1bd7ce34225d`, reserved IPv4 **144.202.54.81** (`4503e8d5-c911-41fc-978a-d7ccb0868f06`, kept if the
 instance is rebuilt). `play.okemily.com` is **DNS only** (grey cloud): game traffic is UDP and Cloudflare's proxy carries
-only HTTP. Firewall (ufw): 22/tcp, 6969/udp.
+only HTTP. Firewall (ufw): 22/tcp, 6969/udp (shankpit-460), 2323/tcp + 2222/tcp + 6970/udp (GFD), 8443/tcp from 64.177.15.59 only.
 
 Web matchmaking does **not** run here: the browser games (shankpit-460, Bedrock Racers, ...) match on IDUNA
 (`/api/v1/shankpit460/play`) through wotan.okemily.com's `/api/` proxy. This box is for native servers.
@@ -17,6 +17,9 @@ Web matchmaking does **not** run here: the browser games (shankpit-460, Bedrock 
 |---|---|---|
 | `shankpit460-server` | shankpit-460 C server (`apps/server/src/main.c`, static build), server-authoritative FFA | 6969/udp |
 | `shankpit460-bots` | 9 `emily-bot` fill players (`apps2/emily-bot`), so a human lands in a 10-player match | — |
+| `gfd-mud` | GoblinFoxDragon MUD (`apps2/mud`): telnet, ssh, the browser WebSocket, world-events API | 2323/tcp, 2222/tcp public; 8480, 7171 local |
+| `gfd-server-go` | GoblinFoxDragon world backend (`apps2/server-go`) | 6970/udp public; 7070, 7071 local |
+| nginx | `nginx/games-ws.conf`: TLS door for browser game sockets, `/GFD/ws` -> 127.0.0.1:8480 | 8443/tcp, **WOTAN box only** |
 
 Both run as `wotan-games` under `/srv/games/<game>`, sandboxed (`ProtectSystem=strict`). Secrets live in
 `/etc/games/<game>.env` (root, 600), read by systemd. `SHANKPIT_TICKET_SECRET` there must equal IDUNA's
@@ -50,6 +53,29 @@ SHANKPIT_TICKET_SECRET=$(cat ~/secrets/shankpit-ticket-secret) bin/emily-bot -ho
 
 Verified 2026-11-26: PASS from the ops box; a wrong secret is refused (never welcomed).
 
+## GFD
+
+Browser path: `wss://wotan.okemily.com/GFD/ws` -> Cloudflare -> WOTAN nginx -> `https://play.okemily.com:8443` (Cloudflare
+Origin CA cert, `~/secrets/games-origin/`, verified by WOTAN against Cloudflare's origin ECC root) -> MUD :8480. WOTAN
+sends `X-Forwarded-For: $http_cf_connecting_ip`, this nginx appends WOTAN's address and the MUD runs `-web-trust-xff`,
+so its per-IP session caps see the player. The MUD validates IDUNA tokens against `iam.okemily.com`'s JWKS and calls
+IDUNA as agent `DRAGONSNSHIT-MUD` (`/etc/games/gfd.env`; copy at `~/secrets/gfd-mud-agent.env`, rotated from the Back
+Office as HOUSE). Native: `telnet play.okemily.com 2323` (guest) and `ssh -p 2222 play.okemily.com`.
+
+```bash
+cd GoblinFoxDragon
+GOWORK=off CGO_ENABLED=0 go build -o bin/mud ./apps2/mud && GOWORK=off CGO_ENABLED=0 go build -o bin/server-go ./apps2/server-go
+scp bin/mud bin/server-go root@play.okemily.com:/srv/games/gfd/bin/
+tar cz data ops/genesis | ssh root@play.okemily.com 'tar xz -C /srv/games/gfd'
+ssh root@play.okemily.com 'systemctl restart gfd-server-go gfd-mud'
+```
+
+State is `/srv/games/gfd/var` (mud-chars.json, mud-player-ids.json, the ssh host key); characters themselves live in
+IDUNA. Verified 2026-11-26 (GoblinFoxDragon 5dcfe7d): a real IDUNA token through wotan.okemily.com reaches the name-claim
+prompt; the agent's character lookup answers (404 = no character yet, not 401/403); telnet banner and ssh host key
+answer on play.okemily.com; 8443 is unreachable from outside. A smoke identity `gfd-smoke-20261126@example.com` exists on
+IDUNA (credentials `~/secrets/gfd-smoke-identity.json`); no character was claimed for it.
+
 ## Not done
 
 - **Native clients can't play yet.** Released clients aim at `okemily.com:6969` (now behind Cloudflare) and sign their
@@ -57,5 +83,7 @@ Verified 2026-11-26: PASS from the ops box; a wrong secret is refused (never wel
   defaults to `play.okemily.com` and fetches a ticket from IDUNA (`POST /api/v1/shankpit/ticket`) instead.
 - Match results: the server reports to IDUNA as an M2M agent (`IDUNA_BASE_URL` / `IDUNA_AGENT_NAME` / `_SECRET`); no
   agent yet, so results are not recorded.
-- GFD, DEADWEIGHT, D2, REDGARDEN and the bot models: next, one at a time.
-- No backups (the box holds no state yet).
+- GFD: not played through in a real browser yet; the public ssh is on 2222, not 22 (22 is the box's admin ssh).
+- DEADWEIGHT, D2, REDGARDEN and the bot models: next, one at a time.
+- WOTAN's origin also answers when reached by IP (not only via Cloudflare), so a direct client could forge CF-Connecting-IP; locking 443 to Cloudflare's ranges would close that.
+- No backups: GFD's `var/` is now state worth keeping.

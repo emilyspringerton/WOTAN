@@ -31,6 +31,7 @@ type config struct {
 	OriginOutDir                  string // where a minted origin cert+key are saved (outside any repo)
 	RollbackFile                  string
 	IdunaUpstream                 string
+	GfdUpstream                   string
 	AutopullMinutes               int
 
 	VultrBase, CFBase string // API roots; overridable for tests only
@@ -103,6 +104,7 @@ func loadConfig(getenv func(string) string) (config, []string) {
 	c.OriginOutDir = strings.TrimSpace(getenv("WOTAN_ORIGIN_OUT_DIR"))
 	c.RollbackFile = strings.TrimSpace(getenv("WOTAN_ROLLBACK_FILE"))
 	c.IdunaUpstream = strings.TrimRight(strings.TrimSpace(getenv("WOTAN_IDUNA_UPSTREAM")), "/")
+	c.GfdUpstream = strings.TrimRight(strings.TrimSpace(getenv("WOTAN_GFD_UPSTREAM")), "/")
 	if s := strings.TrimSpace(getenv("WOTAN_AUTOPULL_MINUTES")); s != "" {
 		n, err := strconv.Atoi(s)
 		if err != nil || n < 1 || n > 1440 {
@@ -134,6 +136,7 @@ func (c config) validate() error {
 		{reGitURL.MatchString(c.GitURL), "WOTAN_GIT_URL (https only)"},
 		{reRef.MatchString(c.GitRef) && !strings.Contains(c.GitRef, ".."), "WOTAN_GIT_REF"},
 		{c.IdunaUpstream == "" || reUp.MatchString(c.IdunaUpstream), "WOTAN_IDUNA_UPSTREAM (https://host[:port], no path)"},
+		{c.GfdUpstream == "" || reUp.MatchString(c.GfdUpstream), "WOTAN_GFD_UPSTREAM (https://host[:port], no path)"},
 		{c.CFZone == "" || reDomain.MatchString(c.CFZone), "WOTAN_CF_ZONE"},
 		{c.CFZone == "" || c.Domain == "" || c.Domain == c.CFZone || strings.HasSuffix(c.Domain, "."+c.CFZone), "WOTAN_DOMAIN must be inside WOTAN_CF_ZONE"},
 	}

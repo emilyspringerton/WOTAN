@@ -77,6 +77,7 @@ func TestUserDataEmbedsOnlyEncodedSecrets(t *testing.T) {
 	e := baseEnv()
 	e["WOTAN_IDUNA_UPSTREAM"] = "https://iam.example.com"
 	e["WOTAN_AUTOPULL_MINUTES"] = "10"
+	e["WOTAN_GFD_UPSTREAM"] = "https://play.example.com:8443"
 	c, _ := loadConfig(env(e))
 	ud, err := renderUserData(c, []byte("-----BEGIN CERTIFICATE-----\nCERT\n"), []byte("-----BEGIN EC PRIVATE KEY-----\nKEY'\n"))
 	if err != nil {
@@ -86,7 +87,8 @@ func TestUserDataEmbedsOnlyEncodedSecrets(t *testing.T) {
 		t.Error("key must only appear base64-encoded")
 	}
 	for _, want := range []string{"server_name wotan.example.com;", "proxy_pass https://iam.example.com;",
-		"location /DEADWEIGHT/ws { return 503; }", "location /GFD/ws { return 503; }", "proxy_set_header Host iam.example.com;",
+		"location /DEADWEIGHT/ws { return 503; }", "proxy_pass https://play.example.com:8443;", "proxy_ssl_name play.example.com;",
+		"BEGIN CERTIFICATE", "X-Forwarded-For $http_cf_connecting_ip;", "proxy_set_header Host iam.example.com;",
 		"proxy_ssl_verify on;", "proxy_set_header Upgrade $http_upgrade;", "proxy_set_header Connection $connection_upgrade;",
 		"OnUnitActiveSec=10min", "WOTAN_GIT_REF=main", base64.StdEncoding.EncodeToString([]byte("-----BEGIN CERTIFICATE-----\nCERT\n"))} {
 		if !strings.Contains(ud, want) {
@@ -95,6 +97,9 @@ func TestUserDataEmbedsOnlyEncodedSecrets(t *testing.T) {
 	}
 	c2, _ := loadConfig(env(baseEnv()))
 	ud2, _ := renderUserData(c2, []byte("c"), []byte("k"))
+	if !strings.Contains(ud2, "location /GFD/ws { return 503; }") {
+		t.Error("no GFD upstream: /GFD/ws must answer 503")
+	}
 	if strings.Contains(ud2, "location /api/") || strings.Contains(ud2, "wotan-deploy.timer") {
 		t.Error("no IDUNA proxy or timer unless asked")
 	}

@@ -1,0 +1,25 @@
+# GoblinFoxDragon MUD (apps2/mud) on the WOTAN game box: telnet 2323 and ssh 2222 public; browser WebSocket 8480 and the
+# world-events API 7171 local only (nginx 8443 forwards /GFD/ws from the WOTAN box). -web-trust-xff: nginx here appends
+# WOTAN's address to the client IP WOTAN forwards, so the second-to-last X-Forwarded-For entry is the player.
+[Unit]
+Description=GoblinFoxDragon MUD
+After=network-online.target gfd-server-go.service
+Wants=network-online.target
+
+[Service]
+User=wotan-games
+WorkingDirectory=/srv/games/gfd
+EnvironmentFile=/etc/games/gfd.env
+ExecStart=/srv/games/gfd/bin/mud -port 2323 -api-port 7171 -ssh-port 2222 -web-port 8480 -web-trust-xff
+Restart=always
+RestartSec=5s
+MemoryMax=1G
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/srv/games/gfd/var
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

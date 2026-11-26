@@ -1,0 +1,23 @@
+# GoblinFoxDragon world backend (apps2/server-go): UDP 6970 public; worldapi 7070 and TRAPX 7071 local only.
+[Unit]
+Description=GoblinFoxDragon server-go
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=wotan-games
+WorkingDirectory=/srv/games/gfd
+EnvironmentFile=/etc/games/gfd.env
+ExecStart=/srv/games/gfd/bin/server-go -udp-port 6970 -worldapi-port 7070 -trapx-port 7071
+Restart=always
+RestartSec=5s
+MemoryMax=1G
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/srv/games/gfd/var
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

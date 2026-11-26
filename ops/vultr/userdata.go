@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"strings"
 	"text/template"
 )
 
@@ -26,6 +27,27 @@ install -d -m 700 /etc/ssl/wotan
 echo '{{.CertB64}}' | base64 -d > /etc/ssl/wotan/origin.pem
 echo '{{.KeyB64}}'  | base64 -d > /etc/ssl/wotan/origin.key
 chmod 600 /etc/ssl/wotan/origin.key
+{{- if .GfdUpstream}}
+# Cloudflare Origin CA ECC root (public): the game box's wss door uses an origin cert, verified against this.
+cat > /etc/ssl/wotan/cf-origin-ecc-root.pem <<'PEM'
+-----BEGIN CERTIFICATE-----
+MIICiTCCAi6gAwIBAgIUXZP3MWb8MKwBE1Qbawsp1sfA/Y4wCgYIKoZIzj0EAwIw
+gY8xCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1T
+YW4gRnJhbmNpc2NvMRkwFwYDVQQKExBDbG91ZEZsYXJlLCBJbmMuMTgwNgYDVQQL
+Ey9DbG91ZEZsYXJlIE9yaWdpbiBTU0wgRUNDIENlcnRpZmljYXRlIEF1dGhvcml0
+eTAeFw0xOTA4MjMyMTA4MDBaFw0yOTA4MTUxNzAwMDBaMIGPMQswCQYDVQQGEwJV
+UzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5jaXNjbzEZ
+MBcGA1UEChMQQ2xvdWRGbGFyZSwgSW5jLjE4MDYGA1UECxMvQ2xvdWRGbGFyZSBP
+cmlnaW4gU1NMIEVDQyBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwWTATBgcqhkjOPQIB
+BggqhkjOPQMBBwNCAASR+sGALuaGshnUbcxKry+0LEXZ4NY6JUAtSeA6g87K3jaA
+xpIg9G50PokpfWkhbarLfpcZu0UAoYy2su0EhN7wo2YwZDAOBgNVHQ8BAf8EBAMC
+AQYwEgYDVR0TAQH/BAgwBgEB/wIBAjAdBgNVHQ4EFgQUhTBdOypw1O3VkmcH/es5
+tBoOOKcwHwYDVR0jBBgwFoAUhTBdOypw1O3VkmcH/es5tBoOOKcwCgYIKoZIzj0E
+AwIDSQAwRgIhAKilfntP2ILGZjwajktkBtXE1pB4Y/fjAfLkIRUzrI15AiEA5UCL
+XYZZ9m2c3fKwIenMMojL1eqydsgqj/wK4p5kagQ=
+-----END CERTIFICATE-----
+PEM
+{{- end}}
 
 cat > /etc/wotan/env <<'EOF'
 WOTAN_GIT_URL={{.GitURL}}
@@ -76,7 +98,27 @@ server {
     # Game WebSockets (ops/nginx-wotan.conf proxied them to DEADWEIGHT and GFD). Those servers are not up on Vultr
     # yet -- the WOTAN games are next (founder 2026-11-26) -- so fail plainly instead of serving a 404 page.
     location /DEADWEIGHT/ws { return 503; }
+{{- if .GfdUpstream}}
+    # GFD's browser WebSocket lives on the game box (ops/games): TLS verified against Cloudflare's origin root, the
+    # player's IP (Cloudflare's CF-Connecting-IP) forwarded so the MUD's per-IP caps see players, not this box.
+    location /GFD/ws {
+        proxy_pass {{.GfdUpstream}};
+        proxy_ssl_server_name on;
+        proxy_ssl_name {{.GfdHost}};
+        proxy_ssl_verify on;
+        proxy_ssl_trusted_certificate /etc/ssl/wotan/cf-origin-ecc-root.pem;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host {{.GfdHost}};
+        proxy_set_header Origin $http_origin;
+        proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+    }
+{{- else}}
     location /GFD/ws { return 503; }
+{{- end}}
 {{- if .IdunaUpstream}}
     # Same-origin IDUNA API, as on the old box (ops/nginx-wotan.conf), pointed at wherever IDUNA now runs.
     location /api/ {
@@ -137,6 +179,7 @@ type udVars struct {
 	Domain, GitURL, GitRef   string
 	CertB64, KeyB64          string
 	IdunaUpstream, IdunaHost string
+	GfdUpstream, GfdHost     string
 	AutopullMinutes          int
 }
 
@@ -150,6 +193,16 @@ func renderUserData(c config, certPEM, keyPEM []byte) (string, error) {
 		Domain: c.Domain, GitURL: c.GitURL, GitRef: c.GitRef,
 		CertB64: base64.StdEncoding.EncodeToString(certPEM), KeyB64: base64.StdEncoding.EncodeToString(keyPEM),
 		IdunaUpstream: c.IdunaUpstream, IdunaHost: c.idunaHost(), AutopullMinutes: c.AutopullMinutes,
+		GfdUpstream: c.GfdUpstream, GfdHost: hostOf(c.GfdUpstream),
 	})
 	return b.String(), err
+}
+
+// hostOf("https://play.okemily.com:8443") = "play.okemily.com" (the upstream is already validated by reUp).
+func hostOf(u string) string {
+	h := strings.TrimPrefix(u, "https://")
+	if i := strings.IndexByte(h, ':'); i >= 0 {
+		h = h[:i]
+	}
+	return h
 }

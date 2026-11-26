@@ -43,6 +43,7 @@ Nothing the founder has not confirmed has a default.
 | `WOTAN_ORIGIN_CERT_FILE` + `WOTAN_ORIGIN_KEY_FILE` | use an existing origin cert instead of minting one |
 | `WOTAN_CF_ZONE`, `WOTAN_ROLLBACK_FILE` | `--dns` only. The rollback file must not already exist |
 | `WOTAN_IDUNA_UPSTREAM` | optional, `https://host[:port]` |
+| `WOTAN_GFD_UPSTREAM` | optional, `https://host[:port]`: the game box's wss door (`https://play.okemily.com:8443`, see `../games/README.md`); unset = `/GFD/ws` answers 503 |
 | `WOTAN_VULTR_SSH_KEY_IDS` | optional, comma-separated ids from Vultr's SSH keys |
 | `WOTAN_VULTR_LABEL` | optional, default `wotan` |
 | `WOTAN_GIT_URL` / `WOTAN_GIT_REF` | default `https://github.com/emilyspringerton/WOTAN.git` / `main` (public repo, its default branch) |
