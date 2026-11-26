@@ -2,6 +2,8 @@
 
 ## 2026-11-26
 
+- fix(ops/vultr): shankpit-460 matchmaking was dead through wotan.okemily.com -- nginx's `/api/` proxy dropped the WebSocket upgrade (400). Template + live box now pass Upgrade/Connection (HTTP/1.1, 1 h timeouts); two guest clients paired into one room live. (sess-20261126-1643-452c2f1a)
+- feat(ops/games): the game box, `play.okemily.com` (Vultr vhp-4c-8gb-amd, reserved IP 144.202.54.81, DNS only for UDP): shankpit-460 native server + 9 emily-bots under systemd; external bot PASS, wrong ticket refused. Native clients still need a build pointed at play.okemily.com with IDUNA-minted tickets (`ops/games/README.md`). (sess-20261126-1643-452c2f1a)
 - feat(ops/vultr): `/DEADWEIGHT/ws` and `/GFD/ws` answer 503 on the Vultr box until those game servers return (founder 2026-11-26); README points at IDUNA's sibling tool `iduna-vultr`. Rendered site passes `nginx -t` (1.24.0). (sess-20261126-1643-452c2f1a)
 
 ## 2026-11-15
