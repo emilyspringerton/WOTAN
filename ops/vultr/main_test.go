@@ -85,7 +85,8 @@ func TestUserDataEmbedsOnlyEncodedSecrets(t *testing.T) {
 	if strings.Contains(ud, "BEGIN EC PRIVATE KEY") || strings.Contains(ud, "KEY'") {
 		t.Error("key must only appear base64-encoded")
 	}
-	for _, want := range []string{"server_name wotan.example.com;", "proxy_pass https://iam.example.com;", "proxy_set_header Host iam.example.com;",
+	for _, want := range []string{"server_name wotan.example.com;", "proxy_pass https://iam.example.com;",
+		"location /DEADWEIGHT/ws { return 503; }", "location /GFD/ws { return 503; }", "proxy_set_header Host iam.example.com;",
 		"proxy_ssl_verify on;", "OnUnitActiveSec=10min", "WOTAN_GIT_REF=main", base64.StdEncoding.EncodeToString([]byte("-----BEGIN CERTIFICATE-----\nCERT\n"))} {
 		if !strings.Contains(ud, want) {
 			t.Errorf("user-data missing %q", want)

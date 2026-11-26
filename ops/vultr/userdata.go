@@ -68,6 +68,10 @@ server {
     location / {
         try_files $uri $uri/ =404;
     }
+    # Game WebSockets (ops/nginx-wotan.conf proxied them to DEADWEIGHT and GFD). Those servers are not up on Vultr
+    # yet -- the WOTAN games are next (founder 2026-11-26) -- so fail plainly instead of serving a 404 page.
+    location /DEADWEIGHT/ws { return 503; }
+    location /GFD/ws { return 503; }
 {{- if .IdunaUpstream}}
     # Same-origin IDUNA API, as on the old box (ops/nginx-wotan.conf), pointed at wherever IDUNA now runs.
     location /api/ {

@@ -23,8 +23,10 @@ destroy --instance ID    deletes it (needs WOTAN_CONFIRM_DESTROY=ID); --restore-
   anything else, and never changes it.
 - `/api/` is proxied (TLS verified) to `WOTAN_IDUNA_UPSTREAM` when that is set. Without it, sign-in and the hat
   store do not work: they need IDUNA.
-- Not carried over from the old box: `/DEADWEIGHT/ws` and `/api/v1/shankpit-net/`, whose backends ran on that
-  host.
+- `/DEADWEIGHT/ws` and `/GFD/ws` answer **503** until those game servers are back (2026-11-26: the WOTAN games are
+  next). `/api/v1/shankpit-net/` is not carried over: its backend ran on the old host.
+- IDUNA itself is provisioned by its sibling tool, `IDUNA/ops/vultr` (`iduna-vultr`). Set
+  `WOTAN_IDUNA_UPSTREAM=https://iam.okemily.com` once that box is up.
 
 ## Environment
 

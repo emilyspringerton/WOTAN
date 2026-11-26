@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-26
+
+- feat(ops/vultr): `/DEADWEIGHT/ws` and `/GFD/ws` answer 503 on the Vultr box until those game servers return (founder 2026-11-26); README points at IDUNA's sibling tool `iduna-vultr`. Rendered site passes `nginx -t` (1.24.0). (sess-20261126-1643-452c2f1a)
+
 ## 2026-11-15
 
 - **fix(sso): "Sign in with IDUNA" works off okemily.com.** `js/iduna-sso.js` `buildSsoURL()` always sent people to `https://iam.okemily.com/`; on any other host it now uses the page's own origin, `/api/v1/auth/sso/login` (`idunaLoginBase()`), because there the site is served by an IDUNA that answers `/api/` itself: IDUNA's new run-anywhere bundles carry this site and serve it with `WOTAN_SITE_DIR` (IDUNA `wotan_site.go`, 2026-11-15), and EmilyOS will too. On `*.okemily.com` nothing changes. Every page's sign-in link already goes through `buildSsoURL()`; the `https://iam.okemily.com/` literals left in `wotan-nav.js`, `hs-ui.js`, `rg-connect.js`, `redeem-widget.js`, `hs-page-tracker.js` and `GFD/gfd.js` are only fallbacks for when that function is missing. Not changed, named: `DEADWEIGHT/dist/sso.js` is DEADWEIGHT's own build output and still hard-codes iam.okemily.com; its source (`DEADWEIGHT/web/src/sso.ts`) needs the same rule. Verified under Node: on 127.0.0.1 the link is `http://127.0.0.1:8090/api/v1/auth/sso/login?redirect_uri=...`; on wotan.okemily.com it is unchanged.
