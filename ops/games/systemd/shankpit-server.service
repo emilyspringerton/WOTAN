@@ -1,0 +1,24 @@
+# OG SHANKPIT on the WOTAN game box (deathmatch / queue server, UDP 6969 (clients asking for mode 108 switch it to MODE_QUEUE)). Mirrors EMILY/gitops/specs/shankpit.pod: built from SHANKPIT (make server,
+# emily-bot), clients dial shankpit.okemily.com (DNS only).
+[Unit]
+Description=SHANKPIT deathmatch / queue server, UDP 6969 (clients asking for mode 108 switch it to MODE_QUEUE)
+After=network-online.target 
+Wants=network-online.target
+
+[Service]
+User=wotan-games
+WorkingDirectory=/srv/games/shankpit
+EnvironmentFile=/etc/games/shankpit.env
+
+ExecStart=/srv/games/shankpit/bin/shank_server --deathmatch
+Restart=always
+RestartSec=5s
+MemoryMax=1G
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/srv/games/shankpit/var
+
+[Install]
+WantedBy=multi-user.target

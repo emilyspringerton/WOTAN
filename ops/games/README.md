@@ -6,7 +6,7 @@ box ... all of the game servers and match making and ai models for multiplayer .
 **Live since 2026-11-26:** `ord`, `vhp-4c-8gb-amd` ($48/month, 4 vCPU / 8 GB), instance
 `bf519d2f-8a03-43a9-ae7f-1bd7ce34225d`, reserved IPv4 **144.202.54.81** (`4503e8d5-c911-41fc-978a-d7ccb0868f06`, kept if the
 instance is rebuilt). `play.okemily.com` is **DNS only** (grey cloud): game traffic is UDP and Cloudflare's proxy carries
-only HTTP. Firewall (ufw): 22/tcp, 6969/udp (shankpit-460), 2323/tcp + 2222/tcp + 6970/udp (GFD), 8443/tcp from 64.177.15.59 only.
+only HTTP. Firewall (ufw): 22/tcp, 6969/udp + 6968/udp (OG SHANKPIT), 4600/udp (shankpit-460), 2323/tcp + 2222/tcp + 6970/udp (GFD), 8443/tcp from 64.177.15.59 only.
 
 Web matchmaking does **not** run here: the browser games (shankpit-460, Bedrock Racers, ...) match on IDUNA
 (`/api/v1/shankpit460/play`) through wotan.okemily.com's `/api/` proxy. This box is for native servers.
@@ -15,7 +15,10 @@ Web matchmaking does **not** run here: the browser games (shankpit-460, Bedrock 
 
 | Unit | What | Port |
 |---|---|---|
-| `shankpit460-server` | shankpit-460 C server (`apps/server/src/main.c`, static build), server-authoritative FFA | 6969/udp |
+| `shankpit460-server` | shankpit-460 C server (`apps/server/src/main.c`, static build), server-authoritative FFA; `SHANKPIT_PORT=4600` | 4600/udp |
+| `shankpit-server` | OG SHANKPIT server (`make server`), `--deathmatch`; a client asking for game mode 108 switches it to MODE_QUEUE | 6969/udp |
+| `shankpit-zombie` | OG SHANKPIT zombie sandbox, `--port 6968 --level var/zombie/nextown_zombies.json` (seeded from `seed_zombie.json`) | 6968/udp |
+| `shankpit-bots` | 4 OG `emily-bot`s in queue mode (`-mode 108 -no-report`); the unit restarts the set if one dies | — |
 | `shankpit460-bots` | 9 `emily-bot` fill players (`apps2/emily-bot`), so a human lands in a 10-player match | — |
 | `gfd-mud` | GoblinFoxDragon MUD (`apps2/mud`): telnet, ssh, the browser WebSocket, world-events API | 2323/tcp, 2222/tcp public; 8480, 7171 local |
 | `gfd-server-go` | GoblinFoxDragon world backend (`apps2/server-go`) | 6970/udp public; 7070, 7071 local |
@@ -52,7 +55,7 @@ ssh root@play.okemily.com 'systemctl daemon-reload && systemctl restart shankpit
 Check from anywhere (one bot over the internet; PASS = welcomed, snapshots, damage both ways, respawns):
 
 ```bash
-SHANKPIT_TICKET_SECRET=$(cat ~/secrets/shankpit-ticket-secret) bin/emily-bot -host play.okemily.com -bots 1 -duration 20s
+SHANKPIT_TICKET_SECRET=$(cat ~/secrets/shankpit-ticket-secret) bin/emily-bot -host play.okemily.com -port 4600 -bots 1 -duration 20s
 ```
 
 Verified 2026-11-26: PASS from the ops box; a wrong secret is refused (never welcomed).
@@ -79,6 +82,25 @@ IDUNA. Verified 2026-11-26 (GoblinFoxDragon 5dcfe7d): a real IDUNA token through
 prompt; the agent's character lookup answers (404 = no character yet, not 401/403); telnet banner and ssh host key
 answer on play.okemily.com; 8443 is unreachable from outside. A smoke identity `gfd-smoke-20261126@example.com` exists on
 IDUNA (credentials `~/secrets/gfd-smoke-identity.json`); no character was claimed for it.
+
+## OG SHANKPIT
+
+Mirrors `EMILY/gitops/specs/shankpit.pod`. Released clients dial `shankpit.okemily.com:6969` (DNS only, now this box;
+old record in `~/secrets/shankpit-dns-rollback.json`), which is why shankpit-460 moved to 4600. Connecting needs no
+ticket; `SHANKPIT_TICKET_SECRET` (`/etc/games/shankpit.env`, the same secret as shankpit-460 and IDUNA's
+`/api/v1/shankpit/ticket`) gates the account ("WOW") wire ops, which fail closed without it. Built dynamically (libc/libm
+only; the box and the ops box are both Ubuntu 24.04, glibc 2.39): a static build warns about the story-door `dlopen`.
+
+```bash
+cd SHANKPIT && make server && (cd apps2/emily-bot && CGO_ENABLED=0 GOWORK=off go build -o ../../bin/emily-bot .)
+scp bin/shank_server bin/emily-bot root@play.okemily.com:/srv/games/shankpit/bin/
+ssh root@play.okemily.com 'systemctl restart shankpit-server shankpit-zombie shankpit-bots'
+bin/emily-bot -host shankpit.okemily.com -port 6969 -mode 108 -no-report -sessions 1 -session-duration 15s   # check
+```
+
+Verified 2026-11-26 (SHANKPIT 36c14a4): the 4 pool bots are welcomed into the queue match (scene 9); an external bot via
+`shankpit.okemily.com` is welcomed alongside them and plays out its session. **Not verified:** that the bots actually
+fight (no kills in a 50 s session; the server logs no hits), the zombie sandbox with a real client, a real human client.
 
 ## REDGARDEN
 
@@ -110,7 +132,7 @@ a test secret that this box does not accept (a public secret would let anyone po
 
 ## Not done
 
-- **Native clients can't play yet.** Released clients aim at `okemily.com:6969` (now behind Cloudflare) and sign their
+- **shankpit-460 native clients can't play yet.** Released clients aim at `okemily.com:6969` (and the server is now on 4600) (now behind Cloudflare) and sign their
   own ticket with the secret shipped in `PLAY.bat`, which would publish the new secret. Needs a client build that
   defaults to `play.okemily.com` and fetches a ticket from IDUNA (`POST /api/v1/shankpit/ticket`) instead.
 - Match results: the server reports to IDUNA as an M2M agent (`IDUNA_BASE_URL` / `IDUNA_AGENT_NAME` / `_SECRET`); no

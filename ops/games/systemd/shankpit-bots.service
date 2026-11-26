@@ -1,0 +1,24 @@
+# OG SHANKPIT on the WOTAN game box (queue bot pool (4 emily-bots, mode 108 -> :6969)). Mirrors EMILY/gitops/specs/shankpit.pod: built from SHANKPIT (make server,
+# emily-bot), clients dial shankpit.okemily.com (DNS only).
+[Unit]
+Description=SHANKPIT queue bot pool (4 emily-bots, mode 108 -> :6969)
+After=network-online.target shankpit-server.service
+Wants=network-online.target
+
+[Service]
+User=wotan-games
+WorkingDirectory=/srv/games/shankpit
+EnvironmentFile=/etc/games/shankpit.env
+
+ExecStart=/bin/bash -c 'for i in 1 2 3 4; do /srv/games/shankpit/bin/emily-bot -host 127.0.0.1 -port 6969 -mode 108 -no-report -session-duration 87600h & done; wait -n; kill 0'
+Restart=always
+RestartSec=5s
+MemoryMax=512M
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/srv/games/shankpit/var
+
+[Install]
+WantedBy=multi-user.target

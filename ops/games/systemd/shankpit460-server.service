@@ -1,7 +1,7 @@
-# shankpit-460 native game server on the WOTAN game box (play.okemily.com, UDP 6969). Built from the shankpit-460 repo
+# shankpit-460 native game server on the WOTAN game box (play.okemily.com, UDP 4600 -- 6969 belongs to OG SHANKPIT, whose released clients dial it). Built from the shankpit-460 repo
 # (static: gcc ... apps/server/src/main.c -static -lm), installed by ops/games/deploy-shankpit460.sh.
 [Unit]
-Description=shankpit-460 game server (UDP :6969)
+Description=shankpit-460 game server (UDP :4600)
 After=network-online.target
 Wants=network-online.target
 
@@ -9,6 +9,7 @@ Wants=network-online.target
 User=wotan-games
 WorkingDirectory=/srv/games/shankpit-460
 EnvironmentFile=/etc/games/shankpit460.env
+Environment=SHANKPIT_PORT=4600
 ExecStart=/srv/games/shankpit-460/bin/shank_server
 Restart=always
 RestartSec=5s
