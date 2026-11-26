@@ -224,7 +224,12 @@ func checkCF(ch *checked) error {
 		return err
 	}
 	for _, r := range recs {
-		fmt.Printf("  existing   %s %s -> %s (proxied=%v): would be replaced, saved to %s first\n", r.Type, r.Name, r.Content, r.Proxied, c.RollbackFile)
+		// pointDNS only replaces address records; MX/TXT/etc. at the same name stay.
+		if r.Type == "A" || r.Type == "AAAA" || r.Type == "CNAME" {
+			fmt.Printf("  existing   %s %s -> %s (proxied=%v): would be replaced, saved to %s first\n", r.Type, r.Name, r.Content, r.Proxied, c.RollbackFile)
+		} else {
+			fmt.Printf("  kept       %s %s -> %s (not an address record: untouched)\n", r.Type, r.Name, r.Content)
+		}
 	}
 	if _, err := os.Stat(c.RollbackFile); err == nil {
 		return fmt.Errorf("WOTAN_ROLLBACK_FILE %s already exists: refusing to overwrite an earlier rollback", c.RollbackFile)
