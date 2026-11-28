@@ -6,7 +6,10 @@
 (function () {
   'use strict';
   var msg = document.getElementById('msg'), back = document.getElementById('back');
-  var q = new URLSearchParams(location.hash.replace(/^#/, ''));
+  var src = location.hash.replace(/^#/, '') || location.search.replace(/^\?/, '');
+  var q = new URLSearchParams(src);
+  var dbg = document.getElementById('dbg');
+  if (dbg) dbg.textContent = 'v3 hash=' + location.hash.length + ' query=' + location.search.length + ' keys=' + Array.from(q.keys()).join(',');
   var token = q.get('sso_token') || '', player = q.get('player_id') || '';
   if (!/^[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+$/.test(token)) {
     document.title = 'SHANKPHONE sign-in';
