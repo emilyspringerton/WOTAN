@@ -1,3 +1,7 @@
+## 2026-11-28
+
+- ci(deploy): **auto-deploy of wotan.okemily.com to the WOTAN box** (the Artifact Registry deploy.yml was dead with GCP). Each push builds the DEADWEIGHT web client, packs the site and ships it over a forced-command SSH key; the receiver (WOTAN/ops/deploy/static-receive.sh) swaps /var/www/wotan, probes it and restores the previous release on failure. New: ops/deploy/ (receivers, setup.sh).
+
 ## 2026-11-26
 
 - feat(ops/games): D2 is live on the game box (TCP 7800, server + elastic bot pool), and IDUNA's d2 gateway points at it. The

@@ -1,10 +1,10 @@
-name: Build and push image
+name: Deploy WOTAN to the WOTAN box
 
-# K8S-CD-01 (same pattern as IDUNA's deploy.yml): build the static-site image and push it to Artifact
-# Registry on every push to main, auth via Workload Identity (no stored key; see
-# EMILY/gitops/CI_SETUP.md). The in-cluster gitops-autodeploy CronJob notices the newest `wotan` tag,
-# bumps WOTAN_TAG in EMILY/gitops/tags.env, re-renders the PARENA manifests and gitops-sync applies
-# them -- this workflow never talks to the cluster.
+# wotan.okemily.com static site auto-deploy on the Vultr infra (GCP gone 2026-11-26): replaces /var/www/wotan on the WOTAN box.
+# Every push to main builds the site on the runner and streams it as a tarball over SSH to the box. The deploy key
+# (secret DEPLOY_SSH_KEY) is bound to a forced command, so all it can do is hand over this one site; the receiver
+# swaps it in, probes the site and restores the previous release on failure
+# (WOTAN/ops/deploy/static-receive.sh; one-time wiring: WOTAN/ops/deploy/setup.sh and README.md).
 on:
   push:
     branches: [main]
@@ -12,21 +12,26 @@ on:
   workflow_dispatch: {}
 
 concurrency:
-  group: wotan-deploy-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-deploy
+  cancel-in-progress: false
 
 permissions:
   contents: read
-  id-token: write
+
+env:
+  DEPLOY_HOST: ${{ vars.DEPLOY_HOST || '64.177.15.59' }}
+  # Pinned host key; if the box is rebuilt update it here or set the DEPLOY_KNOWN_HOSTS repo variable.
+  DEPLOY_KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS || '64.177.15.59 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIQ1y+BA3ZGqNiKVE93VxeQeXOu2vju34xv/4kwy6Gdj' }}
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      # Always ship the DEADWEIGHT client built from DEADWEIGHT main (not the committed copy), so
-      # a WOTAN-only push never reverts a DEADWEIGHT deploy.
+      # Always ship the DEADWEIGHT client built from DEADWEIGHT main (not the committed copy), so a WOTAN-only push
+      # never reverts a DEADWEIGHT deploy.
       - uses: actions/checkout@v4
         with:
           repository: emilyspringerton/DEADWEIGHT
@@ -39,15 +44,26 @@ jobs:
       - name: Build DEADWEIGHT web client
         run: sudo apt-get update && sudo apt-get install -y clang lld && DEADWEIGHT-src/scripts/build-web.sh "$RUNNER_TEMP/dw-web"
 
-      - name: Auth to GCP (Workload Identity, no stored key)
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER || 'projects/532442865445/locations/global/workloadIdentityPools/github/providers/github' }}
-          service_account: ${{ vars.GCP_CI_SERVICE_ACCOUNT || 'github-ci@project-d24a71e9-2daf-4b2d-917.iam.gserviceaccount.com' }}
+      - name: Pack the site (tracked files minus ops, scripts, workflows and docs; DEADWEIGHT/ from the fresh build)
+        run: |
+          set -euo pipefail
+          site="$RUNNER_TEMP/site"; mkdir -p "$site"
+          git ls-files -z -- . ':(exclude)ops' ':(exclude)scripts' ':(exclude).github' ':(exclude)*.md' ':(exclude).gitignore' \
+            | xargs -0 -r tar cf - | tar xf - -C "$site"
+          rm -rf "$site/DEADWEIGHT" && mkdir -p "$site/DEADWEIGHT" && cp -r "$RUNNER_TEMP/dw-web"/. "$site/DEADWEIGHT/"
+          git rev-parse HEAD > "$site/REVISION"
+          test -f "$site/index.html"
+          tar -czf "$RUNNER_TEMP/site.tgz" -C "$site" .
+          ls -l "$RUNNER_TEMP/site.tgz"
 
-      - uses: google-github-actions/setup-gcloud@v2
-
-      - name: Build + push
+      - name: Ship to the box
         env:
-          DEADWEIGHT_WEB_DIR: ${{ runner.temp }}/dw-web
-        run: scripts/build-image.sh "$(git rev-parse --short HEAD)"
+          DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DEPLOY_KEY" ]; then echo "::error::DEPLOY_SSH_KEY secret is not set -- see WOTAN/ops/deploy/README.md"; exit 1; fi
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -T -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o ServerAliveInterval=15 \
+              "root@$DEPLOY_HOST" < "$RUNNER_TEMP/site.tgz"
